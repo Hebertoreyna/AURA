@@ -1,0 +1,549 @@
+import { useState, useEffect, FormEvent } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { X, Clock, ChevronRight, ChevronLeft, Check, Sparkles, AlertTriangle } from 'lucide-react';
+import { Ritual, Specialist, Appointment } from '../types';
+import { RITUALS, SPECIALISTS } from '../data';
+
+interface BookingWizardProps {
+  isOpen: boolean;
+  preSelectedRitualId: string | null;
+  onClose: () => void;
+  onSaveAppointment: (appointment: Appointment) => void;
+}
+
+export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, onSaveAppointment }: BookingWizardProps) {
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  
+  // Selections state
+  const [selectedRitual, setSelectedRitual] = useState<Ritual | null>(null);
+  const [selectedSpecialist, setSelectedSpecialist] = useState<Specialist | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedTime, setSelectedTime] = useState<string>('');
+  
+  // Person details state
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [notes, setNotes] = useState('');
+  const [validationError, setValidationError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  // Sync pre-selected ritual
+  useEffect(() => {
+    if (preSelectedRitualId) {
+      const ritual = RITUALS.find(r => r.id === preSelectedRitualId);
+      if (ritual) {
+        setSelectedRitual(ritual);
+        setStep(2); // Jump straight to choosing specialist
+      }
+    } else {
+      setSelectedRitual(null);
+      setStep(1);
+    }
+  }, [preSelectedRitualId, isOpen]);
+
+  // Generate date options for the next 7 days in May 2026
+  const getDatesList = () => {
+    const list = [];
+    const weekdays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    
+    // Start from current simulated date: 2026-05-28
+    const baseDate = new Date('2026-05-28');
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(baseDate);
+        d.setDate(baseDate.getDate() + i);
+        const dayName = weekdays[d.getDay()];
+        const dayNum = d.getDate();
+        const monthName = d.getMonth() === 4 ? 'Mayo' : months[d.getMonth()]; // May translation specifically
+        const formatted = `${dayName}, ${dayNum} de ${monthName}`;
+        list.push({
+          raw: d.toISOString().split('T')[0],
+          formatted,
+          shortName: dayName.substring(0, 3),
+          dayNum
+        });
+    }
+    return list;
+  };
+
+  const datesList = getDatesList();
+  const timesList = ['09:00 AM', '11:00 AM', '01:30 PM', '03:30 PM', '05:30 PM'];
+
+  const filteredSpecialists = selectedRitual
+    ? SPECIALISTS.filter(s => selectedRitual.therapists.includes(s.name))
+    : SPECIALISTS;
+
+  const handleNextStep = () => {
+    setValidationError('');
+    if (step === 1 && !selectedRitual) {
+      setValidationError('Por verifique y seleccione un ritual para continuar.');
+      return;
+    }
+    if (step === 2 && !selectedSpecialist) {
+      setValidationError('Por favor seleccione un especialista disponible.');
+      return;
+    }
+    if (step === 3 && (!selectedDate || !selectedTime)) {
+      setValidationError('Por favor elija una fecha y un horario.');
+      return;
+    }
+    setStep((prev) => (prev + 1) as any);
+  };
+
+  const handlePrevStep = () => {
+    setValidationError('');
+    setStep((prev) => (prev - 1) as any);
+  };
+
+  const handleConfirmReservation = (e: FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) {
+      setValidationError('Por favor proporcione su nombre para el registro de invitados.');
+      return;
+    }
+    if (!email.trim() || !email.includes('@')) {
+      setValidationError('Por favor introduzca un correo electrónico de contacto válido.');
+      return;
+    }
+
+    if (selectedRitual && selectedSpecialist) {
+      const appDate = datesList.find(d => d.raw === selectedDate)?.formatted || selectedDate;
+      const newAppointment: Appointment = {
+        id: `apt-${Date.now()}`,
+        ritualId: selectedRitual.id,
+        ritualName: selectedRitual.name,
+        ritualImageUrl: selectedRitual.imageUrl,
+        duration: selectedRitual.duration,
+        price: selectedRitual.price,
+        dateTime: `${appDate} a las ${selectedTime}`,
+        specialistName: selectedSpecialist.name,
+        specialistAvatar: selectedSpecialist.avatarUrl,
+        status: 'scheduled',
+        notes: notes.trim() || undefined
+      };
+
+      onSaveAppointment(newAppointment);
+      setSuccess(true);
+    }
+  };
+
+  const handleReset = () => {
+    setStep(1);
+    setSelectedRitual(null);
+    setSelectedSpecialist(null);
+    setSelectedDate('');
+    setSelectedTime('');
+    setName('');
+    setEmail('');
+    setNotes('');
+    setSuccess(false);
+    onClose();
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div id="booking-wizard-overlay" className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <motion.div
+            id="booking-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleReset}
+            className="absolute inset-0 bg-[#4a2815]/30 backdrop-blur-md"
+          />
+
+          {/* Dialog Container */}
+          <motion.div
+            id="booking-dialog"
+            initial={{ opacity: 0, scale: 0.95, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 30 }}
+            className="relative w-full max-w-xl bg-[#faf6f0] rounded-2xl overflow-hidden shadow-2xl border border-[#efe6dc] flex flex-col"
+            style={{ maxHeight: '90vh' }}
+          >
+            {/* Header */}
+            <div id="booking-wizard-header" className="p-5 border-b border-[#efe6dc] flex justify-between items-center bg-white/50">
+              <div>
+                <span className="text-[10px] font-sans font-bold tracking-widest text-[#764229] uppercase">Agendador Exclusivo</span>
+                <h3 className="text-xl font-serif text-[#4a2815]">
+                  {success ? 'Reservación Asegurada' : 'Reservar una Cita'}
+                </h3>
+              </div>
+              <button
+                id="booking-close-btn"
+                onClick={handleReset}
+                className="p-1.5 rounded-full bg-stone-100 text-stone-500 hover:text-stone-800 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Error banner */}
+            {validationError && (
+              <div id="booking-validation-error" className="bg-[#8a4f35]/10 border-b border-[#8a4f35]/20 px-5 py-2.5 text-xs text-[#8a4f35] flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span>{validationError}</span>
+              </div>
+            )}
+
+            {/* Step indicators */}
+            {!success && (
+              <div id="booking-steps-nav" className="flex bg-[#efe6dc]/40 border-b border-[#efe6dc]/50 text-[10px] font-sans font-semibold uppercase tracking-wider text-stone-500">
+                <button
+                  onClick={() => selectedRitual && setStep(1)}
+                  disabled={!selectedRitual}
+                  className={`flex-1 py-3 text-center border-r border-[#efe6dc]/40 transition-all ${step === 1 ? 'bg-[#efe6dc] text-[#4a2815]' : ''}`}
+                >
+                  1. Ritual
+                </button>
+                <button
+                  onClick={() => selectedSpecialist && setStep(2)}
+                  disabled={!selectedSpecialist}
+                  className={`flex-1 py-3 text-center border-r border-[#efe6dc]/40 transition-all ${step === 2 ? 'bg-[#efe6dc] text-[#4a2815]' : ''}`}
+                >
+                  2. Especialista
+                </button>
+                <button
+                  onClick={() => selectedDate && setStep(3)}
+                  disabled={!selectedDate}
+                  className={`flex-1 py-3 text-center border-r border-[#efe6dc]/40 transition-all ${step === 3 ? 'bg-[#efe6dc] text-[#4a2815]' : ''}`}
+                >
+                  3. Horario
+                </button>
+                <button
+                  disabled
+                  className={`flex-1 py-3 text-center transition-all ${step === 4 ? 'bg-[#efe6dc] text-[#4a2815]' : ''}`}
+                >
+                  4. Confirmación
+                </button>
+              </div>
+            )}
+
+            {/* Main Interactive Content Panel */}
+            <div id="booking-wizard-content" className="p-6 overflow-y-auto flex-1">
+              {success ? (
+                /* SUCCESS SCREEN */
+                <motion.div
+                  id="booking-success-pnl"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center py-6 flex flex-col items-center"
+                >
+                  <div className="w-16 h-16 bg-[#5e6c58] rounded-full flex items-center justify-center text-white mb-4 shadow-lg shadow-[#5e6c58]/20">
+                    <Check className="w-8 h-8" />
+                  </div>
+                  <span className="text-xs font-mono tracking-widest text-[#5e6c58] uppercase font-semibold">Tu santuario te espera</span>
+                  <h4 className="text-3xl font-serif text-[#4a2815] mt-1 mb-2">Cita Programada</h4>
+                  <p className="text-xs text-stone-600 max-w-sm leading-relaxed mb-6">
+                    Se han enviado los detalles de confirmación y las guías previas del cuidado de la piel al correo <span className="font-semibold text-stone-800">{email}</span>.
+                  </p>
+
+                  {/* Receipt Detail */}
+                  <div className="w-full bg-[#f2eae4] rounded-xl p-5 text-left border border-[#efe6dc] space-y-3 max-w-sm mb-6">
+                    <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
+                      <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Ritual Seleccionado</span>
+                      <span className="font-serif font-semibold text-[#4a2815]">{selectedRitual?.name}</span>
+                    </div>
+                    <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
+                      <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Especialista</span>
+                      <span className="text-stone-700">{selectedSpecialist?.name}</span>
+                    </div>
+                    <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
+                      <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Fecha y Hora</span>
+                      <span className="text-stone-700">{datesList.find(d => d.raw === selectedDate)?.formatted || selectedDate} • {selectedTime}</span>
+                    </div>
+                    <div className="flex justify-between text-xs pt-1">
+                      <span className="text-[#764229] uppercase tracking-widest font-sans font-bold font-semibold">Total a Pagar</span>
+                      <span className="font-serif font-bold text-[#764229] text-base">${selectedRitual?.price}</span>
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-stone-400 italic mb-4">
+                    Cualquier cambio u cancelación requiere de un aviso protocolario con 24 horas de anticipación.
+                  </p>
+
+                  <button
+                    id="booking-finish-btn"
+                    onClick={handleReset}
+                    className="py-3 px-8 bg-[#764229] hover:bg-[#4a2815] text-white text-xs font-semibold tracking-wider rounded-xl transition-all font-sans uppercase"
+                  >
+                    Listo
+                  </button>
+                </motion.div>
+              ) : (
+                /* STEPPING LOGIC */
+                <div>
+                  {step === 1 && (
+                    /* STEP 1: SELECT RITUAL */
+                    <motion.div
+                      id="step1-ritual-select"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="space-y-4"
+                    >
+                      <p className="text-xs text-stone-500 font-serif italic">Selecciona uno de nuestros icónicos rituales de bienestar dérmico:</p>
+                      <div className="grid grid-cols-1 gap-3">
+                        {RITUALS.map((r) => (
+                          <button
+                            key={r.id}
+                            id={`select-ritual-opt-${r.id}`}
+                            onClick={() => {
+                              setSelectedRitual(r);
+                              setSelectedSpecialist(null);
+                            }}
+                            className={`p-4 rounded-xl text-left border transition-all flex items-center justify-between group ${
+                              selectedRitual?.id === r.id
+                                ? 'bg-[#efe6dc]/50 border-[#764229] shadow-md'
+                                : 'bg-white border-[#efe6dc] hover:border-stone-300'
+                            }`}
+                          >
+                            <div className="flex gap-3 items-center">
+                              <img
+                                src={r.imageUrl}
+                                alt={r.name}
+                                referrerPolicy="no-referrer"
+                                className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                              />
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-serif font-semibold text-[#4a2815] group-hover:text-[#764229] transition-colors">
+                                    {r.name}
+                                  </span>
+                                  {r.badge && (
+                                    <span className="text-[8px] font-sans bg-[#efe6dc] text-[#764229] px-2 py-0.5 rounded-full font-bold">
+                                      {r.badge}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[10px] text-stone-500 mt-0.5 max-w-sm line-clamp-1">{r.shortDescription}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-sm font-serif font-bold text-[#764229] block">${r.price}</span>
+                              <span className="text-[9px] font-mono text-stone-400 block">{r.duration} Mins</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {step === 2 && (
+                    /* STEP 2: SELECT THERAPIST */
+                    <motion.div
+                      id="step2-therapist-select"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="space-y-4"
+                    >
+                      <p className="text-xs text-stone-500 font-serif italic">
+                        Especialistas disponibles para <strong className="text-[#4a2815]">{selectedRitual?.name}</strong>:
+                      </p>
+                      <div className="grid grid-cols-1 gap-3">
+                        {filteredSpecialists.map((s) => (
+                          <button
+                            key={s.id}
+                            id={`select-specialist-opt-${s.id}`}
+                            onClick={() => setSelectedSpecialist(s)}
+                            className={`p-4 rounded-xl text-left border transition-all flex gap-4 items-start ${
+                              selectedSpecialist?.id === s.id
+                                ? 'bg-[#efe6dc]/50 border-[#764229] shadow-md'
+                                : 'bg-white border-[#efe6dc] hover:border-stone-300'
+                            }`}
+                          >
+                            <img
+                              src={s.avatarUrl}
+                              alt={s.name}
+                              referrerPolicy="no-referrer"
+                              className="w-16 h-16 rounded-full object-cover border-2 border-white flex-shrink-0 shadow-sm"
+                            />
+                            <div>
+                              <span className="text-sm font-serif font-semibold text-[#4a2815] block">{s.name}</span>
+                              <span className="text-[10px] font-sans tracking-wider text-[#764229] uppercase font-semibold block">{s.role}</span>
+                              <p className="text-[10px] text-stone-600 mt-1 lines-clamp-3 leading-relaxed">{s.bio}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {step === 3 && (
+                    /* STEP 3: DATE & TIME slots */
+                    <motion.div
+                      id="step3-schedule-select"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="space-y-6"
+                    >
+                      {/* Date Carousel Grid */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-sans font-semibold uppercase tracking-wider text-[#4a2815]">Seleccionar Fecha</label>
+                        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+                          {datesList.map((d) => (
+                            <button
+                              key={d.raw}
+                              id={`select-date-opt-${d.raw}`}
+                              type="button"
+                              onClick={() => setSelectedDate(d.raw)}
+                              className={`p-2 rounded-xl text-center border transition-all ${
+                                selectedDate === d.raw
+                                  ? 'bg-[#764229] border-[#764229] text-white shadow-md'
+                                  : 'bg-white border-[#efe6dc] hover:border-stone-300 text-stone-700'
+                              }`}
+                            >
+                              <span className="text-[9px] font-mono block uppercase tracking-wider opacity-80">{d.shortName}</span>
+                              <span className="text-lg font-serif font-bold block leading-none my-1">{d.dayNum}</span>
+                              <span className="text-[8px] font-sans block uppercase opacity-85">Mayo</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Hour List */}
+                      <div className="space-y-2 pt-2">
+                        <label className="text-xs font-sans font-semibold uppercase tracking-wider text-[#4a2815]">Horarios Disponibles</label>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {timesList.map((t) => (
+                            <button
+                              key={t}
+                              id={`select-time-opt-${t.replace(' ', '-')}`}
+                              type="button"
+                              onClick={() => setSelectedTime(t)}
+                              className={`py-3 px-4 rounded-xl text-center border text-xs font-mono transition-all flex items-center justify-center gap-2 ${
+                                selectedTime === t
+                                  ? 'bg-[#efe6dc] border-[#764229] text-[#4a2815] font-semibold shadow-sm'
+                                  : 'bg-white border-[#efe6dc] hover:border-stone-300 text-stone-600'
+                              }`}
+                            >
+                              <Clock className="w-3.5 h-3.5 text-[#5e6c58] opacity-70" />
+                              {t}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {step === 4 && (
+                    /* STEP 4: CONTACT & SECURE REGISTER */
+                    <motion.div
+                      id="step4-contact"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="space-y-4"
+                    >
+                      <p className="text-xs text-stone-500 font-serif italic">Proporciona los datos del huésped para completar el registro de la sesión:</p>
+                      <form onSubmit={handleConfirmReservation} className="space-y-4">
+                        {/* Summary preview */}
+                        <div className="p-4 bg-white border border-[#efe6dc] rounded-xl flex gap-3 text-xs leading-normal">
+                          <img
+                            src={selectedRitual?.imageUrl}
+                            alt="ritual"
+                            referrerPolicy="no-referrer"
+                            className="w-12 h-12 object-cover rounded-lg"
+                          />
+                          <div>
+                            <span className="font-serif font-bold text-[#4a2815] block">{selectedRitual?.name}</span>
+                            <span className="text-[10px] text-stone-500 block">Especialista: {selectedSpecialist?.name}</span>
+                            <span className="text-[10px] text-stone-500 block font-mono">
+                              {datesList.find(d => d.raw === selectedDate)?.formatted} a las {selectedTime}
+                            </span>
+                          </div>
+                          <span className="ml-auto font-serif font-bold text-[#764229] text-sm">${selectedRitual?.price}</span>
+                        </div>
+
+                        {/* Name input */}
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-sans font-bold tracking-widest text-stone-500 uppercase">Nombre del Huésped</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="Ej. Heberto R. G."
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="w-full p-3 text-xs rounded-xl border border-[#efe6dc] bg-white focus:outline-none focus:border-[#764229]"
+                          />
+                        </div>
+
+                        {/* Email input */}
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-sans font-bold tracking-widest text-stone-500 uppercase">Correo Electrónico</label>
+                          <input
+                            type="email"
+                            required
+                            placeholder="Ej. Heberto.R.G@gmail.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full p-3 text-xs rounded-xl border border-[#efe6dc] bg-white focus:outline-none focus:border-[#764229]"
+                          />
+                        </div>
+
+                        {/* Guest messages */}
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-sans font-bold tracking-widest text-stone-500 uppercase">Alergias o Notas de la Piel (Opcional)</label>
+                          <textarea
+                            rows={3}
+                            placeholder="Cuéntanos sobre sensibilidades cutáneas, zonas secas o preferencias de presión..."
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            className="w-full p-3 text-xs rounded-xl border border-[#efe6dc] bg-white focus:outline-none focus:border-[#764229] resize-none"
+                          />
+                        </div>
+
+                        {/* Invisible Submit trigger */}
+                        <button type="submit" className="hidden" id="booking-submit-trigger" />
+                      </form>
+                    </motion.div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Sticky Actions Footer */}
+            {!success && (
+              <div id="booking-wizard-footer" className="p-5 border-t border-[#efe6dc] flex justify-between gap-3 bg-white/50">
+                {step > 1 && (
+                  <button
+                    id="booking-prev-step-btn"
+                    onClick={handlePrevStep}
+                    className="py-3 px-4 border border-[#efe6dc] hover:bg-[#efe6dc]/20 text-stone-700 text-xs font-semibold tracking-wider rounded-xl transition-all font-sans uppercase flex items-center gap-1.5"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Atrás
+                  </button>
+                )}
+                
+                {step < 4 ? (
+                  <button
+                    id="booking-next-step-btn"
+                    onClick={handleNextStep}
+                    className="ml-auto py-3 px-6 bg-[#764229] hover:bg-[#4a2815] text-white text-xs font-semibold tracking-wider rounded-xl transition-all font-sans uppercase flex items-center gap-1.5"
+                  >
+                    Continuar
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button
+                    id="booking-confirm-reservation-btn"
+                    onClick={(e) => {
+                      const trigger = document.getElementById('booking-submit-trigger');
+                      if (trigger) trigger.click();
+                      else handleConfirmReservation(e);
+                    }}
+                    className="ml-auto py-3 px-6 bg-[#764229] hover:bg-[#4a2815] text-white text-xs font-semibold tracking-wider rounded-xl transition-all font-sans uppercase flex items-center justify-center gap-2"
+                  >
+                    <Sparkles className="w-4 h-4 text-[#efe6dc]" />
+                    Confirmar Cita
+                  </button>
+                )}
+              </div>
+            )}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+}

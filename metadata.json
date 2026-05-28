@@ -1,0 +1,6 @@
+{
+  "name": "Aura Skincare",
+  "description": "An elegant, artisanal skincare and wellness rituals booking and shopping sanctuary.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  
+  --color-aura-gold: #b38865;
+  --color-aura-brown-dark: #4a2815;
+  --color-aura-brown-light: #764229;
+  --color-aura-cream: #faf6f0;
+  --color-aura-beige: #f2eae4;
+  --color-aura-sand: #efe6dc;
+  --color-aura-sage: #5e6c58;
+}
+
+/* Custom styles */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Hide spin buttons for input number */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
