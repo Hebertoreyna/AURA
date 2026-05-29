@@ -198,10 +198,9 @@ export default function App() {
           {activeTab === 'rituals' && (
             <motion.div
               key="rituals"
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              transition={{ duration: 0.25 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.23, 1, 0.32, 1] } }}
+              exit={{ opacity: 0, y: -4, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
             >
               <RitualsScreen
                 onBookAppointment={() => {
@@ -221,10 +220,9 @@ export default function App() {
           {activeTab === 'refine' && (
             <motion.div
               key="refine"
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              transition={{ duration: 0.25 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.23, 1, 0.32, 1] } }}
+              exit={{ opacity: 0, y: -4, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
             >
               <RefineScreen
                 currentProfile={skinProfile}
@@ -239,10 +237,9 @@ export default function App() {
           {activeTab === 'shop' && (
             <motion.div
               key="shop"
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              transition={{ duration: 0.25 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.23, 1, 0.32, 1] } }}
+              exit={{ opacity: 0, y: -4, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
             >
               <ShopScreen
                 cart={cart}
@@ -259,10 +256,9 @@ export default function App() {
           {activeTab === 'profile' && (
             <motion.div
               key="profile"
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              transition={{ duration: 0.25 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.23, 1, 0.32, 1] } }}
+              exit={{ opacity: 0, y: -4, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
             >
               <ProfileScreen
                 appointments={appointments}
