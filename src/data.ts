@@ -224,22 +224,14 @@ export const RITUALS: Ritual[] = [
     duration: 30,
     price: 400,
     imageUrl: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80',
-    shortDescription: 'El servicio exclusivo de AURA. Luminosidad, firmeza y glow — independiente o como extra en cualquier servicio de cabina (+$400).',
-    description: 'El facial que lleva el nombre del salón. Combina activos exclusivos de alta concentración — vitamina C encapsulada, péptidos tensores y ácido hialurónico de triple peso molecular — en un protocolo diseñado para transformar la piel en una sola sesión. Puede reservarse como servicio independiente o añadirse como extra a cualquier servicio de cabina para potenciar sus resultados.',
+    shortDescription: 'Ritual de relajación y estimulación para rostro, cuello, brazos y cuero cabelludo. Agrégalo como extra en cualquier servicio de cabina (+$400).',
+    description: 'Un ritual exclusivo que fusiona relajación profunda y estimulación delicada en el rostro, cuello, brazos y cuero cabelludo. Diseñado para liberar tensiones, revitalizar la piel y brindar una sensación inmediata de bienestar. Sus movimientos suaves ayudan a mejorar la circulación, disminuir el estrés y devolver luminosidad natural al rostro. Vive una experiencia sensorial envolvente que equilibra cuerpo y mente, dejando tu piel descansada y radiante.',
     benefits: [
-      'Luminosidad y glow intensos desde la primera sesión',
-      'Efecto tensor y reafirmante con péptidos activos',
-      'Combinable con cualquier servicio de cabina como extra (+$400)'
+      'Libera tensiones y revitaliza la piel del rostro, cuello y cuero cabelludo',
+      'Mejora la circulación, reduce el estrés y devuelve luminosidad natural',
+      'Ideal para complementar cualquier servicio de cabina como extra (+$400)'
     ],
-    steps: [
-      'Limpieza y preparación de la piel',
-      'Aplicación de vitamina C encapsulada',
-      'Infusión de péptidos tensores',
-      'Masaje con técnica de lifting manual AURA',
-      'Mascarilla de ácido hialurónico triple peso',
-      'Sérum glow finalizador exclusivo',
-      'Crema hidratante y protector solar'
-    ],
+    steps: [],
     therapists: ['Anel Reyna']
   },
   // ── MAQUILLAJE ───────────────────────────────────────────────
