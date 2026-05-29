@@ -74,43 +74,43 @@ export default function RitualsScreen({
         {/* Hero Text Alignments & Triggers */}
         <div className="absolute inset-0 z-10 flex flex-col justify-end p-6 pb-12 sm:p-12 sm:pb-20 max-w-4xl mx-auto">
           <motion.span
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             className="text-xs tracking-[0.3em] font-sans text-[#efe6dc] font-semibold uppercase mb-3 drop-shadow-sm"
           >
             La Esencia de la Pureza
           </motion.span>
-          
+
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.1 }}
+            transition={{ duration: 0.6, delay: 0.08, ease: [0.23, 1, 0.32, 1] }}
             className="text-4xl sm:text-5xl md:text-6xl font-serif text-[#faf6f0] leading-[1.1] mb-8 max-w-2xl font-light tracking-wide"
           >
             Eleva tu belleza natural con cuidado artesanal.
           </motion.h2>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.18, ease: [0.23, 1, 0.32, 1] }}
             className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
           >
             <button
               id="hero-book-btn"
               onClick={onBookAppointment}
-              className="py-4 px-8 bg-[#764229] hover:bg-[#54311f] text-white text-xs font-semibold tracking-[0.2em] rounded-sm transition-all font-sans uppercase shadow-lg text-center cursor-pointer"
+              className="py-4 px-8 bg-[#764229] hover:bg-[#54311f] active:scale-[0.97] text-white text-xs font-semibold tracking-[0.2em] rounded-sm transition-[transform,background-color] duration-150 font-sans uppercase shadow-lg text-center cursor-pointer"
             >
               Reservar una cita
             </button>
             <button
               id="hero-philosophy-btn"
               onClick={onOpenPhilosophy}
-              className="py-4 px-8 border border-[#faf6f0]/60 hover:bg-white/10 text-[#faf6f0] text-xs font-semibold tracking-[0.2em] rounded-sm transition-all font-sans uppercase backdrop-blur-xs text-center cursor-pointer"
+              className="py-4 px-8 border border-[#faf6f0]/60 hover:bg-white/10 active:scale-[0.97] text-[#faf6f0] text-xs font-semibold tracking-[0.2em] rounded-sm transition-[transform,background-color] duration-150 font-sans uppercase backdrop-blur-xs text-center cursor-pointer"
             >
               Nuestra filosofía
             </button>
@@ -127,30 +127,41 @@ export default function RitualsScreen({
           </p>
         </div>
 
-        {/* Scrollable Horizontal Layout */}
-        <div id="rituals-slider" className="flex gap-6 overflow-x-auto pb-6 pt-2 no-scrollbar snap-x cursor-grab active:cursor-grabbing">
+        {/* Scrollable Horizontal Layout — stagger entrance */}
+        <motion.div
+          id="rituals-slider"
+          className="flex gap-6 overflow-x-auto pb-6 pt-2 no-scrollbar snap-x cursor-grab active:cursor-grabbing"
+          variants={{ visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } } }}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-60px' }}
+        >
           {RITUALS.map((ritual) => (
-            <div
+            <motion.div
               key={ritual.id}
               id={`ritual-card-${ritual.id}`}
               className="w-[280px] sm:w-[320px] flex-shrink-0 snap-start bg-transparent flex flex-col group cursor-pointer"
+              variants={{
+                hidden: { opacity: 0, x: 20 },
+                visible: { opacity: 1, x: 0, transition: { duration: 0.45, ease: [0.23, 1, 0.32, 1] } }
+              }}
               onClick={() => onViewRitual(ritual)}
             >
-              <div className="relative h-[380px] w-full rounded-xs overflow-hidden mb-4 bg-[#efe6dc] shadow-sm transform group-hover:scale-[1.01] transition-all duration-300">
+              <div className="relative h-[380px] w-full rounded-xs overflow-hidden mb-4 bg-[#efe6dc] shadow-sm">
                 <img
                   src={ritual.imageUrl}
                   alt={ritual.name}
                   referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                 />
-                
+
                 {/* Badge */}
                 {ritual.badge && (
                   <span className="absolute top-4 right-4 bg-[#efe6dc]/95 backdrop-blur-xs border border-[#faf6f0]/50 text-[#764229] text-[9px] font-sans font-bold tracking-widest px-3 py-1 rounded-sm uppercase">
                     {ritual.badge}
                   </span>
                 )}
-                
+
                 {/* Duration Overlay */}
                 <div className="absolute bottom-3 left-3 bg-[#1c130d]/45 text-[#efe6dc] font-mono text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider backdrop-blur-xs">
                   {ritual.duration} MIN
@@ -160,7 +171,7 @@ export default function RitualsScreen({
               {/* Title, Specs & Link */}
               <div className="flex flex-col">
                 <div className="flex justify-between items-baseline mb-1">
-                  <h4 className="text-xl font-serif text-[#4a2815] group-hover:text-[#764229] transition-colors leading-snug">
+                  <h4 className="text-xl font-serif text-[#4a2815] group-hover:text-[#764229] transition-colors duration-200 leading-snug">
                     {ritual.name}
                   </h4>
                   <span className="text-sm font-serif font-bold text-[#764229]">${ritual.price}</span>
@@ -168,13 +179,13 @@ export default function RitualsScreen({
                 <p className="text-xs text-stone-500 leading-relaxed mb-3 line-clamp-2">
                   {ritual.shortDescription}
                 </p>
-                <div className="inline-flex items-center gap-1.5 text-[10px] font-sans font-bold tracking-widest text-[#764229] uppercase border-b border-transparent group-hover:border-[#764229] w-max transition-all">
+                <div className="inline-flex items-center gap-1.5 text-[10px] font-sans font-bold tracking-widest text-[#764229] uppercase border-b border-transparent group-hover:border-[#764229] w-max transition-[border-color] duration-200">
                   Explorar Ritual <ArrowRight className="w-3.5 h-3.5" />
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* 4. SPECIALIST SPOTLIGHT */}
@@ -208,7 +219,7 @@ export default function RitualsScreen({
               <button
                 id="specialist-book-btn"
                 onClick={onBookAppointment}
-                className="w-full sm:w-auto py-3 px-8 bg-[#764229] hover:bg-[#4a2815] text-white text-xs font-semibold tracking-[0.2em] rounded-sm transition-all font-sans uppercase cursor-pointer"
+                className="w-full sm:w-auto py-3 px-8 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.97] text-white text-xs font-semibold tracking-[0.2em] rounded-sm transition-[transform,background-color] duration-150 font-sans uppercase cursor-pointer"
               >
                 Agendar con Anel
               </button>
@@ -229,7 +240,7 @@ export default function RitualsScreen({
         <button
           id="go-to-refine-block"
           onClick={() => onNavigateToTab('refine')}
-          className="w-full md:w-auto py-3.5 px-8 bg-[#764229] hover:bg-[#4a2815] text-white text-xs font-semibold tracking-wider rounded-xl transition-all font-sans uppercase flex items-center justify-center gap-2 shadow-md cursor-pointer"
+          className="w-full md:w-auto py-3.5 px-8 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center justify-center gap-2 shadow-md cursor-pointer"
         >
           <Sparkles className="w-4 h-4 text-[#efe6dc]" />
           Refinar mi Rutina
