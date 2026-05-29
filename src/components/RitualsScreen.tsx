@@ -275,7 +275,7 @@ export default function RitualsScreen({
           <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#764229] uppercase">Evaluación de la Piel</span>
           <h4 className="text-3xl font-serif text-[#4a2815] mt-1 mb-2 leading-snug">Descubre el servicio ideal para tu piel</h4>
           <p className="text-xs text-stone-600 leading-relaxed font-serif italic">
-            Completa nuestro breve diagnóstico sensorial botánico. Cuéntanos acerca de tus sensibilidades cutáneas y preocupaciones, y nuestro algoritmo identificará los servicios y activos ideales para el ritmo óptimo de tu piel.
+            Completa nuestro breve análisis sensorial botánico. Cuéntanos acerca de tus sensibilidades cutáneas y preocupaciones, y nuestro algoritmo identificará los servicios y activos ideales para el ritmo óptimo de tu piel.
           </p>
         </div>
         <button
@@ -314,7 +314,7 @@ export default function RitualsScreen({
           </div>
           <div className="flex gap-6 text-[10px] font-sans font-semibold tracking-widest uppercase">
             <button onClick={onOpenPhilosophy} className="hover:text-stone-700 transition-[#764229] cursor-pointer">Filosofía</button>
-            <button onClick={() => onNavigateToTab('refine')} className="hover:text-stone-700 transition-[#764229] cursor-pointer">Diagnóstico</button>
+            <button onClick={() => onNavigateToTab('refine')} className="hover:text-stone-700 transition-[#764229] cursor-pointer">Análisis</button>
             {/* <button onClick={() => onNavigateToTab('shop')} className="hover:text-stone-700 transition-[#764229] cursor-pointer">Tienda</button> */}
             <button onClick={onBookAppointment} className="hover:text-stone-700 transition-[#764229] cursor-pointer">Reservar</button>
           </div>
