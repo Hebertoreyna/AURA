@@ -7,7 +7,7 @@ import { getBookedSlots, saveBooking } from '../lib/bookings';
 
 // ─── CONFIGURACIÓN DEL SALÓN ────────────────────────────────────────────────
 // Reemplaza con el número de WhatsApp de Anel (formato: 52 + número sin espacios)
-const WHATSAPP_PHONE = '521XXXXXXXXXX';
+const WHATSAPP_PHONE = '526381285959';
 // ────────────────────────────────────────────────────────────────────────────
 
 interface BookingWizardProps {
