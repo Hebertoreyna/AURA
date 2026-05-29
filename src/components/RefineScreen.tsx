@@ -62,12 +62,12 @@ const BODY_CONCERNS = [
     label: 'Ocasión Especial',
     desc: 'Boda, evento importante o celebración donde quieres lucir radiante.',
     matchIds: ['r16'],
-    prescription: 'Para lucir perfecta en tu día especial, el Velo de Novia es el ritual completo: exfoliación corporal, mascarilla personalizada y envoltura por ambos lados del cuerpo para una piel sedosa y radiante.',
+    prescription: 'Para lucir perfecta en tu día especial, el Velo de Novia es el servicio completo: exfoliación corporal, mascarilla personalizada y envoltura por ambos lados del cuerpo para una piel sedosa y radiante.',
   },
   {
     id: 'skin_lesions',
     label: 'Lesiones Cutáneas (Verrugas)',
-    desc: 'Verrugas u otras lesiones que requieren evaluación y tratamiento especializado.',
+    desc: 'Verrugas u otras lesiones que requieren evaluación y atención especializada.',
     matchIds: ['r12'],
     prescription: 'El primer paso es una evaluación gratuita donde Anel analiza las lesiones, determina el método más adecuado y te entrega un presupuesto personalizado sin compromiso.',
   },
@@ -76,7 +76,7 @@ const BODY_CONCERNS = [
 const VIBE_ROUTINES = [
   { id: 'minimalist', label: 'Básica (2 pasos)',      desc: 'Solo lo esencial. Menos de 3 minutos al día.' },
   { id: 'balanced',   label: 'Equilibrada (4 pasos)', desc: 'Rutina completa. Menos de 6 minutos al día.' },
-  { id: 'immersive',  label: 'Ritual completo',       desc: 'Cuidado profundo estilo spa en casa.' },
+  { id: 'immersive',  label: 'Cuidado Completo',       desc: 'Cuidado profundo estilo spa en casa.' },
 ];
 
 // ─── HELPERS DE ETIQUETAS ─────────────────────────────────────────────────────
@@ -158,7 +158,7 @@ export default function RefineScreen({
         prescription = 'La piel acumula células opacas e impurezas. Limpieza profunda con Hydrofacial o Limpieza Facial para recuperar la luminosidad y limpiar los poros.';
       } else if (concern === 'hydration') {
         rituals = RITUALS.filter(r => ['r2','r15'].includes(r.id));
-        prescription = 'La deshidratación profunda reduce la elasticidad y acelera el envejecimiento. Prioriza activos de ácido hialurónico y tratamientos de infusión de humedad.';
+        prescription = 'La deshidratación profunda reduce la elasticidad y acelera el envejecimiento. Prioriza activos de ácido hialurónico y sesiones de infusión de humedad.';
       } else {
         rituals = RITUALS.filter(r => ['r14','r1'].includes(r.id));
         prescription = 'Con tu perfil dérmico, un diagnóstico personalizado con Anel te dará el protocolo más preciso para tus objetivos específicos.';
@@ -188,7 +188,7 @@ export default function RefineScreen({
             <div className="mb-6">
               <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#764229] uppercase">Diagnóstico AURA</span>
               <h3 className="text-3xl font-serif text-[#4a2815] mt-1">¿Qué área quieres trabajar?</h3>
-              <p className="text-xs text-stone-500 mt-1 font-serif italic">Elige el tipo de tratamiento que buscas y te guiaremos al servicio ideal.</p>
+              <p className="text-xs text-stone-500 mt-1 font-serif italic">Elige el área de cuidado y te guiaremos al servicio ideal.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -196,13 +196,13 @@ export default function RefineScreen({
                 {
                   id: 'facial' as const,
                   label: 'Facial',
-                  sub: 'Tratamientos para el rostro',
+                  sub: 'Servicios para el rostro',
                   icon: <Sparkles className="w-7 h-7" />,
                 },
                 {
                   id: 'corporal' as const,
                   label: 'Corporal',
-                  sub: 'Tratamientos para el cuerpo',
+                  sub: 'Servicios para el cuerpo',
                   icon: <Waves className="w-7 h-7" />,
                 },
               ]).map(z => (
@@ -278,7 +278,7 @@ export default function RefineScreen({
             <div className="mb-4">
               <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#764229] uppercase">Paso 1 de {totalSteps} · Corporal</span>
               <h3 className="text-2xl font-serif text-[#4a2815] mt-1">¿Qué quieres trabajar?</h3>
-              <p className="text-xs text-stone-500 mt-1 font-serif italic">Selecciona tu objetivo principal para este tratamiento.</p>
+              <p className="text-xs text-stone-500 mt-1 font-serif italic">Selecciona tu objetivo principal y te mostramos el servicio ideal.</p>
             </div>
 
             <div className="grid grid-cols-1 gap-2.5">
@@ -419,7 +419,7 @@ export default function RefineScreen({
                   <span className="text-[9px] font-sans font-bold tracking-[0.2em] text-[#764229] uppercase block">
                     {zone === 'corporal' ? 'Diagnóstico Corporal · AURA' : 'Diagnóstico Facial · AURA'}
                   </span>
-                  <h3 className="text-2xl font-serif text-[#4a2815] mt-0.5">Tu Prescripción Personalizada</h3>
+                  <h3 className="text-2xl font-serif text-[#4a2815] mt-0.5">Tu Recomendación Personalizada</h3>
                 </div>
                 <button
                   onClick={startQuiz}
@@ -457,7 +457,7 @@ export default function RefineScreen({
             {/* Rituales recomendados */}
             <div className="space-y-3">
               <h4 className="text-xs font-sans font-bold tracking-widest text-[#4a2815] uppercase border-b border-[#efe6dc]/50 pb-2">
-                {zone === 'corporal' ? 'Tratamiento Recomendado' : 'Ritual Facial Recomendado'}
+                {zone === 'corporal' ? 'Servicio Recomendado' : 'Servicio Facial Recomendado'}
               </h4>
 
               {matchedRituals.length === 0 && (
