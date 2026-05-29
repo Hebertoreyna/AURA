@@ -382,8 +382,7 @@ export const RITUALS: Ritual[] = [
       'Preparación con aceites esenciales relajantes',
       'Masaje de espalda, hombros y cuello',
       'Masaje de piernas y pies',
-      'Técnica de presión profunda en puntos de tensión',
-      'Relajación final con compresas tibias'
+      'Técnica de presión profunda en puntos de tensión'
     ],
     therapists: ['Anel Reyna']
   },
@@ -405,11 +404,9 @@ export const RITUALS: Ritual[] = [
     ],
     steps: [
       'Medición y evaluación de zonas a tratar',
-      'Aplicación de gel conductor',
       'Sesión de electroestimulación EMS',
       'Drenaje linfático manual de zonas tratadas',
-      'Masaje reafirmante con crema activa',
-      'Vendaje frío de efecto tensor'
+      'Masaje reafirmante con crema activa'
     ],
     therapists: ['Anel Reyna']
   },
@@ -471,7 +468,7 @@ export const RITUALS: Ritual[] = [
     badge: 'NUPCIAL',
     category: 'cabina',
     subcategory: 'corporal',
-    duration: 60,
+    duration: 120,
     price: 1500,
     imageUrl: 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=800&q=80',
     shortDescription: 'Exfoliación corporal completa con mascarilla y envoltura para una piel radiante en tu día especial.',
@@ -487,7 +484,8 @@ export const RITUALS: Ritual[] = [
       'Enjuague y preparación de la piel',
       'Aplicación de mascarilla personalizada',
       'Envoltura corporal por ambos lados',
-      'Hidratación selladora final'
+      'Hidratación selladora final',
+      'Masaje de relajación final'
     ],
     therapists: ['Anel Reyna']
   }
