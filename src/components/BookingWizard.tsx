@@ -29,6 +29,7 @@ const DEPOSIT_PCT: Record<string, number> = {
   r9:   0,  // Masaje Relajante          — pago al llegar
   r10: 30,  // EMS Body + Drenaje        — 30 %
   r11:  0,  // Exfoliación de Espalda    — pago al llegar
+  r12:  0,  // Eliminación de Verrugas   — evaluación gratuita, precio personalizado
 };
 
 // ─── HELPERS DE FECHA ───────────────────────────────────────────────────────
@@ -211,27 +212,32 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
     const pct  = depositPct(selectedRitual.id);
     const dep  = depositAmt(selectedRitual.id, selectedRitual.price);
     const rest = selectedRitual.price - dep;
+    const isEval = selectedRitual.customQuote === true;
 
     const msg = [
-      `¡Hola Anel! Me gustaría reservar una cita 🌿`,
+      isEval
+        ? `¡Hola Anel! Me gustaría agendar una cita de evaluación 🌿`
+        : `¡Hola Anel! Me gustaría reservar una cita 🌿`,
       ``,
       `*Servicio:* ${selectedRitual.name}`,
+      isEval ? `*Tipo:* Evaluación gratuita (presupuesto personalizado)` : null,
       `*Especialista:* ${selectedSpecialist.name}`,
       `*Fecha:* ${appDate}`,
       `*Hora:* ${selectedTime}`,
-      `*Duración:* ${selectedRitual.duration} min`,
+      `*Duración aprox.:* ${selectedRitual.duration} min`,
       ``,
-      `*Precio total:* $${selectedRitual.price} MXN`,
-      pct > 0
-        ? `*Anticipo (${pct}%):* $${dep} MXN`
-        : `*Anticipo:* Sin anticipo — pago al llegar`,
-      pct > 0 ? `*Resto al llegar:* $${rest} MXN` : null,
+      isEval
+        ? `*Precio:* Por definir (presupuesto personalizado durante la evaluación)`
+        : `*Precio total:* $${selectedRitual.price} MXN`,
+      !isEval && pct > 0  ? `*Anticipo (${pct}%):* $${dep} MXN`           : null,
+      !isEval && pct > 0  ? `*Resto al llegar:* $${rest} MXN`              : null,
+      !isEval && pct === 0 ? `*Anticipo:* Sin anticipo — pago al llegar`   : null,
       ``,
       `*Nombre:* ${name.trim()}`,
       `*Correo:* ${email.trim()}`,
       notes.trim() ? `*Notas:* ${notes.trim()}` : null,
       ``,
-      `¡Gracias! 💆‍♀️`,
+      isEval ? `¡Gracias! Quedo pendiente del presupuesto 🙏` : `¡Gracias! 💆‍♀️`,
     ].filter(line => line !== null).join('\n');
 
     // Abrir WhatsApp PRIMERO — respuesta directa al click, sin await
@@ -375,24 +381,33 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                       <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Fecha y Hora</span>
                       <span className="text-stone-700 text-right max-w-[150px]">{fmtDisplay(selectedDate)} · {selectedTime}</span>
                     </div>
-                    <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
-                      <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Precio Total</span>
-                      <span className="font-serif font-semibold text-[#4a2815]">${selectedRitual?.price} MXN</span>
-                    </div>
-                    {selectedRitual && depositPct(selectedRitual.id) > 0 ? (
+                    {selectedRitual?.customQuote ? (
                       <div className="flex justify-between text-xs pt-1">
-                        <span className="text-amber-700 uppercase tracking-widest font-sans font-bold">
-                          Anticipo ({depositPct(selectedRitual.id)}%)
-                        </span>
-                        <span className="font-serif font-bold text-amber-700 text-base">
-                          ${depositAmt(selectedRitual.id, selectedRitual.price)} MXN
-                        </span>
+                        <span className="text-sky-700 uppercase tracking-widest font-sans font-bold">Precio</span>
+                        <span className="font-sans font-semibold text-sky-700">Presupuesto personalizado</span>
                       </div>
                     ) : (
-                      <div className="flex justify-between text-xs pt-1">
-                        <span className="text-emerald-700 uppercase tracking-widest font-sans font-bold">Anticipo</span>
-                        <span className="font-sans font-semibold text-emerald-700">Sin anticipo</span>
-                      </div>
+                      <>
+                        <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
+                          <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Precio Total</span>
+                          <span className="font-serif font-semibold text-[#4a2815]">${selectedRitual?.price} MXN</span>
+                        </div>
+                        {selectedRitual && depositPct(selectedRitual.id) > 0 ? (
+                          <div className="flex justify-between text-xs pt-1">
+                            <span className="text-amber-700 uppercase tracking-widest font-sans font-bold">
+                              Anticipo ({depositPct(selectedRitual.id)}%)
+                            </span>
+                            <span className="font-serif font-bold text-amber-700 text-base">
+                              ${depositAmt(selectedRitual.id, selectedRitual.price)} MXN
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex justify-between text-xs pt-1">
+                            <span className="text-emerald-700 uppercase tracking-widest font-sans font-bold">Anticipo</span>
+                            <span className="font-sans font-semibold text-emerald-700">Sin anticipo</span>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
 
@@ -449,11 +464,19 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                               </div>
                             </div>
                             <div className="text-right flex-shrink-0 ml-2 space-y-0.5">
-                              <span className="text-sm font-serif font-bold text-[#764229] block">${r.price}</span>
+                              {r.customQuote
+                                ? <>
+                                    <span className="text-xs font-serif font-bold text-[#764229] block leading-tight">Cotización</span>
+                                    <span className="text-[9px] font-mono text-[#764229]/60 block">personalizada</span>
+                                  </>
+                                : <span className="text-sm font-serif font-bold text-[#764229] block">${r.price}</span>
+                              }
                               <span className="text-[9px] font-mono text-stone-400 block">{r.duration} min</span>
-                              {depositPct(r.id) > 0
-                                ? <span className="text-[9px] font-mono text-amber-700/80 block">Anticipo {depositPct(r.id)}%</span>
-                                : <span className="text-[9px] font-mono text-emerald-600/70 block">Sin anticipo</span>
+                              {r.customQuote
+                                ? <span className="text-[9px] font-mono text-sky-600/80 block">Gratis</span>
+                                : depositPct(r.id) > 0
+                                  ? <span className="text-[9px] font-mono text-amber-700/80 block">Anticipo {depositPct(r.id)}%</span>
+                                  : <span className="text-[9px] font-mono text-emerald-600/70 block">Sin anticipo</span>
                               }
                             </div>
                           </button>
@@ -668,12 +691,30 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                             </div>
                             <span className="ml-auto font-serif font-bold text-[#764229] text-sm flex-shrink-0">${selectedRitual?.price} MXN</span>
                           </div>
-                          {/* Desglose anticipo */}
+                          {/* Desglose anticipo / evaluación gratuita */}
                           {selectedRitual && (
                             <div className={`px-4 py-3 border-t border-[#efe6dc] flex items-center justify-between ${
-                              depositPct(selectedRitual.id) > 0 ? 'bg-amber-50/60' : 'bg-emerald-50/40'
+                              selectedRitual.customQuote
+                                ? 'bg-sky-50/60'
+                                : depositPct(selectedRitual.id) > 0
+                                ? 'bg-amber-50/60'
+                                : 'bg-emerald-50/40'
                             }`}>
-                              {depositPct(selectedRitual.id) > 0 ? (
+                              {selectedRitual.customQuote ? (
+                                <>
+                                  <div>
+                                    <span className="font-sans font-semibold text-sky-800 block">
+                                      Esta es una cita de evaluación gratuita
+                                    </span>
+                                    <span className="text-[10px] text-sky-700/70 leading-relaxed">
+                                      Anel evaluará tu caso y te dará un presupuesto personalizado sin compromiso
+                                    </span>
+                                  </div>
+                                  <span className="font-serif font-bold text-sky-700 text-base ml-4 flex-shrink-0">
+                                    Gratis
+                                  </span>
+                                </>
+                              ) : depositPct(selectedRitual.id) > 0 ? (
                                 <>
                                   <div>
                                     <span className="font-sans font-semibold text-amber-800 block">
