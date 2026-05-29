@@ -148,7 +148,7 @@ export default function App() {
           }`}
         >
           <Sparkles className="w-5 h-5 mb-1" />
-          <span className="text-[10px] sm:text-xs font-sans font-medium tracking-wide">Rituales</span>
+          <span className="text-[10px] sm:text-xs font-sans font-medium tracking-wide">Servicios</span>
         </button>
 
       </nav>
