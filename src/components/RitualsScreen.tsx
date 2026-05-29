@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { ArrowRight, Menu, Sparkles } from 'lucide-react';
+import { ArrowRight, Menu, Sparkles, CalendarPlus } from 'lucide-react';
 import { Ritual, Product } from '../types';
 import { RITUALS } from '../data';
 
@@ -9,16 +9,14 @@ interface RitualsScreenProps {
   onViewRitual: (ritual: Ritual) => void;
   onViewProduct: (product: Product) => void;
   onAddToCart: (product: Product) => void;
-  onNavigateToTab: (tabId: 'refine' | 'rituals' | 'shop' | 'profile') => void;
-  userAvatar: string;
+  onNavigateToTab: (tabId: 'refine' | 'rituals') => void;
 }
 
 export default function RitualsScreen({
   onBookAppointment,
   onOpenPhilosophy,
   onViewRitual,
-  onNavigateToTab,
-  userAvatar
+  onNavigateToTab
 }: RitualsScreenProps) {
 
   return (
@@ -33,26 +31,22 @@ export default function RitualsScreen({
         >
           <Menu className="w-5 h-5" />
         </button>
-        
+
         <h1
           id="hdr-brand-logo"
           onClick={() => onNavigateToTab('rituals')}
-          className="text-3xl font-serif tracking-[0.18em] text-[#4a2815] pl-5 font-light cursor-pointer select-none"
+          className="text-3xl font-serif tracking-[0.18em] text-[#4a2815] font-light cursor-pointer select-none"
         >
           AURA
         </h1>
-        
+
         <button
-          id="hdr-profile-btn"
-          onClick={() => onNavigateToTab('profile')}
-          className="w-8 h-8 rounded-full overflow-hidden border border-[#efe6dc] shadow-sm hover:opacity-85 transition-opacity"
+          id="hdr-book-btn"
+          onClick={onBookAppointment}
+          className="flex items-center gap-1.5 py-1.5 px-3 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.95] text-white text-[10px] font-sans font-semibold tracking-widest uppercase rounded-full transition-[transform,background-color] duration-150 shadow-sm"
         >
-          <img
-            src={userAvatar}
-            alt="Profile Avatar"
-            referrerPolicy="no-referrer"
-            className="w-full h-full object-cover"
-          />
+          <CalendarPlus className="w-3.5 h-3.5" />
+          Reservar
         </button>
       </header>
 
