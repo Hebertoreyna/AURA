@@ -24,10 +24,9 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
           {/* Modal Content */}
           <motion.div
             id="philosophy-card"
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+            initial={{ opacity: 0, scale: 0.96, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0, transition: { type: 'spring', duration: 0.4, bounce: 0.1 } }}
+            exit={{ opacity: 0, scale: 0.97, y: 8, transition: { duration: 0.16, ease: [0.32, 0.72, 0, 1] } }}
             className="relative w-full max-w-lg overflow-y-auto max-h-[85vh] bg-[#faf6f0] rounded-2xl p-6 md:p-8 shadow-xl border border-[#efe6dc] text-stone-800"
           >
             {/* Close button */}
@@ -94,7 +93,7 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
             <button
               id="philosophy-dismiss-btn"
               onClick={onClose}
-              className="mt-6 w-full py-3 bg-[#764229] hover:bg-[#4a2815] text-white text-xs font-semibold tracking-wider rounded-xl transition-all font-sans uppercase"
+              className="mt-6 w-full py-3 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase"
             >
               Continuar Nuestro Viaje
             </button>
