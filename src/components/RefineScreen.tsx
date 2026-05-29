@@ -161,7 +161,7 @@ export default function RefineScreen({
         prescription = 'La deshidratación profunda reduce la elasticidad y acelera el envejecimiento. Prioriza activos de ácido hialurónico y sesiones de infusión de humedad.';
       } else {
         rituals = RITUALS.filter(r => ['r14','r1'].includes(r.id));
-        prescription = 'Con tu perfil dérmico, un diagnóstico personalizado con Anel te dará el protocolo más preciso para tus objetivos específicos.';
+        prescription = 'Con tu perfil dérmico, un análisis personalizado con Anel te dará el protocolo más preciso para tus objetivos específicos.';
       }
     }
 
@@ -186,7 +186,7 @@ export default function RefineScreen({
             className="space-y-6"
           >
             <div className="mb-6">
-              <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#764229] uppercase">Diagnóstico AURA</span>
+              <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#764229] uppercase">Análisis AURA</span>
               <h3 className="text-3xl font-serif text-[#4a2815] mt-1">¿Qué área quieres trabajar?</h3>
               <p className="text-xs text-stone-500 mt-1 font-serif italic">Elige el área de cuidado y te guiaremos al servicio ideal.</p>
             </div>
@@ -314,7 +314,7 @@ export default function RefineScreen({
                     : 'bg-stone-200 text-stone-400 cursor-not-allowed'
                 }`}
               >
-                Ver Diagnóstico →
+                Ver Análisis →
               </button>
             </div>
           </motion.div>
@@ -398,7 +398,7 @@ export default function RefineScreen({
                     : 'bg-stone-200 text-stone-400 cursor-not-allowed'
                 }`}
               >
-                Ver Diagnóstico →
+                Ver Análisis →
               </button>
             </div>
           </motion.div>
@@ -417,7 +417,7 @@ export default function RefineScreen({
               <div className="flex justify-between items-start gap-2">
                 <div>
                   <span className="text-[9px] font-sans font-bold tracking-[0.2em] text-[#764229] uppercase block">
-                    {zone === 'corporal' ? 'Diagnóstico Corporal · AURA' : 'Diagnóstico Facial · AURA'}
+                    {zone === 'corporal' ? 'Análisis Corporal · AURA' : 'Análisis Facial · AURA'}
                   </span>
                   <h3 className="text-2xl font-serif text-[#4a2815] mt-0.5">Tu Recomendación Personalizada</h3>
                 </div>
@@ -462,7 +462,7 @@ export default function RefineScreen({
 
               {matchedRituals.length === 0 && (
                 <p className="text-xs text-stone-400 italic font-serif py-2">
-                  Vuelve a hacer el diagnóstico para ver recomendaciones.
+                  Vuelve a hacer el análisis para ver recomendaciones.
                 </p>
               )}
 
