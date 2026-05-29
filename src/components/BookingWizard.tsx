@@ -38,7 +38,7 @@ const DEPOSIT_PCT: Record<string, number> = {
   r18: 50,  // Curso de Automaquillaje
 };
 
-const AURA_ADDON_PRICE = 500; // precio del Ritual AURA como complemento
+const AURA_ADDON_PRICE = 400; // precio del Ritual AURA como complemento
 
 // ─── HELPERS DE FECHA ───────────────────────────────────────────────────────
 const DAYS_ES   = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
