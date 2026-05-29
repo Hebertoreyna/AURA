@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Clock, ChevronRight, ChevronLeft, Check, Sparkles, AlertTriangle, MessageCircle } from 'lucide-react';
+import { X, Clock, ChevronRight, ChevronLeft, Sparkles, AlertTriangle, MessageCircle, Loader2 } from 'lucide-react';
 import { Ritual, Specialist } from '../types';
 import { RITUALS, SPECIALISTS } from '../data';
+import { getBookedSlots, saveBooking } from '../lib/bookings';
 
 // ─── CONFIGURACIÓN DEL SALÓN ────────────────────────────────────────────────
 // Reemplaza con el número de WhatsApp de Anel (formato: 52 + número sin espacios)
@@ -32,6 +33,11 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
   const [notes, setNotes] = useState('');
   const [validationError, setValidationError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Firestore — slots ya reservados para la fecha seleccionada
+  const [bookedSlots, setBookedSlots] = useState<Set<string>>(new Set());
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   // Sync pre-selected ritual
   useEffect(() => {
@@ -39,13 +45,24 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
       const ritual = RITUALS.find(r => r.id === preSelectedRitualId);
       if (ritual) {
         setSelectedRitual(ritual);
-        setStep(2); // Jump straight to choosing specialist
+        setStep(2);
       }
     } else {
       setSelectedRitual(null);
       setStep(1);
     }
   }, [preSelectedRitualId, isOpen]);
+
+  // Cargar horarios ocupados de Firestore cuando cambia la fecha seleccionada
+  useEffect(() => {
+    if (!selectedDate) return;
+    setLoadingSlots(true);
+    setSelectedTime(''); // resetear hora si cambia la fecha
+    getBookedSlots(selectedDate)
+      .then(slots => setBookedSlots(slots))
+      .catch(() => setBookedSlots(new Set()))
+      .finally(() => setLoadingSlots(false));
+  }, [selectedDate]);
 
   // Generate date options for the next 7 days in May 2026
   const getDatesList = () => {
@@ -103,7 +120,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
     setStep((prev) => (prev - 1) as any);
   };
 
-  const handleConfirmReservation = (e: FormEvent) => {
+  const handleConfirmReservation = async (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       setValidationError('Por favor proporciona tu nombre para continuar.');
@@ -113,11 +130,27 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
       setValidationError('Por favor ingresa un correo electrónico válido.');
       return;
     }
+    if (!selectedRitual || !selectedSpecialist) return;
 
-    if (selectedRitual && selectedSpecialist) {
+    setSubmitting(true);
+    setValidationError('');
+
+    try {
       const appDate = datesList.find(d => d.raw === selectedDate)?.formatted || selectedDate;
 
-      // Construir mensaje de WhatsApp
+      // 1. Guardar reserva en Firestore (status: pending)
+      await saveBooking({
+        date: selectedDate,
+        time: selectedTime,
+        ritualName: selectedRitual.name,
+        specialistName: selectedSpecialist.name,
+        clientName: name.trim(),
+        clientEmail: email.trim(),
+        notes: notes.trim(),
+        status: 'pending',
+      });
+
+      // 2. Construir y abrir mensaje de WhatsApp
       const msg = [
         `¡Hola Anel! Me gustaría reservar una cita 🌿`,
         ``,
@@ -132,12 +165,16 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
         `*Correo:* ${email.trim()}`,
         notes.trim() ? `*Notas:* ${notes.trim()}` : null,
         ``,
-        `¡Gracias! 💆‍♀️`
+        `¡Gracias! 💆‍♀️`,
       ].filter(line => line !== null).join('\n');
 
-      const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(msg)}`;
-      window.open(url, '_blank');
+      window.open(`https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(msg)}`, '_blank');
       setSuccess(true);
+    } catch (err) {
+      console.error('Error al guardar reserva:', err);
+      setValidationError('Error al conectar con el servidor. Por favor intenta de nuevo.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -424,25 +461,46 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
 
                       {/* Hour List */}
                       <div className="space-y-2 pt-2">
-                        <label className="text-xs font-sans font-semibold uppercase tracking-wider text-[#4a2815]">Horarios Disponibles</label>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                          {timesList.map((t) => (
-                            <button
-                              key={t}
-                              id={`select-time-opt-${t.replace(' ', '-')}`}
-                              type="button"
-                              onClick={() => setSelectedTime(t)}
-                              className={`py-3 px-4 rounded-xl text-center border text-xs font-mono transition-all flex items-center justify-center gap-2 ${
-                                selectedTime === t
-                                  ? 'bg-[#efe6dc] border-[#764229] text-[#4a2815] font-semibold shadow-sm'
-                                  : 'bg-white border-[#efe6dc] hover:border-stone-300 text-stone-600'
-                              }`}
-                            >
-                              <Clock className="w-3.5 h-3.5 text-[#5e6c58] opacity-70" />
-                              {t}
-                            </button>
-                          ))}
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-sans font-semibold uppercase tracking-wider text-[#4a2815]">
+                            Horarios Disponibles
+                          </label>
+                          {loadingSlots && (
+                            <span className="flex items-center gap-1 text-[10px] text-stone-400 font-mono">
+                              <Loader2 className="w-3 h-3 animate-spin" /> verificando...
+                            </span>
+                          )}
                         </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {timesList.map((t) => {
+                            const isBooked = bookedSlots.has(t);
+                            const isSelected = selectedTime === t;
+                            return (
+                              <button
+                                key={t}
+                                id={`select-time-opt-${t.replace(' ', '-')}`}
+                                type="button"
+                                disabled={isBooked || loadingSlots}
+                                onClick={() => !isBooked && setSelectedTime(t)}
+                                className={`py-3 px-4 rounded-xl text-center border text-xs font-mono transition-[background-color,border-color,opacity] duration-150 flex items-center justify-center gap-2 ${
+                                  isBooked
+                                    ? 'bg-stone-100 border-stone-200 text-stone-300 cursor-not-allowed line-through'
+                                    : isSelected
+                                    ? 'bg-[#efe6dc] border-[#764229] text-[#4a2815] font-semibold shadow-sm'
+                                    : 'bg-white border-[#efe6dc] hover:border-stone-300 text-stone-600 cursor-pointer'
+                                }`}
+                              >
+                                <Clock className={`w-3.5 h-3.5 ${isBooked ? 'text-stone-300' : 'text-[#5e6c58] opacity-70'}`} />
+                                {isBooked ? `${t}` : t}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {selectedDate && !loadingSlots && bookedSlots.size > 0 && (
+                          <p className="text-[10px] text-stone-400 font-serif italic mt-1">
+                            Los horarios tachados ya tienen reserva pendiente.
+                          </p>
+                        )}
                       </div>
                     </motion.div>
                   )}
@@ -555,10 +613,13 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                       if (trigger) trigger.click();
                       else handleConfirmReservation(e);
                     }}
-                    className="ml-auto py-3 px-6 bg-[#25D366] hover:bg-[#1da851] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center justify-center gap-2"
+                    disabled={submitting}
+                    className="ml-auto py-3 px-6 bg-[#25D366] hover:bg-[#1da851] active:scale-[0.97] disabled:opacity-60 text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center justify-center gap-2"
                   >
-                    <MessageCircle className="w-4 h-4" />
-                    Enviar por WhatsApp
+                    {submitting
+                      ? <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</>
+                      : <><MessageCircle className="w-4 h-4" /> Enviar por WhatsApp</>
+                    }
                   </button>
                 )}
               </div>
