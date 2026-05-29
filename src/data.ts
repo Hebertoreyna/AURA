@@ -5,7 +5,7 @@ export const SPECIALISTS: Specialist[] = [
     id: 's1',
     name: 'Anel Reyna',
     role: 'Lic. Cosmetología e Imagen',
-    bio: 'Licenciada en Cosmetología e Imagen, especializada en maquillaje artístico, tratamientos faciales avanzados y rituales corporales. Cada servicio es una experiencia diseñada para realzar tu belleza natural con técnicas profesionales y atención personalizada.',
+    bio: 'Licenciada en Cosmetología e Imagen, especializada en maquillaje artístico, técnicas faciales avanzadas y servicios corporales. Cada visita es una experiencia diseñada para realzar tu belleza natural con técnicas profesionales y atención personalizada.',
     avatarUrl: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=250&q=80'
   }
 ];
@@ -41,8 +41,8 @@ export const RITUALS: Ritual[] = [
     duration: 60,
     price: 750,
     imageUrl: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
-    shortDescription: 'Tratamiento ideal para tu primera cita, personalizado a las necesidades de tu piel.',
-    description: 'Tratamiento ideal para tu primera cita, personalizado a las necesidades de tu piel. Utilizando aparatología personalizada luce tu piel limpia, saludable y luminosa.',
+    shortDescription: 'Servicio ideal para tu primera cita, personalizado a las necesidades de tu piel.',
+    description: 'Servicio ideal para tu primera cita, personalizado a las necesidades de tu piel. Utilizando aparatología personalizada luce tu piel limpia, saludable y luminosa.',
     benefits: [
       'Piel limpia, saludable y luminosa desde la primera sesión',
       'Protocolo personalizado según tu tipo de piel',
@@ -68,7 +68,7 @@ export const RITUALS: Ritual[] = [
     price: 800,
     imageUrl: 'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=800&q=80',
     shortDescription: 'Limpieza profunda, extracción, hidratación y exfoliación para una piel oxigenada y limpia.',
-    description: 'Tratamiento facial que combina limpieza profunda, extracción, hidratación y exfoliación. Eliminando impurezas para una piel oxigenada y limpia.',
+    description: 'Sesión facial que combina limpieza profunda, extracción, hidratación y exfoliación. Eliminando impurezas para una piel oxigenada y limpia.',
     benefits: [
       'Limpieza profunda con extracción de impurezas',
       'Hidratación intensa y exfoliación simultánea',
@@ -94,7 +94,7 @@ export const RITUALS: Ritual[] = [
     price: 800,
     imageUrl: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=800&q=80',
     shortDescription: 'Radiofrecuencia para estimular colágeno y elastina, previniendo arrugas y flacidez.',
-    description: 'Procedimiento que utiliza radiofrecuencia. Estimulando la producción de colágeno y elastina en la piel, previniendo y reduciendo arrugas y flacidez en el rostro.',
+    description: 'Sesión de radiofrecuencia que estimula la producción de colágeno y elastina en la piel, previniendo y reduciendo arrugas y flacidez en el rostro.',
     benefits: [
       'Estimula la producción de colágeno y elastina',
       'Previene y reduce arrugas y flacidez',
@@ -120,7 +120,7 @@ export const RITUALS: Ritual[] = [
     price: 750,
     imageUrl: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=800&q=80',
     shortDescription: 'Limpieza profunda para controlar el exceso de grasa y disminuir brotes e impurezas.',
-    description: 'Tratamiento enfocado en limpiar profundamente la piel, controlar el exceso de grasa y ayudar a disminuir brotes e impurezas. Incluye limpieza, exfoliación, extracción, activos especializados, aparatología específica y mascarilla calmante para favorecer una piel más equilibrada y saludable.',
+    description: 'Sesión enfocada en limpiar profundamente la piel, controlar el exceso de grasa y ayudar a disminuir brotes e impurezas. Incluye limpieza, exfoliación, extracción, activos especializados, aparatología específica y mascarilla calmante para favorecer una piel más equilibrada y saludable.',
     benefits: [
       'Limpieza profunda y control del exceso de grasa',
       'Reducción de brotes e impurezas',
@@ -145,8 +145,8 @@ export const RITUALS: Ritual[] = [
     duration: 60,
     price: 750,
     imageUrl: 'https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&w=800&q=80',
-    shortDescription: 'Procedimiento no invasivo que exfolia y renueva la piel, eliminando células muertas.',
-    description: 'Consiste en un procedimiento no invasivo que exfolia y renueva la piel, eliminando células muertas y mejorando su apariencia.',
+    shortDescription: 'Técnica no invasiva que exfolia y renueva la piel, eliminando células muertas.',
+    description: 'Consiste en una técnica no invasiva que exfolia y renueva la piel, eliminando células muertas y mejorando su apariencia.',
     benefits: [
       'Exfolia profundamente sin irritación',
       'Elimina células muertas y piel opaca',
@@ -172,7 +172,7 @@ export const RITUALS: Ritual[] = [
     price: 550,
     imageUrl: 'https://images.unsplash.com/photo-1588776814546-1ffbb8abba64?auto=format&fit=crop&w=800&q=80',
     shortDescription: 'Protocolo cosmetológico personalizado de 40 min para quienes quieren lucir bien con poco tiempo.',
-    description: 'Tratamiento de 40 min. que consiste de un protocolo cosmetológico personalizado adecuado a tus necesidades. Para aquellas personas con poco tiempo pero que quieren lucir de una piel sana y limpia.',
+    description: 'Sesión de 40 min. con un protocolo cosmetológico personalizado adecuado a tus necesidades. Para quienes tienen poco tiempo pero quieren lucir una piel sana y limpia.',
     benefits: [
       'Piel sana y limpia en solo 40 minutos',
       'Protocolo personalizado según tus necesidades',
@@ -209,7 +209,7 @@ export const RITUALS: Ritual[] = [
       'Limpieza y preparación a medida',
       'Aplicación de activos seleccionados para ti',
       'Mascarilla personalizada',
-      'Cierre con tratamiento finalizador específico'
+      'Cierre con activo finalizador específico'
     ],
     therapists: ['Anel Reyna']
   },
@@ -275,8 +275,8 @@ export const RITUALS: Ritual[] = [
     duration: 50,
     price: 600,
     imageUrl: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80',
-    shortDescription: 'El ritual exclusivo de AURA. Luminosidad, firmeza y glow — independiente o como extra en cualquier facial (+$600).',
-    description: 'El facial que lleva el nombre del salón. Combina activos exclusivos de alta concentración — vitamina C encapsulada, péptidos tensores y ácido hialurónico de triple peso molecular — en un protocolo diseñado para transformar la piel en una sola sesión. Puede reservarse como tratamiento independiente o añadirse como extra a cualquier otro facial de cabina para potenciar sus resultados.',
+    shortDescription: 'El servicio exclusivo de AURA. Luminosidad, firmeza y glow — independiente o como extra en cualquier facial (+$600).',
+    description: 'El facial que lleva el nombre del salón. Combina activos exclusivos de alta concentración — vitamina C encapsulada, péptidos tensores y ácido hialurónico de triple peso molecular — en un protocolo diseñado para transformar la piel en una sola sesión. Puede reservarse como servicio independiente o añadirse como extra a cualquier otro facial de cabina para potenciar sus resultados.',
     benefits: [
       'Luminosidad y glow intensos desde la primera sesión',
       'Efecto tensor y reafirmante con péptidos activos',
@@ -309,7 +309,7 @@ export const RITUALS: Ritual[] = [
       'Adaptado a tus preferencias y facciones'
     ],
     steps: [
-      'Consulta y análisis de tono de piel',
+      'Análisis de tono de piel y preferencias',
       'Preparación: limpieza, hidratación y primer',
       'Aplicación de base y corrección',
       'Diseño y delineado de cejas',
@@ -334,7 +334,7 @@ export const RITUALS: Ritual[] = [
       'Realza tus facciones con técnica profesional'
     ],
     steps: [
-      'Consulta personalizada y preparación de la piel',
+      'Bienvenida personalizada y preparación de la piel',
       'Base de ultra larga duración',
       'Contouring e iluminación profesional',
       'Maquillaje de ojos personalizado',
@@ -359,7 +359,7 @@ export const RITUALS: Ritual[] = [
       'Perfecto para fotografías y videos del evento'
     ],
     steps: [
-      'Consulta de estilo y temática del evento',
+      'Análisis de estilo y temática del evento',
       'Preparación e hidratación de la piel',
       'Base ligera y luminosa',
       'Diseño de cejas suave y definido',
@@ -384,7 +384,7 @@ export const RITUALS: Ritual[] = [
       'Perfecto para ceremonia y celebración'
     ],
     steps: [
-      'Consulta y análisis de tono de piel',
+      'Análisis de tono de piel y preferencias',
       'Preparación: limpieza, hidratación y primer',
       'Base HD y corrección de imperfecciones',
       'Diseño y delineado de cejas',
@@ -436,7 +436,7 @@ export const RITUALS: Ritual[] = [
       'Renueva la energía y el bienestar mental'
     ],
     steps: [
-      'Recepción y consulta de zonas de tensión',
+      'Recepción y análisis de zonas de tensión',
       'Preparación con aceites esenciales relajantes',
       'Masaje de espalda, hombros y cuello',
       'Masaje de piernas y pies',
@@ -455,7 +455,7 @@ export const RITUALS: Ritual[] = [
     price: 1000,
     imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80',
     shortDescription: 'Tecnología EMS y drenaje linfático manual para tonificar, reafirmar y eliminar retención de líquidos.',
-    description: 'Tratamiento corporal de alta tecnología que combina electroestimulación muscular (EMS) con drenaje linfático manual. Tonifica los músculos, reduce la celulitis y elimina la retención de líquidos para un cuerpo más firme y definido.',
+    description: 'Sesión corporal de alta tecnología que combina electroestimulación muscular (EMS) con drenaje linfático manual. Tonifica los músculos, reduce la celulitis y elimina la retención de líquidos para un cuerpo más firme y definido.',
     benefits: [
       'Tonifica y reafirma la musculatura corporal',
       'Elimina la retención de líquidos y reduce el volumen',
@@ -481,7 +481,7 @@ export const RITUALS: Ritual[] = [
     price: 850,
     imageUrl: 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=800&q=80',
     shortDescription: 'Exfoliación mecánica con mascarilla personalizada para eliminar células muertas e hidratar la piel.',
-    description: 'Tratamiento que consiste en una exfoliación mecánica en la zona para eliminar células muertas de la piel seguido con una mascarilla personalizada y envolvemos la zona para hidratar y nutrir la piel.',
+    description: 'Sesión con exfoliación mecánica en la zona para eliminar células muertas de la piel, seguida de una mascarilla personalizada y envoltura para hidratar y nutrir la piel.',
     benefits: [
       'Elimina células muertas e impurezas acumuladas',
       'Mascarilla personalizada para hidratación profunda',
@@ -507,7 +507,7 @@ export const RITUALS: Ritual[] = [
     price: 0,
     customQuote: true,
     imageUrl: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80',
-    shortDescription: 'Evaluación gratuita para determinar el tratamiento y presupuesto personalizado según cada caso.',
+    shortDescription: 'Evaluación gratuita para determinar el método y presupuesto personalizado según cada caso.',
     description: 'Eliminación de verrugas con aparatología. El precio varía según el número y características de las lesiones, por ello la primera cita es una evaluación gratuita donde Anel analizará tu caso y te entregará un presupuesto personalizado sin compromiso.',
     benefits: [
       'Evaluación diagnóstica gratuita y sin compromiso',
@@ -516,10 +516,10 @@ export const RITUALS: Ritual[] = [
     ],
     steps: [
       'Evaluación visual y diagnóstica de las lesiones',
-      'Determinación del método de tratamiento idóneo',
+      'Determinación del método idóneo',
       'Estimación del número de sesiones necesarias',
       'Entrega de presupuesto personalizado',
-      'Agendamiento del tratamiento si se acepta el presupuesto'
+      'Agendamiento de la sesión si se acepta el presupuesto'
     ],
     therapists: ['Anel Reyna']
   },
