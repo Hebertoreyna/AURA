@@ -12,21 +12,23 @@ import {
 const WHATSAPP_PHONE = '526381285959';
 
 /**
- * Anticipo mínimo por tipo de servicio (en días completos).
- * Lógica: servicios comunes 1-2 días; servicios especiales/eventos 3-7 días.
+ * Porcentaje de anticipo (depósito) requerido por tipo de servicio.
+ * Criterio: servicios cotidianos sin anticipo (pago al llegar);
+ * servicios de maquillaje y tratamientos de mayor inversión requieren 30 %;
+ * eventos especiales (novia, XV años) requieren 50 % por el compromiso de fecha.
  */
-const ADVANCE_DAYS: Record<string, number> = {
-  r1:  1,  // Limpieza Facial           — servicio cotidiano
-  r2:  2,  // Hydrofacial               — requiere preparación de activos
-  r3:  2,  // Facial Lifting            — técnica especializada
-  r4:  1,  // Facial Control Acné       — servicio cotidiano
-  r5:  2,  // Facial Microdermoabrasión — equipo especializado
-  r6:  2,  // Maquillaje Social         — prep de materiales
-  r7:  7,  // Maquillaje Novia          — incluye sesión de prueba
-  r8:  3,  // Maquillaje XV Años        — coordinación de evento
-  r9:  1,  // Masaje Relajante          — servicio cotidiano
-  r10: 2,  // EMS Body + Drenaje        — equipo especializado
-  r11: 1,  // Exfoliación de Espalda    — servicio cotidiano
+const DEPOSIT_PCT: Record<string, number> = {
+  r1:   0,  // Limpieza Facial           — pago al llegar
+  r2:  30,  // Hydrofacial               — 30 %
+  r3:  30,  // Facial Lifting            — 30 %
+  r4:   0,  // Facial Control Acné       — pago al llegar
+  r5:  30,  // Facial Microdermoabrasión — 30 %
+  r6:  30,  // Maquillaje Social         — 30 %
+  r7:  50,  // Maquillaje Novia          — 50 % (evento especial)
+  r8:  50,  // Maquillaje XV Años        — 50 % (evento especial)
+  r9:   0,  // Masaje Relajante          — pago al llegar
+  r10: 30,  // EMS Body + Drenaje        — 30 %
+  r11:  0,  // Exfoliación de Espalda    — pago al llegar
 };
 
 // ─── HELPERS DE FECHA ───────────────────────────────────────────────────────
@@ -48,12 +50,10 @@ const fmtDisplay = (raw: string): string => {
   });
 };
 
-/** Fecha mínima reservable para un ritual dado (anticipo + días) */
-const getMinDate = (ritualId: string): Date => {
-  const advDays = ADVANCE_DAYS[ritualId] ?? 1;
+/** Fecha mínima reservable: hoy (no se permiten fechas pasadas) */
+const getMinDate = (): Date => {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() + advDays);
   return d;
 };
 
@@ -118,8 +118,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
 
   // ── Helpers del calendario ───────────────────────────────────────────────
   const isDateDisabled = (y: number, m: number, d: number): boolean => {
-    const date = new Date(y, m, d);
-    return date < getMinDate(selectedRitual?.id ?? '');
+    return new Date(y, m, d) < getMinDate();
   };
 
   /** Filtra horarios ya transcurridos si la fecha seleccionada es hoy */
@@ -209,6 +208,10 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
 
     const appDate = fmtDisplay(selectedDate);
 
+    const pct  = depositPct(selectedRitual.id);
+    const dep  = depositAmt(selectedRitual.id, selectedRitual.price);
+    const rest = selectedRitual.price - dep;
+
     const msg = [
       `¡Hola Anel! Me gustaría reservar una cita 🌿`,
       ``,
@@ -217,7 +220,12 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
       `*Fecha:* ${appDate}`,
       `*Hora:* ${selectedTime}`,
       `*Duración:* ${selectedRitual.duration} min`,
-      `*Precio:* $${selectedRitual.price} MXN`,
+      ``,
+      `*Precio total:* $${selectedRitual.price} MXN`,
+      pct > 0
+        ? `*Anticipo (${pct}%):* $${dep} MXN`
+        : `*Anticipo:* Sin anticipo — pago al llegar`,
+      pct > 0 ? `*Resto al llegar:* $${rest} MXN` : null,
       ``,
       `*Nombre:* ${name.trim()}`,
       `*Correo:* ${email.trim()}`,
@@ -257,13 +265,11 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
     onClose();
   };
 
-  // ── Anticipo legible para el tooltip ─────────────────────────────────────
-  const advanceDaysLabel = (ritualId: string): string => {
-    const days = ADVANCE_DAYS[ritualId] ?? 1;
-    return days === 1 ? '1 día de anticipo' : `${days} días de anticipo`;
-  };
+  // ── Helpers de anticipo (depósito) ───────────────────────────────────────
+  const depositPct = (ritualId: string): number => DEPOSIT_PCT[ritualId] ?? 0;
+  const depositAmt = (ritualId: string, price: number): number =>
+    Math.round(price * depositPct(ritualId) / 100);
 
-  // ── Fecha mínima display (para mostrar al usuario) ────────────────────────
   const todayRaw = fmtRaw(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -369,10 +375,25 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                       <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Fecha y Hora</span>
                       <span className="text-stone-700 text-right max-w-[150px]">{fmtDisplay(selectedDate)} · {selectedTime}</span>
                     </div>
-                    <div className="flex justify-between text-xs pt-1">
-                      <span className="text-[#764229] uppercase tracking-widest font-sans font-bold">Precio</span>
-                      <span className="font-serif font-bold text-[#764229] text-base">${selectedRitual?.price} MXN</span>
+                    <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
+                      <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Precio Total</span>
+                      <span className="font-serif font-semibold text-[#4a2815]">${selectedRitual?.price} MXN</span>
                     </div>
+                    {selectedRitual && depositPct(selectedRitual.id) > 0 ? (
+                      <div className="flex justify-between text-xs pt-1">
+                        <span className="text-amber-700 uppercase tracking-widest font-sans font-bold">
+                          Anticipo ({depositPct(selectedRitual.id)}%)
+                        </span>
+                        <span className="font-serif font-bold text-amber-700 text-base">
+                          ${depositAmt(selectedRitual.id, selectedRitual.price)} MXN
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex justify-between text-xs pt-1">
+                        <span className="text-emerald-700 uppercase tracking-widest font-sans font-bold">Anticipo</span>
+                        <span className="font-sans font-semibold text-emerald-700">Sin anticipo</span>
+                      </div>
+                    )}
                   </div>
 
                   <p className="text-[10px] text-stone-400 italic mb-5">
@@ -425,15 +446,15 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                   )}
                                 </div>
                                 <p className="text-[10px] text-stone-500 mt-0.5 max-w-sm line-clamp-1">{r.shortDescription}</p>
-                                {/* Anticipo mínimo */}
-                                <span className="text-[9px] font-mono text-[#764229]/70 mt-0.5 block">
-                                  ⏱ {advanceDaysLabel(r.id)}
-                                </span>
                               </div>
                             </div>
-                            <div className="text-right flex-shrink-0 ml-2">
+                            <div className="text-right flex-shrink-0 ml-2 space-y-0.5">
                               <span className="text-sm font-serif font-bold text-[#764229] block">${r.price}</span>
                               <span className="text-[9px] font-mono text-stone-400 block">{r.duration} min</span>
+                              {depositPct(r.id) > 0
+                                ? <span className="text-[9px] font-mono text-amber-700/80 block">Anticipo {depositPct(r.id)}%</span>
+                                : <span className="text-[9px] font-mono text-emerald-600/70 block">Sin anticipo</span>
+                              }
                             </div>
                           </button>
                         ))}
@@ -494,9 +515,9 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                             <CalendarDays className="w-3.5 h-3.5" />
                             Seleccionar Fecha
                           </label>
-                          {selectedRitual && (
-                            <span className="text-[9px] font-mono text-[#764229]/80 bg-[#efe6dc]/60 px-2 py-0.5 rounded-full">
-                              ⏱ {advanceDaysLabel(selectedRitual.id)}
+                          {selectedRitual && depositPct(selectedRitual.id) > 0 && (
+                            <span className="text-[9px] font-mono text-amber-700/80 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded-full">
+                              Anticipo {depositPct(selectedRitual.id)}% al confirmar
                             </span>
                           )}
                         </div>
@@ -632,18 +653,51 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                         Proporciona los datos del huésped para completar el registro de la sesión:
                       </p>
                       <form onSubmit={handleConfirmReservation} className="space-y-4">
-                        {/* Resumen de reserva */}
-                        <div className="p-4 bg-white border border-[#efe6dc] rounded-xl flex gap-3 text-xs leading-normal">
-                          <img src={selectedRitual?.imageUrl} alt="ritual" referrerPolicy="no-referrer"
-                            className="w-12 h-12 object-cover rounded-lg" />
-                          <div className="min-w-0">
-                            <span className="font-serif font-bold text-[#4a2815] block truncate">{selectedRitual?.name}</span>
-                            <span className="text-[10px] text-stone-500 block">Especialista: {selectedSpecialist?.name}</span>
-                            <span className="text-[10px] text-stone-500 block font-mono">
-                              {selectedDate ? fmtDisplay(selectedDate) : '—'} · {selectedTime}
-                            </span>
+                        {/* Resumen de reserva con desglose de anticipo */}
+                        <div className="bg-white border border-[#efe6dc] rounded-xl overflow-hidden text-xs">
+                          {/* Fila principal del ritual */}
+                          <div className="p-4 flex gap-3 leading-normal">
+                            <img src={selectedRitual?.imageUrl} alt="ritual" referrerPolicy="no-referrer"
+                              className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
+                            <div className="min-w-0">
+                              <span className="font-serif font-bold text-[#4a2815] block truncate">{selectedRitual?.name}</span>
+                              <span className="text-[10px] text-stone-500 block">Especialista: {selectedSpecialist?.name}</span>
+                              <span className="text-[10px] text-stone-500 block font-mono">
+                                {selectedDate ? fmtDisplay(selectedDate) : '—'} · {selectedTime}
+                              </span>
+                            </div>
+                            <span className="ml-auto font-serif font-bold text-[#764229] text-sm flex-shrink-0">${selectedRitual?.price} MXN</span>
                           </div>
-                          <span className="ml-auto font-serif font-bold text-[#764229] text-sm flex-shrink-0">${selectedRitual?.price}</span>
+                          {/* Desglose anticipo */}
+                          {selectedRitual && (
+                            <div className={`px-4 py-3 border-t border-[#efe6dc] flex items-center justify-between ${
+                              depositPct(selectedRitual.id) > 0 ? 'bg-amber-50/60' : 'bg-emerald-50/40'
+                            }`}>
+                              {depositPct(selectedRitual.id) > 0 ? (
+                                <>
+                                  <div>
+                                    <span className="font-sans font-semibold text-amber-800 block">
+                                      Anticipo requerido — {depositPct(selectedRitual.id)}%
+                                    </span>
+                                    <span className="text-[10px] text-amber-700/70">Resto se paga al llegar al salón</span>
+                                  </div>
+                                  <div className="text-right">
+                                    <span className="font-serif font-bold text-amber-800 text-base block">
+                                      ${depositAmt(selectedRitual.id, selectedRitual.price)} MXN
+                                    </span>
+                                    <span className="text-[9px] text-stone-400 font-mono">
+                                      Resto: ${selectedRitual.price - depositAmt(selectedRitual.id, selectedRitual.price)} MXN
+                                    </span>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="font-sans font-semibold text-emerald-700">Sin anticipo</span>
+                                  <span className="text-[10px] text-emerald-700/70">Pago completo al llegar</span>
+                                </>
+                              )}
+                            </div>
+                          )}
                         </div>
 
                         <div className="space-y-1">
