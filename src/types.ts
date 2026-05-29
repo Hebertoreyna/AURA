@@ -25,7 +25,8 @@ export interface Ritual {
   name: string;
   badge?: string;
   duration: number; // in minutes
-  price: number;
+  price: number;    // 0 si customQuote = true
+  customQuote?: boolean; // true = precio personalizado, primera cita es evaluación gratuita
   imageUrl: string;
   shortDescription: string;
   description: string;
