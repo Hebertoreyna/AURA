@@ -31,11 +31,13 @@ export const PRODUCTS: Product[] = [
 ];
 
 export const RITUALS: Ritual[] = [
-  // ── FACIALES ─────────────────────────────────────────────────
+  // ── CABINA: FACIALES ─────────────────────────────────────────
   {
     id: 'r1',
     name: 'Limpieza Facial',
     badge: 'ESENCIAL',
+    category: 'cabina',
+    subcategory: 'facial',
     duration: 50,
     price: 750,
     imageUrl: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
@@ -60,6 +62,8 @@ export const RITUALS: Ritual[] = [
     id: 'r2',
     name: 'Hydrofacial',
     badge: 'PREMIUM',
+    category: 'cabina',
+    subcategory: 'facial',
     duration: 50,
     price: 800,
     imageUrl: 'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=800&q=80',
@@ -84,6 +88,8 @@ export const RITUALS: Ritual[] = [
     id: 'r3',
     name: 'Facial Lifting',
     badge: 'REAFIRMANTE',
+    category: 'cabina',
+    subcategory: 'facial',
     duration: 50,
     price: 800,
     imageUrl: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=800&q=80',
@@ -108,6 +114,8 @@ export const RITUALS: Ritual[] = [
     id: 'r4',
     name: 'Facial Control Acné',
     badge: 'PURIFICANTE',
+    category: 'cabina',
+    subcategory: 'facial',
     duration: 50,
     price: 750,
     imageUrl: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=800&q=80',
@@ -132,6 +140,8 @@ export const RITUALS: Ritual[] = [
     id: 'r5',
     name: 'Facial Microdermoabrasión',
     badge: 'RENOVADOR',
+    category: 'cabina',
+    subcategory: 'facial',
     duration: 50,
     price: 750,
     imageUrl: 'https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&w=800&q=80',
@@ -152,11 +162,90 @@ export const RITUALS: Ritual[] = [
     ],
     therapists: ['Anel Reyna']
   },
+  {
+    id: 'r13',
+    name: 'Facial Ejecutivo',
+    badge: 'RÁPIDO',
+    category: 'cabina',
+    subcategory: 'facial',
+    duration: 50,
+    price: 550,
+    imageUrl: 'https://images.unsplash.com/photo-1588776814546-1ffbb8abba64?auto=format&fit=crop&w=800&q=80',
+    shortDescription: 'Protocolo esencial de limpieza, tratamiento e hidratación para quienes buscan resultados efectivos en poco tiempo.',
+    description: 'El facial diseñado para el ritmo de vida actual. Combina los pasos esenciales de un tratamiento profesional — limpieza enzimática, extracción rápida y mascarilla express — en una sesión eficiente que renueva la piel sin sacrificar calidad. Ideal para citas de mantenimiento o primeras visitas.',
+    benefits: [
+      'Limpieza profunda en tiempo reducido',
+      'Hidratación y luminosidad inmediata',
+      'Ideal para mantenimiento mensual'
+    ],
+    steps: [
+      'Limpieza y desmaquillaje express',
+      'Exfoliación enzimática',
+      'Extracción de comedones esenciales',
+      'Mascarilla tratante express',
+      'Sérum e hidratante finalizador'
+    ],
+    therapists: ['Anel Reyna']
+  },
+  {
+    id: 'r14',
+    name: 'Facial Personalizado',
+    badge: 'A TU MEDIDA',
+    category: 'cabina',
+    subcategory: 'facial',
+    duration: 60,
+    price: 900,
+    imageUrl: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=800&q=80',
+    shortDescription: 'Protocolo 100% diseñado para tus necesidades específicas, con activos seleccionados por Anel según tu diagnóstico.',
+    description: 'El tratamiento más exclusivo de la cabina. Anel realiza un diagnóstico profundo de tu piel y construye un protocolo único eligiendo cada activo, técnica y mascarilla en función de tus necesidades reales. Sin fórmulas fijas: cada sesión es irrepetible.',
+    benefits: [
+      'Diagnóstico cutáneo personalizado incluido',
+      'Activos premium seleccionados para tu piel',
+      'Resultados visibles adaptados a tu objetivo'
+    ],
+    steps: [
+      'Diagnóstico cutáneo profundo',
+      'Limpieza y preparación personalizada',
+      'Protocolo activo a medida',
+      'Técnica de masaje personalizada',
+      'Mascarilla y activos seleccionados para ti',
+      'Cierre con tratamiento finalizador específico'
+    ],
+    therapists: ['Anel Reyna']
+  },
+  {
+    id: 'r15',
+    name: 'Facial AURA',
+    badge: 'SIGNATURE',
+    category: 'cabina',
+    subcategory: 'facial',
+    isAddon: true,
+    duration: 50,
+    price: 600,
+    imageUrl: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80',
+    shortDescription: 'El ritual exclusivo de AURA. Luminosidad, firmeza y glow en una experiencia independiente o como complemento de cualquier facial (+$600).',
+    description: 'El facial que lleva el nombre del salón. Combina activos exclusivos de alta concentración — vitamina C encapsulada, péptidos tensores y ácido hialurónico de triple peso molecular — en un protocolo diseñado para transformar la piel en una sola sesión. Puede reservarse como tratamiento independiente o añadirse a cualquier otro facial de cabina para potenciar sus resultados.',
+    benefits: [
+      'Luminosidad y glow intensos desde la primera sesión',
+      'Efecto tensor y reafirmante con péptidos activos',
+      'Combinable con cualquier facial para resultados superiores'
+    ],
+    steps: [
+      'Limpieza y preparación de la piel',
+      'Aplicación de vitamina C encapsulada',
+      'Infusión de péptidos tensores',
+      'Masaje con técnica de lifting manual AURA',
+      'Mascarilla de ácido hialurónico triple peso',
+      'Sérum glow finalizador exclusivo'
+    ],
+    therapists: ['Anel Reyna']
+  },
   // ── MAQUILLAJE ───────────────────────────────────────────────
   {
     id: 'r6',
     name: 'Maquillaje Social',
     badge: 'CLÁSICO',
+    category: 'maquillaje',
     duration: 45,
     price: 700,
     imageUrl: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=800&q=80',
@@ -181,6 +270,7 @@ export const RITUALS: Ritual[] = [
     id: 'r7',
     name: 'Maquillaje Novia',
     badge: 'ESPECIAL',
+    category: 'maquillaje',
     duration: 90,
     price: 2000,
     imageUrl: 'https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?auto=format&fit=crop&w=800&q=80',
@@ -205,6 +295,7 @@ export const RITUALS: Ritual[] = [
     id: 'r8',
     name: 'Maquillaje XV Años',
     badge: 'ESPECIAL',
+    category: 'maquillaje',
     duration: 60,
     price: 900,
     imageUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
@@ -225,11 +316,13 @@ export const RITUALS: Ritual[] = [
     ],
     therapists: ['Anel Reyna']
   },
-  // ── CORPORALES ───────────────────────────────────────────────
+  // ── CABINA: CORPORALES ───────────────────────────────────────
   {
     id: 'r9',
     name: 'Masaje Relajante',
     badge: 'BIENESTAR',
+    category: 'cabina',
+    subcategory: 'corporal',
     duration: 60,
     price: 700,
     imageUrl: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
@@ -254,6 +347,8 @@ export const RITUALS: Ritual[] = [
     id: 'r10',
     name: 'EMS Body + Drenaje Linfático',
     badge: 'REAFIRMANTE',
+    category: 'cabina',
+    subcategory: 'corporal',
     duration: 60,
     price: 1000,
     imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80',
@@ -278,6 +373,8 @@ export const RITUALS: Ritual[] = [
     id: 'r11',
     name: 'Exfoliación de Espalda',
     badge: 'PURIFICANTE',
+    category: 'cabina',
+    subcategory: 'corporal',
     duration: 60,
     price: 850,
     imageUrl: 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=800&q=80',
@@ -295,6 +392,110 @@ export const RITUALS: Ritual[] = [
       'Extracción de comedones si es necesario',
       'Mascarilla purificante e hidratante',
       'Hidratación profunda finalizadora'
+    ],
+    therapists: ['Anel Reyna']
+  },
+  // ── TRATAMIENTOS ESPECIALES ──────────────────────────────────────────
+  {
+    id: 'r12',
+    name: 'Eliminación de Verrugas',
+    badge: 'EVALUACIÓN',
+    category: 'cabina',
+    subcategory: 'corporal',
+    duration: 30,
+    price: 0,
+    customQuote: true,
+    imageUrl: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80',
+    shortDescription: 'Evaluación gratuita para determinar el tratamiento y presupuesto personalizado según cada caso.',
+    description: 'La eliminación de verrugas es un tratamiento especializado cuyo costo varía según el número, tamaño, profundidad y localización de las lesiones. Por ello, la primera cita es una evaluación gratuita en la que Anel analizará tu caso, definirá el método más adecuado (crioterapia, electrocauterización u otros) y te entregará un presupuesto personalizado sin compromiso.',
+    benefits: [
+      'Evaluación diagnóstica gratuita y sin compromiso',
+      'Presupuesto personalizado según tu caso específico',
+      'Técnica adecuada al tipo y número de verrugas'
+    ],
+    steps: [
+      'Evaluación visual y diagnóstica de las lesiones',
+      'Determinación del método de tratamiento idóneo',
+      'Estimación del número de sesiones necesarias',
+      'Entrega de presupuesto personalizado',
+      'Agendamiento del tratamiento si se acepta el presupuesto'
+    ],
+    therapists: ['Anel Reyna']
+  },
+  {
+    id: 'r16',
+    name: 'Velo de Novia',
+    badge: 'NUPCIAL',
+    category: 'cabina',
+    subcategory: 'corporal',
+    duration: 60,
+    price: 1500,
+    imageUrl: 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=800&q=80',
+    shortDescription: 'Tratamiento corporal exclusivo para novias: piel radiante, sedosa y luminosa para el día más importante.',
+    description: 'Un ritual nupcial diseñado para que la novia luzca una piel perfecta el día de su boda. Combina exfoliación corporal profunda, envoltura hidratante con activos iluminadores y masaje de bienvenida con aceites especiales. Deja la piel suave como seda y lista para brillar bajo cualquier iluminación.',
+    benefits: [
+      'Piel suave, luminosa y perfecta para el día de la boda',
+      'Hidratación profunda de larga duración',
+      'Activos iluminadores para un brillo natural y fotogénico'
+    ],
+    steps: [
+      'Exfoliación corporal con cristales y aceites nupciales',
+      'Enjuague y preparación de la piel',
+      'Aplicación de envolvente hidratante con activos iluminadores',
+      'Tiempo de absorción con compresas tibias',
+      'Masaje corporal con aceites nutritivos exclusivos',
+      'Cierre con velo sérum de luminosidad'
+    ],
+    therapists: ['Anel Reyna']
+  },
+  // ── MAQUILLAJE: SERVICIOS ADICIONALES ────────────────────────
+  {
+    id: 'r17',
+    name: 'Maquillaje Graduación',
+    badge: 'CELEBRACIÓN',
+    category: 'maquillaje',
+    duration: 45,
+    price: 750,
+    imageUrl: 'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=800&q=80',
+    shortDescription: 'Look fresco, fotogénico y de larga duración para el día de tu graduación.',
+    description: 'Maquillaje profesional diseñado para que luzcas perfecta en uno de los días más importantes de tu carrera. Técnica HD de larga duración, personalizado a tu tono y estilo, listo para fotos y ceremonia. Anel trabajará un look que capture tu esencia y te haga sentir única en tu celebración.',
+    benefits: [
+      'Look fotogénico adaptado a tu tono y personalidad',
+      'Técnica HD de larga duración para toda la celebración',
+      'Preparación e hidratación de la piel incluida'
+    ],
+    steps: [
+      'Consulta y análisis de tono de piel',
+      'Preparación: limpieza, hidratación y primer',
+      'Base HD y corrección de imperfecciones',
+      'Diseño y delineado de cejas',
+      'Maquillaje de ojos festivo y acabado final',
+      'Fijación de larga duración'
+    ],
+    therapists: ['Anel Reyna']
+  },
+  {
+    id: 'r18',
+    name: 'Curso de Automaquillaje',
+    badge: 'APRENDE',
+    category: 'maquillaje',
+    duration: 90,
+    price: 800,
+    imageUrl: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=800&q=80',
+    shortDescription: 'Aprende técnicas profesionales de maquillaje con Anel para recrear tus looks favoritos tú misma.',
+    description: 'Una sesión personalizada donde Anel te enseña las técnicas, productos y trucos que usa en su cabina profesional, adaptados a tus facciones, tono de piel y estilo personal. Saldrás con el conocimiento y la confianza para maquillarte sola como una profesional.',
+    benefits: [
+      'Técnicas profesionales adaptadas a tu tipo de rostro',
+      'Aprende a seleccionar productos correctos para tu tono',
+      'Cuaderno de notas y guía personalizada incluida'
+    ],
+    steps: [
+      'Diagnóstico de facciones y tono de piel',
+      'Explicación de bases y preparación de la piel',
+      'Práctica guiada: base, corrección y cejas',
+      'Técnicas de ojos adaptadas a tu forma',
+      'Contouring, iluminación y labial personalizado',
+      'Resolución de dudas y guía de productos recomendados'
     ],
     therapists: ['Anel Reyna']
   }
