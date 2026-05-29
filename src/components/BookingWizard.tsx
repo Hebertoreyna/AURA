@@ -120,7 +120,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
     setStep((prev) => (prev - 1) as any);
   };
 
-  const handleConfirmReservation = async (e: FormEvent) => {
+  const handleConfirmReservation = (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       setValidationError('Por favor proporciona tu nombre para continuar.');
@@ -132,50 +132,43 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
     }
     if (!selectedRitual || !selectedSpecialist) return;
 
-    setSubmitting(true);
     setValidationError('');
 
-    try {
-      const appDate = datesList.find(d => d.raw === selectedDate)?.formatted || selectedDate;
+    const appDate = datesList.find(d => d.raw === selectedDate)?.formatted || selectedDate;
 
-      // 1. Guardar reserva en Firestore (status: pending)
-      await saveBooking({
-        date: selectedDate,
-        time: selectedTime,
-        ritualName: selectedRitual.name,
-        specialistName: selectedSpecialist.name,
-        clientName: name.trim(),
-        clientEmail: email.trim(),
-        notes: notes.trim(),
-        status: 'pending',
-      });
+    // 1. Construir mensaje
+    const msg = [
+      `¡Hola Anel! Me gustaría reservar una cita 🌿`,
+      ``,
+      `*Servicio:* ${selectedRitual.name}`,
+      `*Especialista:* ${selectedSpecialist.name}`,
+      `*Fecha:* ${appDate}`,
+      `*Hora:* ${selectedTime}`,
+      `*Duración:* ${selectedRitual.duration} min`,
+      `*Precio:* $${selectedRitual.price} MXN`,
+      ``,
+      `*Nombre:* ${name.trim()}`,
+      `*Correo:* ${email.trim()}`,
+      notes.trim() ? `*Notas:* ${notes.trim()}` : null,
+      ``,
+      `¡Gracias! 💆‍♀️`,
+    ].filter(line => line !== null).join('\n');
 
-      // 2. Construir y abrir mensaje de WhatsApp
-      const msg = [
-        `¡Hola Anel! Me gustaría reservar una cita 🌿`,
-        ``,
-        `*Servicio:* ${selectedRitual.name}`,
-        `*Especialista:* ${selectedSpecialist.name}`,
-        `*Fecha:* ${appDate}`,
-        `*Hora:* ${selectedTime}`,
-        `*Duración:* ${selectedRitual.duration} min`,
-        `*Precio:* $${selectedRitual.price} MXN`,
-        ``,
-        `*Nombre:* ${name.trim()}`,
-        `*Correo:* ${email.trim()}`,
-        notes.trim() ? `*Notas:* ${notes.trim()}` : null,
-        ``,
-        `¡Gracias! 💆‍♀️`,
-      ].filter(line => line !== null).join('\n');
+    // 2. Abrir WhatsApp PRIMERO (respuesta directa al click — sin await)
+    window.open(`https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(msg)}`, '_blank');
+    setSuccess(true);
 
-      window.open(`https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(msg)}`, '_blank');
-      setSuccess(true);
-    } catch (err) {
-      console.error('Error al guardar reserva:', err);
-      setValidationError('Error al conectar con el servidor. Por favor intenta de nuevo.');
-    } finally {
-      setSubmitting(false);
-    }
+    // 3. Guardar en Firestore en segundo plano (no bloquea la UI)
+    saveBooking({
+      date: selectedDate,
+      time: selectedTime,
+      ritualName: selectedRitual.name,
+      specialistName: selectedSpecialist.name,
+      clientName: name.trim(),
+      clientEmail: email.trim(),
+      notes: notes.trim(),
+      status: 'pending',
+    }).catch(err => console.error('Firestore (non-blocking):', err));
   };
 
   const handleReset = () => {
