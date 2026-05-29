@@ -112,75 +112,106 @@ export default function RitualsScreen({
         </div>
       </section>
 
-      {/* 3. FEATURED RITUALS SECTION */}
-      <section id="featured-rituals" className="py-16 px-6 max-w-6xl mx-auto">
-        <div className="mb-10 text-center sm:text-left">
-          <h3 className="text-3xl sm:text-4xl font-serif text-[#4a2815] font-light">Rituales Destacados</h3>
-          <p className="text-xs sm:text-sm text-stone-600 mt-2 max-w-xl leading-relaxed">
-            Experimenta nuestra selección exclusiva de tratamientos personalizados diseñados para rejuvenecer tu piel y alma.
-          </p>
-        </div>
-
-        {/* Scrollable Horizontal Layout — stagger entrance */}
-        <motion.div
-          id="rituals-slider"
-          className="flex gap-6 overflow-x-auto pb-6 pt-2 no-scrollbar snap-x cursor-grab active:cursor-grabbing"
-          variants={{ visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } } }}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-60px' }}
-        >
-          {RITUALS.map((ritual) => (
-            <motion.div
-              key={ritual.id}
-              id={`ritual-card-${ritual.id}`}
-              className="w-[280px] sm:w-[320px] flex-shrink-0 snap-start bg-transparent flex flex-col group cursor-pointer"
-              variants={{
-                hidden: { opacity: 0, x: 20 },
-                visible: { opacity: 1, x: 0, transition: { duration: 0.45, ease: [0.23, 1, 0.32, 1] } }
-              }}
-              onClick={() => onViewRitual(ritual)}
-            >
-              <div className="relative h-[380px] w-full rounded-xs overflow-hidden mb-4 bg-[#efe6dc] shadow-sm">
-                <img
-                  src={ritual.imageUrl}
-                  alt={ritual.name}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                />
-
-                {/* Badge */}
-                {ritual.badge && (
-                  <span className="absolute top-4 right-4 bg-[#efe6dc]/95 backdrop-blur-xs border border-[#faf6f0]/50 text-[#764229] text-[9px] font-sans font-bold tracking-widest px-3 py-1 rounded-sm uppercase">
-                    {ritual.badge}
-                  </span>
-                )}
-
-                {/* Duration Overlay */}
-                <div className="absolute bottom-3 left-3 bg-[#1c130d]/45 text-[#efe6dc] font-mono text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider backdrop-blur-xs">
-                  {ritual.duration} MIN
-                </div>
-              </div>
-
-              {/* Title, Specs & Link */}
-              <div className="flex flex-col">
-                <div className="flex justify-between items-baseline mb-1">
-                  <h4 className="text-xl font-serif text-[#4a2815] group-hover:text-[#764229] transition-colors duration-200 leading-snug">
-                    {ritual.name}
-                  </h4>
-                  <span className="text-sm font-serif font-bold text-[#764229]">${ritual.price}</span>
-                </div>
-                <p className="text-xs text-stone-500 leading-relaxed mb-3 line-clamp-2">
-                  {ritual.shortDescription}
+      {/* 3. RITUALS — CABINA + MAQUILLAJE */}
+      {(['cabina', 'maquillaje'] as const).map((cat) => {
+        const catRituals = RITUALS.filter(r => r.category === cat);
+        const isCabina   = cat === 'cabina';
+        return (
+          <section
+            key={cat}
+            id={`rituals-section-${cat}`}
+            className={`py-16 px-6 max-w-6xl mx-auto ${!isCabina ? 'border-t border-[#efe6dc]/50' : ''}`}
+          >
+            <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+              <div>
+                <span className="text-[10px] font-sans font-bold tracking-[0.3em] text-[#764229]/70 uppercase block mb-1">
+                  {isCabina ? 'Tratamientos' : 'Arte & Imagen'}
+                </span>
+                <h3 className="text-3xl sm:text-4xl font-serif text-[#4a2815] font-light">
+                  {isCabina ? 'Servicios de Cabina' : 'Maquillaje'}
+                </h3>
+                <p className="text-xs text-stone-500 mt-1.5 max-w-lg leading-relaxed">
+                  {isCabina
+                    ? 'Tratamientos faciales, corporales y dermatológicos especializados para el cuidado profundo de tu piel.'
+                    : 'Looks profesionales para cada ocasión, desde eventos sociales hasta el altar.'}
                 </p>
-                <div className="inline-flex items-center gap-1.5 text-[10px] font-sans font-bold tracking-widest text-[#764229] uppercase border-b border-transparent group-hover:border-[#764229] w-max transition-[border-color] duration-200">
-                  Explorar Ritual <ArrowRight className="w-3.5 h-3.5" />
-                </div>
               </div>
+              <button
+                onClick={onBookAppointment}
+                className="w-full sm:w-auto flex-shrink-0 py-2.5 px-5 border border-[#764229]/40 text-[#764229] hover:bg-[#764229]/5 active:scale-[0.97] text-[10px] font-sans font-semibold tracking-widest uppercase rounded-full transition-[transform,background-color] duration-150 flex items-center justify-center gap-1.5"
+              >
+                Reservar <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+
+            {/* Horizontal scroll — stagger entrance */}
+            <motion.div
+              id={`rituals-slider-${cat}`}
+              className="flex gap-6 overflow-x-auto pb-6 pt-2 no-scrollbar snap-x cursor-grab active:cursor-grabbing"
+              variants={{ visible: { transition: { staggerChildren: 0.07, delayChildren: 0.04 } } }}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-60px' }}
+            >
+              {catRituals.map((ritual) => (
+                <motion.div
+                  key={ritual.id}
+                  id={`ritual-card-${ritual.id}`}
+                  className="w-[260px] sm:w-[300px] flex-shrink-0 snap-start bg-transparent flex flex-col group cursor-pointer"
+                  variants={{
+                    hidden: { opacity: 0, x: 20 },
+                    visible: { opacity: 1, x: 0, transition: { duration: 0.45, ease: [0.23, 1, 0.32, 1] } }
+                  }}
+                  onClick={() => onViewRitual(ritual)}
+                >
+                  <div className="relative h-[340px] w-full rounded-xs overflow-hidden mb-4 bg-[#efe6dc] shadow-sm">
+                    <img
+                      src={ritual.imageUrl}
+                      alt={ritual.name}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    />
+
+                    {/* Badge */}
+                    {ritual.badge && (
+                      <span className={`absolute top-4 right-4 backdrop-blur-xs border text-[9px] font-sans font-bold tracking-widest px-3 py-1 rounded-sm uppercase ${
+                        ritual.customQuote
+                          ? 'bg-sky-50/90 border-sky-200/60 text-sky-700'
+                          : 'bg-[#efe6dc]/95 border-[#faf6f0]/50 text-[#764229]'
+                      }`}>
+                        {ritual.badge}
+                      </span>
+                    )}
+
+                    {/* Duration Overlay */}
+                    <div className="absolute bottom-3 left-3 bg-[#1c130d]/45 text-[#efe6dc] font-mono text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider backdrop-blur-xs">
+                      {ritual.duration} MIN
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex flex-col">
+                    <div className="flex justify-between items-baseline mb-1">
+                      <h4 className="text-xl font-serif text-[#4a2815] group-hover:text-[#764229] transition-colors duration-200 leading-snug">
+                        {ritual.name}
+                      </h4>
+                      <span className="text-sm font-serif font-bold text-[#764229] ml-2 flex-shrink-0">
+                        {ritual.customQuote ? 'Cotización' : `$${ritual.price}`}
+                      </span>
+                    </div>
+                    <p className="text-xs text-stone-500 leading-relaxed mb-3 line-clamp-2">
+                      {ritual.shortDescription}
+                    </p>
+                    <div className="inline-flex items-center gap-1.5 text-[10px] font-sans font-bold tracking-widest text-[#764229] uppercase border-b border-transparent group-hover:border-[#764229] w-max transition-[border-color] duration-200">
+                      Explorar <ArrowRight className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </motion.div>
-          ))}
-        </motion.div>
-      </section>
+          </section>
+        );
+      })}
 
       {/* 4. SPECIALIST SPOTLIGHT */}
       <section id="specialist-spotlight" className="py-16 px-6 bg-[#f4eae1]/40 border-t border-b border-[#efe6dc]/50">
