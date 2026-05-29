@@ -1,17 +1,21 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Clock, ChevronRight, ChevronLeft, Check, Sparkles, AlertTriangle } from 'lucide-react';
-import { Ritual, Specialist, Appointment } from '../types';
+import { X, Clock, ChevronRight, ChevronLeft, Check, Sparkles, AlertTriangle, MessageCircle } from 'lucide-react';
+import { Ritual, Specialist } from '../types';
 import { RITUALS, SPECIALISTS } from '../data';
+
+// ─── CONFIGURACIÓN DEL SALÓN ────────────────────────────────────────────────
+// Reemplaza con el número de WhatsApp de Anel (formato: 52 + número sin espacios)
+const WHATSAPP_PHONE = '521XXXXXXXXXX';
+// ────────────────────────────────────────────────────────────────────────────
 
 interface BookingWizardProps {
   isOpen: boolean;
   preSelectedRitualId: string | null;
   onClose: () => void;
-  onSaveAppointment: (appointment: Appointment) => void;
 }
 
-export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, onSaveAppointment }: BookingWizardProps) {
+export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: BookingWizardProps) {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const prevStep = useRef<number>(1);
   const direction = step > prevStep.current ? 1 : -1;
@@ -102,31 +106,37 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, on
   const handleConfirmReservation = (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      setValidationError('Por favor proporcione su nombre para el registro de invitados.');
+      setValidationError('Por favor proporciona tu nombre para continuar.');
       return;
     }
     if (!email.trim() || !email.includes('@')) {
-      setValidationError('Por favor introduzca un correo electrónico de contacto válido.');
+      setValidationError('Por favor ingresa un correo electrónico válido.');
       return;
     }
 
     if (selectedRitual && selectedSpecialist) {
       const appDate = datesList.find(d => d.raw === selectedDate)?.formatted || selectedDate;
-      const newAppointment: Appointment = {
-        id: `apt-${Date.now()}`,
-        ritualId: selectedRitual.id,
-        ritualName: selectedRitual.name,
-        ritualImageUrl: selectedRitual.imageUrl,
-        duration: selectedRitual.duration,
-        price: selectedRitual.price,
-        dateTime: `${appDate} a las ${selectedTime}`,
-        specialistName: selectedSpecialist.name,
-        specialistAvatar: selectedSpecialist.avatarUrl,
-        status: 'scheduled',
-        notes: notes.trim() || undefined
-      };
 
-      onSaveAppointment(newAppointment);
+      // Construir mensaje de WhatsApp
+      const msg = [
+        `¡Hola Anel! Me gustaría reservar una cita 🌿`,
+        ``,
+        `*Servicio:* ${selectedRitual.name}`,
+        `*Especialista:* ${selectedSpecialist.name}`,
+        `*Fecha:* ${appDate}`,
+        `*Hora:* ${selectedTime}`,
+        `*Duración:* ${selectedRitual.duration} min`,
+        `*Precio:* $${selectedRitual.price} MXN`,
+        ``,
+        `*Nombre:* ${name.trim()}`,
+        `*Correo:* ${email.trim()}`,
+        notes.trim() ? `*Notas:* ${notes.trim()}` : null,
+        ``,
+        `¡Gracias! 💆‍♀️`
+      ].filter(line => line !== null).join('\n');
+
+      const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(msg)}`;
+      window.open(url, '_blank');
       setSuccess(true);
     }
   };
@@ -172,7 +182,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, on
               <div>
                 <span className="text-[10px] font-sans font-bold tracking-widest text-[#764229] uppercase">Agendador Exclusivo</span>
                 <h3 className="text-xl font-serif text-[#4a2815]">
-                  {success ? 'Reservación Asegurada' : 'Reservar una Cita'}
+                  {success ? '¡Mensaje Enviado!' : 'Reservar por WhatsApp'}
                 </h3>
               </div>
               <button
@@ -228,26 +238,26 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, on
             {/* Main Interactive Content Panel */}
             <div id="booking-wizard-content" className="p-6 overflow-y-auto flex-1">
               {success ? (
-                /* SUCCESS SCREEN */
+                /* SUCCESS SCREEN — WhatsApp enviado */
                 <motion.div
                   id="booking-success-pnl"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                  initial={{ opacity: 0, scale: 0.96, y: 8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.35, ease: [0.23, 1, 0.32, 1] } }}
                   className="text-center py-6 flex flex-col items-center"
                 >
-                  <div className="w-16 h-16 bg-[#5e6c58] rounded-full flex items-center justify-center text-white mb-4 shadow-lg shadow-[#5e6c58]/20">
-                    <Check className="w-8 h-8" />
+                  <div className="w-16 h-16 bg-[#25D366] rounded-full flex items-center justify-center text-white mb-4 shadow-lg shadow-[#25D366]/25">
+                    <MessageCircle className="w-8 h-8" />
                   </div>
-                  <span className="text-xs font-mono tracking-widest text-[#5e6c58] uppercase font-semibold">Tu santuario te espera</span>
-                  <h4 className="text-3xl font-serif text-[#4a2815] mt-1 mb-2">Cita Programada</h4>
+                  <span className="text-xs font-mono tracking-widest text-[#25D366] uppercase font-semibold">Mensaje enviado</span>
+                  <h4 className="text-2xl font-serif text-[#4a2815] mt-1 mb-2">¡Solicitud enviada por WhatsApp!</h4>
                   <p className="text-xs text-stone-600 max-w-sm leading-relaxed mb-6">
-                    Se han enviado los detalles de confirmación y las guías previas del cuidado de la piel al correo <span className="font-semibold text-stone-800">{email}</span>.
+                    Tu mensaje fue enviado a Anel Reyna por WhatsApp. Ella confirmará tu cita en breve.
                   </p>
 
-                  {/* Receipt Detail */}
+                  {/* Resumen */}
                   <div className="w-full bg-[#f2eae4] rounded-xl p-5 text-left border border-[#efe6dc] space-y-3 max-w-sm mb-6">
                     <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
-                      <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Ritual Seleccionado</span>
+                      <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Servicio</span>
                       <span className="font-serif font-semibold text-[#4a2815]">{selectedRitual?.name}</span>
                     </div>
                     <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
@@ -256,24 +266,24 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, on
                     </div>
                     <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
                       <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Fecha y Hora</span>
-                      <span className="text-stone-700">{datesList.find(d => d.raw === selectedDate)?.formatted || selectedDate} • {selectedTime}</span>
+                      <span className="text-stone-700 text-right max-w-[150px]">{datesList.find(d => d.raw === selectedDate)?.formatted} • {selectedTime}</span>
                     </div>
                     <div className="flex justify-between text-xs pt-1">
-                      <span className="text-[#764229] uppercase tracking-widest font-sans font-bold font-semibold">Total a Pagar</span>
-                      <span className="font-serif font-bold text-[#764229] text-base">${selectedRitual?.price}</span>
+                      <span className="text-[#764229] uppercase tracking-widest font-sans font-bold">Precio</span>
+                      <span className="font-serif font-bold text-[#764229] text-base">${selectedRitual?.price} MXN</span>
                     </div>
                   </div>
 
-                  <p className="text-[10px] text-stone-400 italic mb-4">
-                    Cualquier cambio u cancelación requiere de un aviso protocolario con 24 horas de anticipación.
+                  <p className="text-[10px] text-stone-400 italic mb-5">
+                    Cancelaciones con al menos 24 horas de anticipación.
                   </p>
 
                   <button
                     id="booking-finish-btn"
                     onClick={handleReset}
-                    className="py-3 px-8 bg-[#764229] hover:bg-[#4a2815] text-white text-xs font-semibold tracking-wider rounded-xl transition-all font-sans uppercase"
+                    className="py-3 px-10 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase"
                   >
-                    Listo
+                    Cerrar
                   </button>
                 </motion.div>
               ) : (
@@ -545,10 +555,10 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, on
                       if (trigger) trigger.click();
                       else handleConfirmReservation(e);
                     }}
-                    className="ml-auto py-3 px-6 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center justify-center gap-2"
+                    className="ml-auto py-3 px-6 bg-[#25D366] hover:bg-[#1da851] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center justify-center gap-2"
                   >
-                    <Sparkles className="w-4 h-4 text-[#efe6dc]" />
-                    Confirmar Cita
+                    <MessageCircle className="w-4 h-4" />
+                    Enviar por WhatsApp
                   </button>
                 )}
               </div>
