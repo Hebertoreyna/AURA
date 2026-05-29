@@ -31,11 +31,12 @@ export const PRODUCTS: Product[] = [
 ];
 
 export const RITUALS: Ritual[] = [
-  // ── FACIALES ─────────────────────────────────────────────────
+  // ── CABINA: FACIALES ─────────────────────────────────────────
   {
     id: 'r1',
     name: 'Limpieza Facial',
     badge: 'ESENCIAL',
+    category: 'cabina',
     duration: 50,
     price: 750,
     imageUrl: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
@@ -60,6 +61,7 @@ export const RITUALS: Ritual[] = [
     id: 'r2',
     name: 'Hydrofacial',
     badge: 'PREMIUM',
+    category: 'cabina',
     duration: 50,
     price: 800,
     imageUrl: 'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=800&q=80',
@@ -84,6 +86,7 @@ export const RITUALS: Ritual[] = [
     id: 'r3',
     name: 'Facial Lifting',
     badge: 'REAFIRMANTE',
+    category: 'cabina',
     duration: 50,
     price: 800,
     imageUrl: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=800&q=80',
@@ -108,6 +111,7 @@ export const RITUALS: Ritual[] = [
     id: 'r4',
     name: 'Facial Control Acné',
     badge: 'PURIFICANTE',
+    category: 'cabina',
     duration: 50,
     price: 750,
     imageUrl: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=800&q=80',
@@ -132,6 +136,7 @@ export const RITUALS: Ritual[] = [
     id: 'r5',
     name: 'Facial Microdermoabrasión',
     badge: 'RENOVADOR',
+    category: 'cabina',
     duration: 50,
     price: 750,
     imageUrl: 'https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&w=800&q=80',
@@ -157,6 +162,7 @@ export const RITUALS: Ritual[] = [
     id: 'r6',
     name: 'Maquillaje Social',
     badge: 'CLÁSICO',
+    category: 'maquillaje',
     duration: 45,
     price: 700,
     imageUrl: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=800&q=80',
@@ -181,6 +187,7 @@ export const RITUALS: Ritual[] = [
     id: 'r7',
     name: 'Maquillaje Novia',
     badge: 'ESPECIAL',
+    category: 'maquillaje',
     duration: 90,
     price: 2000,
     imageUrl: 'https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?auto=format&fit=crop&w=800&q=80',
@@ -205,6 +212,7 @@ export const RITUALS: Ritual[] = [
     id: 'r8',
     name: 'Maquillaje XV Años',
     badge: 'ESPECIAL',
+    category: 'maquillaje',
     duration: 60,
     price: 900,
     imageUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
@@ -225,11 +233,12 @@ export const RITUALS: Ritual[] = [
     ],
     therapists: ['Anel Reyna']
   },
-  // ── CORPORALES ───────────────────────────────────────────────
+  // ── CABINA: CORPORALES ───────────────────────────────────────
   {
     id: 'r9',
     name: 'Masaje Relajante',
     badge: 'BIENESTAR',
+    category: 'cabina',
     duration: 60,
     price: 700,
     imageUrl: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
@@ -254,6 +263,7 @@ export const RITUALS: Ritual[] = [
     id: 'r10',
     name: 'EMS Body + Drenaje Linfático',
     badge: 'REAFIRMANTE',
+    category: 'cabina',
     duration: 60,
     price: 1000,
     imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80',
@@ -278,6 +288,7 @@ export const RITUALS: Ritual[] = [
     id: 'r11',
     name: 'Exfoliación de Espalda',
     badge: 'PURIFICANTE',
+    category: 'cabina',
     duration: 60,
     price: 850,
     imageUrl: 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=800&q=80',
@@ -303,6 +314,7 @@ export const RITUALS: Ritual[] = [
     id: 'r12',
     name: 'Eliminación de Verrugas',
     badge: 'EVALUACIÓN',
+    category: 'cabina',
     duration: 30,
     price: 0,
     customQuote: true,
