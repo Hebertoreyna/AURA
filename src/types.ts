@@ -66,8 +66,10 @@ export interface CartItem {
 }
 
 export interface SkinProfile {
+  zone?: 'facial' | 'corporal';  // área seleccionada en el diagnóstico
   skinType: 'dry' | 'oily' | 'sensitive' | 'combination' | 'normal' | '';
-  concern: 'dullness' | 'fine_lines' | 'hydration' | 'redness' | 'congestion' | '';
+  concern: 'dullness' | 'fine_lines' | 'hydration' | 'redness' | 'congestion' | 'acne' | 'spots' | '';
+  bodyConcern?: 'tension' | 'flaccidity' | 'back_skin' | 'special_occasion' | 'skin_lesions' | '';
   vibe: 'minimalist' | 'balanced' | 'immersive' | '';
   completed: boolean;
 }
