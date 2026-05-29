@@ -249,7 +249,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
     const isEval    = selectedRitual.customQuote === true;
     const hasAddon  = canHaveAuraAddon && withAuraAddon;
     const svcName   = hasAddon
-      ? `${selectedRitual.name} + Facial AURA`
+      ? `${selectedRitual.name} + Ritual AURA`
       : selectedRitual.name;
 
     const msg = [
@@ -259,7 +259,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
       ``,
       `*Servicio:* ${svcName}`,
       isEval ? `*Tipo:* Evaluación gratuita (presupuesto personalizado)` : null,
-      hasAddon ? `*Complemento:* Facial AURA · activos exclusivos, vitamina C y péptidos tensores` : null,
+      hasAddon ? `*Complemento:* Ritual AURA · activos exclusivos, vitamina C y péptidos tensores` : null,
       `*Especialista:* ${selectedSpecialist.name}`,
       `*Fecha:* ${appDate}`,
       `*Hora:* ${selectedTime}`,
@@ -416,7 +416,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                         <span className="font-serif font-semibold text-[#4a2815] block">{selectedRitual?.name}</span>
                         {canHaveAuraAddon && withAuraAddon && (
                           <span className="text-[9px] font-sans font-semibold text-[#764229] flex items-center justify-end gap-1 mt-0.5">
-                            <Sparkles className="w-2.5 h-2.5" /> + Facial AURA
+                            <Sparkles className="w-2.5 h-2.5" /> + Ritual AURA
                           </span>
                         )}
                       </div>
@@ -639,7 +639,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                     <div className="flex items-center gap-2">
                                       <Sparkles className="w-3.5 h-3.5 text-[#764229]" />
                                       <span className="text-xs font-serif font-semibold text-[#4a2815]">
-                                        Potenciar con Facial AURA
+                                        Potenciar con Ritual AURA
                                       </span>
                                       <span className="text-[9px] font-mono font-bold text-[#764229] bg-[#efe6dc] px-2 py-0.5 rounded-full">
                                         +${AURA_ADDON_PRICE}
@@ -859,7 +859,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                               <span className="font-serif font-bold text-[#4a2815] block truncate">{selectedRitual?.name}</span>
                               {canHaveAuraAddon && withAuraAddon && (
                                 <span className="text-[9px] font-sans font-semibold text-[#764229] flex items-center gap-1 mt-0.5">
-                                  <Sparkles className="w-2.5 h-2.5" /> Facial AURA incluido · +30 min
+                                  <Sparkles className="w-2.5 h-2.5" /> Ritual AURA incluido · +30 min
                                 </span>
                               )}
                               <span className="text-[10px] text-stone-500 block mt-0.5">Especialista: {selectedSpecialist?.name}</span>
