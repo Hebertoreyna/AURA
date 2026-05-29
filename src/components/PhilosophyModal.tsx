@@ -24,10 +24,9 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
           {/* Modal Content */}
           <motion.div
             id="philosophy-card"
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+            initial={{ opacity: 0, scale: 0.96, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0, transition: { type: 'spring', duration: 0.4, bounce: 0.1 } }}
+            exit={{ opacity: 0, scale: 0.97, y: 8, transition: { duration: 0.16, ease: [0.32, 0.72, 0, 1] } }}
             className="relative w-full max-w-lg overflow-y-auto max-h-[85vh] bg-[#faf6f0] rounded-2xl p-6 md:p-8 shadow-xl border border-[#efe6dc] text-stone-800"
           >
             {/* Close button */}
@@ -52,9 +51,9 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
                   <Sprout className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg text-[#4a2815] font-medium">Alquimia Botánica Real</h3>
+                  <h3 className="font-serif text-lg text-[#4a2815] font-medium">Cuidado Personalizado</h3>
                   <p className="text-xs text-stone-600 mt-1 leading-relaxed">
-                    Seleccionamos elementos crudos y silvestres cultivados sin disruptores endocrinos ni metales pesados. Cada lote de suero se infunde lentamente en alambiques de cobre para preservar las enzimas activas naturales.
+                    Cada servicio comienza con un diagnóstico de tu piel. Adaptamos cada tratamiento a tus necesidades específicas para que veas resultados reales desde la primera sesión.
                   </p>
                 </div>
               </div>
@@ -64,9 +63,9 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg text-[#4a2815] font-medium">Sinergias Circadianas</h3>
+                  <h3 className="font-serif text-lg text-[#4a2815] font-medium">Técnicas Profesionales</h3>
                   <p className="text-xs text-stone-600 mt-1 leading-relaxed">
-                    Nuestra piel tiene una fase de defensa diurna y una velocidad de restauración nocturna. Cada ritual de AURA está diseñado para cooperar con tus picos hormonales circadianos, duplicando la recuperación celular.
+                    Combinamos las técnicas más avanzadas en cosmetología con productos de alta calidad. Desde faciales con tecnología Hydrofacial hasta maquillaje artístico para tus momentos más especiales.
                   </p>
                 </div>
               </div>
@@ -76,9 +75,9 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
                   <Heart className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg text-[#4a2815] font-medium">Química Limpia y Consciente</h3>
+                  <h3 className="font-serif text-lg text-[#4a2815] font-medium">Experiencia que Transforma</h3>
                   <p className="text-xs text-stone-600 mt-1 leading-relaxed">
-                    La estética nunca debería costar nuestros ecosistemas planetarios. Distribuimos en frascos de vidrio ámbar, utilizamos etiquetas de pulpa de madera y financiamos santuarios de restauración botánica en todo el país.
+                    Más que un servicio de belleza, AURA es un espacio donde te cuidas y te consientes. Cada visita es una pausa en tu día para reconectar contigo misma y salir radiante.
                   </p>
                 </div>
               </div>
@@ -86,15 +85,15 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
 
             {/* Quote Block */}
             <div id="philosophy-quote" className="mt-8 pt-6 border-t border-[#efe6dc] text-center italic text-[#764229] text-sm font-serif">
-              "Para sanar la piel, aquieta la mente y escucha los ritmos de la tierra."
-              <p className="text-[10px] mt-1 not-italic font-sans tracking-widest uppercase text-stone-500">— SANTUARIO AURA</p>
+              "Tu belleza natural es el lienzo. Mi trabajo es hacerla brillar."
+              <p className="text-[10px] mt-1 not-italic font-sans tracking-widest uppercase text-stone-500">— Anel Reyna, AURA</p>
             </div>
 
             {/* Dismiss Button */}
             <button
               id="philosophy-dismiss-btn"
               onClick={onClose}
-              className="mt-6 w-full py-3 bg-[#764229] hover:bg-[#4a2815] text-white text-xs font-semibold tracking-wider rounded-xl transition-all font-sans uppercase"
+              className="mt-6 w-full py-3 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase"
             >
               Continuar Nuestro Viaje
             </button>

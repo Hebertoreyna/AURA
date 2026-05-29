@@ -88,16 +88,8 @@ export default function RefineScreen({
       prescriptionText = 'La deshidratación profunda restringe los procesos de reparación celular naturales. Concéntrese en masajes de aceite tibio de rosa otto y terapias de vapor de manzanilla.';
     }
 
-    // Match Products
-    if (skinType === 'dry' || concern === 'hydration') {
-      matchedProducts = PRODUCTS.filter(p => p.id === 'p1' || p.id === 'p3' || p.id === 'p5'); // Silk Serum, Mask, Oil
-    } else if (skinType === 'oily' || concern === 'congestion') {
-      matchedProducts = PRODUCTS.filter(p => p.id === 'p2' || p.id === 'p4'); // Cleansing Balm, Mist
-    } else if (skinType === 'sensitive' || concern === 'redness') {
-      matchedProducts = PRODUCTS.filter(p => p.id === 'p3' || p.id === 'p4'); // Mask, Mist
-    } else { // normal / combination
-      matchedProducts = PRODUCTS.filter(p => p.id === 'p1' || p.id === 'p2' || p.id === 'p4'); // Serum, Balm, Mist
-    }
+    // Match Products (solo p1 disponible por ahora)
+    matchedProducts = PRODUCTS.filter(p => p.id === 'p1');
 
     // Sub-select based on routine vibe scale
     if (vibe === 'minimalist') {

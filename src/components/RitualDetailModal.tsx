@@ -29,10 +29,9 @@ export default function RitualDetailModal({ ritual, isOpen, onClose, onBookRitua
           {/* Modal Container */}
           <motion.div
             id="ritual-modal-card"
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+            initial={{ opacity: 0, scale: 0.96, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0, transition: { type: 'spring', duration: 0.4, bounce: 0.12 } }}
+            exit={{ opacity: 0, scale: 0.97, y: 8, transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] } }}
             className="relative w-full max-w-2xl bg-[#faf6f0] rounded-2xl overflow-hidden shadow-2xl border border-[#efe6dc] md:flex"
             style={{ maxHeight: '90vh' }}
           >
@@ -128,7 +127,7 @@ export default function RitualDetailModal({ ritual, isOpen, onClose, onBookRitua
                   onClick={() => {
                     onBookRitual(ritual.id);
                   }}
-                  className="flex-1 py-3 px-4 bg-[#764229] hover:bg-[#4a2815] text-white text-xs font-semibold tracking-wider rounded-xl transition-all font-sans uppercase flex items-center justify-center gap-2 shadow-lg"
+                  className="flex-1 py-3 px-4 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center justify-center gap-2 shadow-lg"
                 >
                   Reservar Sesión — ${ritual.price}
                 </button>
