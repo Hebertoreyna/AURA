@@ -183,8 +183,8 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
   // ── Precio y duración efectivos (incluye add-on si aplica) ──────────────
   const canHaveAuraAddon = !!(
     selectedRitual &&
-    selectedRitual.subcategory === 'facial' &&
-    selectedRitual.id !== 'r15' &&    // Facial AURA no se añade a sí mismo
+    selectedRitual.category === 'cabina' &&  // faciales y corporales
+    selectedRitual.id !== 'r15' &&           // Ritual AURA no se añade a sí mismo
     !selectedRitual.customQuote
   );
   const effectivePrice    = (selectedRitual?.price ?? 0) + (canHaveAuraAddon && withAuraAddon ? AURA_ADDON_PRICE : 0);
