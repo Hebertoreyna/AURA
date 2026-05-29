@@ -36,6 +36,8 @@ const DEPOSIT_PCT: Record<string, number> = {
   r16: 50,  // Velo de Novia
   r17: 30,  // Maquillaje Graduación
   r18: 50,  // Curso de Automaquillaje
+  r19:  0,  // Facial Glow
+  r20:  0,  // Facial Detox
 };
 
 const AURA_ADDON_PRICE = 600; // precio del Facial AURA como complemento
