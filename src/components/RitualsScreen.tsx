@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
-import { ArrowUpRight, ArrowRight, ShoppingBag, Menu, Sparkles } from 'lucide-react';
+import { ArrowRight, Menu, Sparkles } from 'lucide-react';
 import { Ritual, Product } from '../types';
-import { RITUALS, PRODUCTS } from '../data';
+import { RITUALS } from '../data';
 
 interface RitualsScreenProps {
   onBookAppointment: () => void;
@@ -17,15 +17,9 @@ export default function RitualsScreen({
   onBookAppointment,
   onOpenPhilosophy,
   onViewRitual,
-  onViewProduct,
-  onAddToCart,
   onNavigateToTab,
   userAvatar
 }: RitualsScreenProps) {
-  // Extract Aura Silk Serum for the featured hero inside Daily Essentials
-  const featuredProduct = PRODUCTS.find(p => p.id === 'p1') || PRODUCTS[0];
-  // Extract cleansing balm and tea mask for bottom elements
-  const listProducts = PRODUCTS.filter(p => p.id === 'p2' || p.id === 'p3');
 
   return (
     <div id="rituals-screen" className="relative w-full overflow-hidden bg-[#faf8f5]">
@@ -183,131 +177,43 @@ export default function RitualsScreen({
         </div>
       </section>
 
-      {/* 4. DAILY ESSENTIALS CONTAINER */}
-      <section id="daily-essentials" className="py-16 px-6 bg-[#f4eae1]/40 border-t border-b border-[#efe6dc]/50">
+      {/* 4. SPECIALIST SPOTLIGHT */}
+      <section id="specialist-spotlight" className="py-16 px-6 bg-[#f4eae1]/40 border-t border-b border-[#efe6dc]/50">
         <div className="max-w-4xl mx-auto">
-          
           <div className="mb-10 text-center">
-            <h3 className="text-3xl sm:text-4xl font-serif text-[#4a2815] font-light">Esenciales Diarios</h3>
+            <h3 className="text-3xl sm:text-4xl font-serif text-[#4a2815] font-light">Tu Especialista</h3>
             <p className="text-xs text-stone-600 mt-2 max-w-sm mx-auto leading-relaxed font-serif italic">
-              Los pilares de tu rutina de cuidado en casa, elaborados con la mayor concentración de activos botánicos.
+              Atención personalizada y profesional en cada visita.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-            
-            {/* LARGE FEATURED ITEM BLOCK */}
-            <div
-              id={`featured-product-card-${featuredProduct.id}`}
-              className="bg-[#efe6dc]/60 rounded-xs p-6 sm:p-8 flex flex-col justify-between border border-[#efe6dc] shadow-xs group"
-            >
-              <div>
-                <span className="text-[10px] font-sans font-bold tracking-[0.2em] text-[#764229] uppercase block mb-1">
-                  Más Vendido
-                </span>
-                <h4 className="text-3xl font-serif text-[#4a2815] leading-tight mb-3">
-                  {featuredProduct.name}
-                </h4>
-                <p className="text-xs text-stone-600 leading-relaxed mb-6">
-                  {featuredProduct.shortDescription}
-                </p>
-                
-                <button
-                  onClick={() => onViewProduct(featuredProduct)}
-                  className="inline-block text-[10px] font-sans font-bold tracking-widest text-[#764229] uppercase border-b border-[#764229] pb-0.5 mb-8 hover:text-[#4a2815] hover:border-[#4a2815] transition-colors cursor-pointer"
-                >
-                  Ver Detalles
-                </button>
-              </div>
-
-              {/* Central Dropper bottle art */}
-              <div
-                onClick={() => onViewProduct(featuredProduct)}
-                className="relative h-[250px] w-full bg-white/20 rounded-lg overflow-hidden cursor-pointer"
+          <div className="flex flex-col sm:flex-row gap-8 items-center bg-white rounded-xl border border-[#efe6dc] shadow-xs overflow-hidden">
+            <div className="w-full sm:w-64 h-64 sm:h-auto flex-shrink-0 bg-[#efe6dc]">
+              <img
+                src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80"
+                alt="Anel Reyna"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="p-6 sm:p-8 flex flex-col justify-center">
+              <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#764229] uppercase block mb-2">
+                Especialista Certificada
+              </span>
+              <h4 className="text-3xl font-serif text-[#4a2815] leading-tight mb-1">Anel Reyna</h4>
+              <p className="text-xs font-mono text-stone-500 mb-4 uppercase tracking-wider">Lic. Cosmetología e Imagen</p>
+              <p className="text-sm text-stone-600 leading-relaxed font-serif mb-6">
+                Licenciada en Cosmetología e Imagen, especializada en maquillaje artístico, tratamientos faciales avanzados y rituales corporales. Cada servicio es una experiencia diseñada para realzar tu belleza natural con técnicas profesionales y atención personalizada.
+              </p>
+              <button
+                id="specialist-book-btn"
+                onClick={onBookAppointment}
+                className="w-full sm:w-auto py-3 px-8 bg-[#764229] hover:bg-[#4a2815] text-white text-xs font-semibold tracking-[0.2em] rounded-sm transition-all font-sans uppercase cursor-pointer"
               >
-                <img
-                  src={featuredProduct.imageUrl}
-                  alt={featuredProduct.name}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover rounded-md group-hover:scale-102 transition-transform duration-500"
-                />
-                {/* Botón de añadir al carrito ocultado temporalmente
-                <div className="absolute right-4 bottom-4 w-10 h-10 rounded-full bg-[#764229]/95 text-white flex items-center justify-center shadow-md hover:bg-[#4a2815] transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddToCart(featuredProduct);
-                  }}
-                >
-                  <ShoppingBag className="w-4 h-4" />
-                </div>
-                */}
-              </div>
+                Agendar con Anel
+              </button>
             </div>
-
-            {/* SECONDARY PRODUCTS SLOTS LIST */}
-            <div className="space-y-6 flex flex-col justify-between h-full">
-              <div className="space-y-4">
-                {listProducts.map((p) => (
-                  <div
-                    key={p.id}
-                    id={`essential-item-${p.id}`}
-                    onClick={() => onViewProduct(p)}
-                    className="p-4 bg-white rounded-xs border border-[#efe6dc]/60 shadow-xs flex items-center justify-between cursor-pointer group hover:border-stone-300 transition-colors"
-                  >
-                    <div className="flex gap-4 items-center">
-                      <div className="w-16 h-16 rounded-sm overflow-hidden bg-stone-100 flex-shrink-0">
-                        <img
-                          src={p.imageUrl}
-                          alt={p.name}
-                          referrerPolicy="no-referrer"
-                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                        />
-                      </div>
-                      <div>
-                        <h5 className="text-base font-serif text-[#4a2815] group-hover:text-[#764229] transition-colors">
-                          {p.name}
-                        </h5>
-                        <p className="text-xs font-medium text-stone-500 mt-0.5">${p.price.toFixed(2)}</p>
-                      </div>
-                    </div>
-
-                    {/* Botón de añadir al carrito ocultado temporalmente
-                    <button
-                      id={`essential-add-btn-${p.id}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onAddToCart(p);
-                      }}
-                      className="p-3.5 rounded-full bg-[#faf6f0] border border-[#efe6dc] hover:bg-[#764229] hover:text-white text-[#764229] transition-all flex items-center justify-center shadow-xs cursor-pointer"
-                    >
-                      <ShoppingBag className="w-4 h-4" />
-                    </button>
-                    */}
-                  </div>
-                ))}
-              </div>
-
-              {/* apothecary shelf promo - OCULTADO TEMPORALMENTE
-              <div className="bg-[#efe6dc]/20 border border-dashed border-[#efe6dc] rounded-lg p-5 text-center mt-4">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">¿Necesitas fórmulas específicas?</span>
-                <p className="text-xs text-stone-600 mt-1 max-w-xs mx-auto mb-4 font-serif italic">
-                  Explora nuestra farmacia botánica completa, con brumas tonificantes, limpiadores profundos y aceites herbales nutritivos.
-                </p>
-                <button
-                  id="essentials-shop-link"
-                  onClick={() => onNavigateToTab('shop')}
-                  className="py-2.5 px-6 bg-transparent hover:bg-[#764229] text-[#764229] hover:text-white border border-[#764229] text-xs font-semibold tracking-wider rounded-md transition-all font-sans uppercase inline-flex items-center gap-1.5 cursor-pointer"
-                >
-                  Ver Todos los Productos
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              */}
-
-            </div>
-
           </div>
-
         </div>
       </section>
 
@@ -336,11 +242,11 @@ export default function RitualsScreen({
           <span className="text-5xl font-serif text-[#e4dacd] text-center block mb-2 select-none leading-none">“</span>
           
           <blockquote className="text-2xl sm:text-3xl font-serif text-[#764229] italic leading-relaxed tracking-wide font-light mb-8">
-            La verdadera alquimia de la belleza reside en el equilibrio perfecto entre la ciencia molecular y los ritmos más silenciosos de la naturaleza.
+            Tu belleza natural es el lienzo. Mi trabajo es hacerla brillar con técnica, cuidado y pasión.
           </blockquote>
           
           <cite className="text-[10px] sm:text-xs not-italic font-sans tracking-[0.2em] font-semibold text-stone-500 uppercase">
-            — Elara Vance, Fundadora
+            — Anel Reyna, Lic. Cosmetología e Imagen
           </cite>
         </div>
       </section>
@@ -351,7 +257,7 @@ export default function RitualsScreen({
           <div className="text-center md:text-left">
             <span className="text-xl font-serif tracking-[0.2em] text-[#4a2815]">AURA</span>
             <p className="text-[10px] mt-1.5 text-stone-500 font-sans tracking-wide">
-              Cuidado Botánico Artesanal y Santuario Dérmico.
+              Cosmetología e Imagen Profesional.
             </p>
           </div>
           <div className="flex gap-6 text-[10px] font-sans font-semibold tracking-widest uppercase">
