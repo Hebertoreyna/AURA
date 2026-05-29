@@ -117,16 +117,16 @@ export default function RitualsScreen({
         {
           key:      'facial',
           label:    'Faciales',
-          eyebrow:  'Cabina · Tratamientos',
-          desc:     'Protocolos clínicos y rituales faciales diseñados para cada tipo de piel.',
+          eyebrow:  'Cabina · Servicios',
+          desc:     'Faciales profesionales diseñados para cada tipo de piel.',
           filter:   (r: (typeof RITUALS)[0]) => r.subcategory === 'facial',
           border:   false,
         },
         {
           key:      'corporal',
           label:    'Corporales',
-          eyebrow:  'Cabina · Tratamientos',
-          desc:     'Masajes, reafirmantes y tratamientos dermatológicos para el cuerpo.',
+          eyebrow:  'Cabina · Servicios',
+          desc:     'Masajes, reafirmantes y servicios corporales para el cuerpo.',
           filter:   (r: (typeof RITUALS)[0]) => r.subcategory === 'corporal',
           border:   true,
         },
@@ -255,7 +255,7 @@ export default function RitualsScreen({
               <h4 className="text-3xl font-serif text-[#4a2815] leading-tight mb-1">Anel Reyna</h4>
               <p className="text-xs font-mono text-stone-500 mb-4 uppercase tracking-wider">Lic. Cosmetología e Imagen</p>
               <p className="text-sm text-stone-600 leading-relaxed font-serif mb-6">
-                Licenciada en Cosmetología e Imagen, especializada en maquillaje artístico, tratamientos faciales avanzados y rituales corporales. Cada servicio es una experiencia diseñada para realzar tu belleza natural con técnicas profesionales y atención personalizada.
+                Licenciada en Cosmetología e Imagen, especializada en maquillaje artístico, técnicas faciales avanzadas y servicios corporales. Cada visita es una experiencia diseñada para realzar tu belleza natural con técnicas profesionales y atención personalizada.
               </p>
               <button
                 id="specialist-book-btn"
@@ -273,9 +273,9 @@ export default function RitualsScreen({
       <section id="refine-callout" className="py-16 px-6 max-w-4xl mx-auto flex flex-col md:flex-row gap-8 items-center justify-between">
         <div className="max-w-md">
           <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#764229] uppercase">Evaluación de la Piel</span>
-          <h4 className="text-3xl font-serif text-[#4a2815] mt-1 mb-2 leading-snug">Descubre la alineación ideal de tus rituales</h4>
+          <h4 className="text-3xl font-serif text-[#4a2815] mt-1 mb-2 leading-snug">Descubre el servicio ideal para tu piel</h4>
           <p className="text-xs text-stone-600 leading-relaxed font-serif italic">
-            Completa nuestro breve diagnóstico sensorial botánico. Cuéntanos acerca de tus sensibilidades cutáneas y preocupaciones, y nuestro algoritmo trazará tratamientos y aceites exactos para el ritmo óptimo de tu piel.
+            Completa nuestro breve diagnóstico sensorial botánico. Cuéntanos acerca de tus sensibilidades cutáneas y preocupaciones, y nuestro algoritmo identificará los servicios y activos ideales para el ritmo óptimo de tu piel.
           </p>
         </div>
         <button
