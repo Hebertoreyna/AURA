@@ -58,6 +58,10 @@ export interface Appointment {
   specialistAvatar: string;
   status: 'scheduled' | 'completed' | 'cancelled';
   notes?: string;
+  clientName?: string;
+  clientEmail?: string;
+  rawDate?: string;
+  rawTime?: string;
 }
 
 export interface CartItem {
