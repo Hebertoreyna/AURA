@@ -297,5 +297,30 @@ export const RITUALS: Ritual[] = [
       'Hidratación profunda finalizadora'
     ],
     therapists: ['Anel Reyna']
+  },
+  // ── TRATAMIENTOS ESPECIALES ──────────────────────────────────────────
+  {
+    id: 'r12',
+    name: 'Eliminación de Verrugas',
+    badge: 'EVALUACIÓN',
+    duration: 30,
+    price: 0,
+    customQuote: true,
+    imageUrl: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80',
+    shortDescription: 'Evaluación gratuita para determinar el tratamiento y presupuesto personalizado según cada caso.',
+    description: 'La eliminación de verrugas es un tratamiento especializado cuyo costo varía según el número, tamaño, profundidad y localización de las lesiones. Por ello, la primera cita es una evaluación gratuita en la que Anel analizará tu caso, definirá el método más adecuado (crioterapia, electrocauterización u otros) y te entregará un presupuesto personalizado sin compromiso.',
+    benefits: [
+      'Evaluación diagnóstica gratuita y sin compromiso',
+      'Presupuesto personalizado según tu caso específico',
+      'Técnica adecuada al tipo y número de verrugas'
+    ],
+    steps: [
+      'Evaluación visual y diagnóstica de las lesiones',
+      'Determinación del método de tratamiento idóneo',
+      'Estimación del número de sesiones necesarias',
+      'Entrega de presupuesto personalizado',
+      'Agendamiento del tratamiento si se acepta el presupuesto'
+    ],
+    therapists: ['Anel Reyna']
   }
 ];
