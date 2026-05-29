@@ -67,7 +67,7 @@ export default function ProfileScreen({
   const getLoyaltyTier = (pts: number) => {
     if (pts > 400) return { name: 'Élite del Santuario Iris Dorado', perk: 'Sesiones de vapor de 30 minutos gratis y 15% de descuento en la tienda' };
     if (pts > 200) return { name: 'Socio de Loto Plateado', perk: 'Brumas activas de cortesía y prioridad para reservar citas' };
-    return { name: 'Practicante de Salvia de Bronce', perk: '1 punto de bonificación por cada dólar invertido y recibos de diagnóstico mensual' };
+    return { name: 'Practicante de Salvia de Bronce', perk: '1 punto de bonificación por cada visita e informe mensual de seguimiento' };
   };
 
   const currentTier = getLoyaltyTier(totalPoints);
@@ -114,7 +114,7 @@ export default function ProfileScreen({
             onClick={() => onNavigateToTab('refine')}
             className="text-[10px] font-sans font-bold text-[#764229] uppercase border-b border-[#764229] cursor-pointer"
           >
-            {skinProfile.completed ? 'Rehacer Diagnóstico' : 'Hacer Diagnóstico de Piel'}
+            {skinProfile.completed ? 'Rehacer Análisis' : 'Hacer Análisis de Piel'}
           </button>
         </div>
 
@@ -135,9 +135,9 @@ export default function ProfileScreen({
           </div>
         ) : (
           <div className="text-center py-4 bg-white/50 border border-dashed border-[#efe6dc] rounded-lg">
-            <p className="text-xs text-stone-600 italic font-serif">Aún no se ha cargado un diagnóstico de piel.</p>
+            <p className="text-xs text-stone-600 italic font-serif">Aún no has completado tu análisis de piel.</p>
             <p className="text-[10px] text-stone-500 mt-1 max-w-sm mx-auto">
-              Nuestro analizador clínico de piel mapea los sueros de alta concentración botánica correctos para el ritmo celular único de su rostro.
+              Nuestro análisis personalizado identifica los servicios y activos ideales para las necesidades únicas de tu piel.
             </p>
           </div>
         )}
