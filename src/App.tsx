@@ -136,7 +136,7 @@ export default function App() {
           }`}
         >
           <Sprout className="w-5 h-5 mb-1" />
-          <span className="text-[10px] sm:text-xs font-sans font-medium tracking-wide">Diagnóstico</span>
+          <span className="text-[10px] sm:text-xs font-sans font-medium tracking-wide">Análisis</span>
         </button>
 
         {/* TAB 2: RITUALES */}
