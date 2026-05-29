@@ -1,14 +1,63 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Clock, ChevronRight, ChevronLeft, Sparkles, AlertTriangle, MessageCircle, Loader2 } from 'lucide-react';
+import { X, Clock, ChevronRight, ChevronLeft, AlertTriangle, MessageCircle, Loader2, CalendarDays } from 'lucide-react';
 import { Ritual, Specialist } from '../types';
 import { RITUALS, SPECIALISTS } from '../data';
-import { BookedSlot, getBookedSlots, saveBooking, generateTimeSlots, isSlotAvailable, SESSION_BUFFER } from '../lib/bookings';
+import {
+  BookedSlot, getBookedSlots, saveBooking,
+  generateTimeSlots, isSlotAvailable, SESSION_BUFFER, timeToMin,
+} from '../lib/bookings';
 
 // ─── CONFIGURACIÓN DEL SALÓN ────────────────────────────────────────────────
-// Reemplaza con el número de WhatsApp de Anel (formato: 52 + número sin espacios)
 const WHATSAPP_PHONE = '526381285959';
-// ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Anticipo mínimo por tipo de servicio (en días completos).
+ * Lógica: servicios comunes 1-2 días; servicios especiales/eventos 3-7 días.
+ */
+const ADVANCE_DAYS: Record<string, number> = {
+  r1:  1,  // Limpieza Facial           — servicio cotidiano
+  r2:  2,  // Hydrofacial               — requiere preparación de activos
+  r3:  2,  // Facial Lifting            — técnica especializada
+  r4:  1,  // Facial Control Acné       — servicio cotidiano
+  r5:  2,  // Facial Microdermoabrasión — equipo especializado
+  r6:  2,  // Maquillaje Social         — prep de materiales
+  r7:  7,  // Maquillaje Novia          — incluye sesión de prueba
+  r8:  3,  // Maquillaje XV Años        — coordinación de evento
+  r9:  1,  // Masaje Relajante          — servicio cotidiano
+  r10: 2,  // EMS Body + Drenaje        — equipo especializado
+  r11: 1,  // Exfoliación de Espalda    — servicio cotidiano
+};
+
+// ─── HELPERS DE FECHA ───────────────────────────────────────────────────────
+const DAYS_ES   = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+const MONTHS_ES = [
+  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre',
+];
+
+/** "2026-05-28" sin problemas de zona horaria */
+const fmtRaw = (y: number, m: number, d: number): string =>
+  `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+/** "2026-05-28" → "Jueves, 28 de mayo de 2026" en español */
+const fmtDisplay = (raw: string): string => {
+  const [y, m, d] = raw.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('es-MX', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  });
+};
+
+/** Fecha mínima reservable para un ritual dado (anticipo + días) */
+const getMinDate = (ritualId: string): Date => {
+  const advDays = ADVANCE_DAYS[ritualId] ?? 1;
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + advDays);
+  return d;
+};
+
+// ─── COMPONENTE ─────────────────────────────────────────────────────────────
 
 interface BookingWizardProps {
   isOpen: boolean;
@@ -20,87 +69,109 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const prevStep = useRef<number>(1);
   const direction = step > prevStep.current ? 1 : -1;
-  
-  // Selections state
-  const [selectedRitual, setSelectedRitual] = useState<Ritual | null>(null);
+
+  // Selecciones del usuario
+  const [selectedRitual,     setSelectedRitual]     = useState<Ritual | null>(null);
   const [selectedSpecialist, setSelectedSpecialist] = useState<Specialist | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>('');
-  const [selectedTime, setSelectedTime] = useState<string>('');
-  
-  // Person details state
-  const [name, setName] = useState('');
+  const [selectedDate,       setSelectedDate]       = useState<string>('');
+  const [selectedTime,       setSelectedTime]       = useState<string>('');
+
+  // Datos del cliente
+  const [name,  setName]  = useState('');
   const [email, setEmail] = useState('');
   const [notes, setNotes] = useState('');
+
+  // UI feedback
   const [validationError, setValidationError] = useState('');
-  const [success, setSuccess] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [success,         setSuccess]         = useState(false);
+  const [submitting]                          = useState(false);
 
-  // Firestore — slots ya reservados para la fecha + especialista seleccionados
-  const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
-  const [loadingSlots, setLoadingSlots] = useState(false);
+  // Navegación del calendario mensual
+  const [calYear,  setCalYear]  = useState(() => new Date().getFullYear());
+  const [calMonth, setCalMonth] = useState(() => new Date().getMonth());
 
-  // Sync pre-selected ritual
+  // Firestore — slots reservados para la fecha + especialista seleccionados
+  const [bookedSlots,   setBookedSlots]   = useState<BookedSlot[]>([]);
+  const [loadingSlots, setLoadingSlots]   = useState(false);
+
+  // ── Sincronizar ritual pre-seleccionado ─────────────────────────────────
   useEffect(() => {
     if (preSelectedRitualId) {
       const ritual = RITUALS.find(r => r.id === preSelectedRitualId);
-      if (ritual) {
-        setSelectedRitual(ritual);
-        setStep(2);
-      }
+      if (ritual) { setSelectedRitual(ritual); setStep(2); }
     } else {
       setSelectedRitual(null);
       setStep(1);
     }
   }, [preSelectedRitualId, isOpen]);
 
-  // Cargar horarios ocupados de Firestore cuando cambia la fecha o el especialista
+  // ── Cargar slots ocupados al cambiar fecha o especialista ───────────────
   useEffect(() => {
     if (!selectedDate) return;
     setLoadingSlots(true);
-    setSelectedTime(''); // resetear hora si cambia la fecha
+    setSelectedTime('');
     getBookedSlots(selectedDate, selectedSpecialist?.name)
       .then(slots => setBookedSlots(slots))
       .catch(() => setBookedSlots([]))
       .finally(() => setLoadingSlots(false));
   }, [selectedDate, selectedSpecialist]);
 
-  // Generate date options for the next 7 days in May 2026
-  const getDatesList = () => {
-    const list = [];
-    const weekdays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    
-    // Start from current simulated date: 2026-05-28
-    const baseDate = new Date('2026-05-28');
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(baseDate);
-        d.setDate(baseDate.getDate() + i);
-        const dayName = weekdays[d.getDay()];
-        const dayNum = d.getDate();
-        const monthName = d.getMonth() === 4 ? 'Mayo' : months[d.getMonth()]; // May translation specifically
-        const formatted = `${dayName}, ${dayNum} de ${monthName}`;
-        list.push({
-          raw: d.toISOString().split('T')[0],
-          formatted,
-          shortName: dayName.substring(0, 3),
-          dayNum
-        });
-    }
-    return list;
+  // ── Helpers del calendario ───────────────────────────────────────────────
+  const isDateDisabled = (y: number, m: number, d: number): boolean => {
+    const date = new Date(y, m, d);
+    return date < getMinDate(selectedRitual?.id ?? '');
   };
 
-  const datesList = getDatesList();
-  // Slots dinámicos: cada 30 min desde 8:00 AM hasta que el último slot + duración ≤ 7:00 PM
+  /** Filtra horarios ya transcurridos si la fecha seleccionada es hoy */
+  const isTimePast = (slotTime: string): boolean => {
+    const now = new Date();
+    const todayRaw = fmtRaw(now.getFullYear(), now.getMonth(), now.getDate());
+    if (selectedDate !== todayRaw) return false;
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    return timeToMin(slotTime) <= nowMin;
+  };
+
+  /** Celdas del mes: null = relleno inicial, number = día */
+  const calCells = (): (number | null)[] => {
+    const firstDow  = new Date(calYear, calMonth, 1).getDay();
+    const totalDays = new Date(calYear, calMonth + 1, 0).getDate();
+    const cells: (number | null)[] = Array(firstDow).fill(null);
+    for (let d = 1; d <= totalDays; d++) cells.push(d);
+    return cells;
+  };
+
+  const isPrevMonthDisabled = (): boolean => {
+    const now = new Date();
+    return calYear === now.getFullYear() && calMonth === now.getMonth();
+  };
+
+  const goPrevMonth = () => {
+    if (calMonth === 0) { setCalYear(y => y - 1); setCalMonth(11); }
+    else setCalMonth(m => m - 1);
+  };
+
+  const goNextMonth = () => {
+    if (calMonth === 11) { setCalYear(y => y + 1); setCalMonth(0); }
+    else setCalMonth(m => m + 1);
+  };
+
+  const handleSelectDate = (day: number) => {
+    if (isDateDisabled(calYear, calMonth, day)) return;
+    setSelectedDate(fmtRaw(calYear, calMonth, day));
+  };
+
+  // ── Slots de tiempo ──────────────────────────────────────────────────────
   const timesList = generateTimeSlots(selectedRitual?.duration ?? 60);
 
   const filteredSpecialists = selectedRitual
     ? SPECIALISTS.filter(s => selectedRitual.therapists.includes(s.name))
     : SPECIALISTS;
 
+  // ── Navegación por pasos ─────────────────────────────────────────────────
   const handleNextStep = () => {
     setValidationError('');
     if (step === 1 && !selectedRitual) {
-      setValidationError('Por verifique y seleccione un ritual para continuar.');
+      setValidationError('Por favor seleccione un ritual para continuar.');
       return;
     }
     if (step === 2 && !selectedSpecialist) {
@@ -112,15 +183,16 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
       return;
     }
     prevStep.current = step;
-    setStep((prev) => (prev + 1) as any);
+    setStep((prev) => (prev + 1) as 1 | 2 | 3 | 4);
   };
 
   const handlePrevStep = () => {
     setValidationError('');
     prevStep.current = step;
-    setStep((prev) => (prev - 1) as any);
+    setStep((prev) => (prev - 1) as 1 | 2 | 3 | 4);
   };
 
+  // ── Confirmación y envío a WhatsApp ──────────────────────────────────────
   const handleConfirmReservation = (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
@@ -135,9 +207,8 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
 
     setValidationError('');
 
-    const appDate = datesList.find(d => d.raw === selectedDate)?.formatted || selectedDate;
+    const appDate = fmtDisplay(selectedDate);
 
-    // 1. Construir mensaje
     const msg = [
       `¡Hola Anel! Me gustaría reservar una cita 🌿`,
       ``,
@@ -155,21 +226,21 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
       `¡Gracias! 💆‍♀️`,
     ].filter(line => line !== null).join('\n');
 
-    // 2. Abrir WhatsApp PRIMERO (respuesta directa al click — sin await)
+    // Abrir WhatsApp PRIMERO — respuesta directa al click, sin await
     window.open(`https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(msg)}`, '_blank');
     setSuccess(true);
 
-    // 3. Guardar en Firestore en segundo plano (no bloquea la UI)
+    // Guardar en Firestore en segundo plano (fire-and-forget)
     saveBooking({
-      date: selectedDate,
-      time: selectedTime,
-      duration: selectedRitual.duration, // necesario para calcular solapamientos futuros
-      ritualName: selectedRitual.name,
+      date:           selectedDate,
+      time:           selectedTime,
+      duration:       selectedRitual.duration,
+      ritualName:     selectedRitual.name,
       specialistName: selectedSpecialist.name,
-      clientName: name.trim(),
-      clientEmail: email.trim(),
-      notes: notes.trim(),
-      status: 'pending',
+      clientName:     name.trim(),
+      clientEmail:    email.trim(),
+      notes:          notes.trim(),
+      status:         'pending',
     }).catch(err => console.error('Firestore (non-blocking):', err));
   };
 
@@ -186,6 +257,16 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
     onClose();
   };
 
+  // ── Anticipo legible para el tooltip ─────────────────────────────────────
+  const advanceDaysLabel = (ritualId: string): string => {
+    const days = ADVANCE_DAYS[ritualId] ?? 1;
+    return days === 1 ? '1 día de anticipo' : `${days} días de anticipo`;
+  };
+
+  // ── Fecha mínima display (para mostrar al usuario) ────────────────────────
+  const todayRaw = fmtRaw(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+
+  // ─────────────────────────────────────────────────────────────────────────
   return (
     <AnimatePresence>
       {isOpen && (
@@ -200,7 +281,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
             className="absolute inset-0 bg-[#4a2815]/30 backdrop-blur-md"
           />
 
-          {/* Dialog Container */}
+          {/* Dialog */}
           <motion.div
             id="booking-dialog"
             initial={{ opacity: 0, scale: 0.96, y: 24 }}
@@ -220,7 +301,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
               <button
                 id="booking-close-btn"
                 onClick={handleReset}
-                className="p-1.5 rounded-full bg-stone-100 text-stone-500 hover:text-stone-800 transition-colors"
+                className="p-1.5 rounded-full bg-stone-100 text-stone-500 hover:text-stone-800 transition-colors active:scale-[0.97]"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -234,43 +315,32 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
               </div>
             )}
 
-            {/* Step indicators */}
+            {/* Step tabs */}
             {!success && (
               <div id="booking-steps-nav" className="flex bg-[#efe6dc]/40 border-b border-[#efe6dc]/50 text-[10px] font-sans font-semibold uppercase tracking-wider text-stone-500">
-                <button
-                  onClick={() => selectedRitual && setStep(1)}
-                  disabled={!selectedRitual}
-                  className={`flex-1 py-3 text-center border-r border-[#efe6dc]/40 transition-all ${step === 1 ? 'bg-[#efe6dc] text-[#4a2815]' : ''}`}
-                >
-                  1. Ritual
-                </button>
-                <button
-                  onClick={() => selectedSpecialist && setStep(2)}
-                  disabled={!selectedSpecialist}
-                  className={`flex-1 py-3 text-center border-r border-[#efe6dc]/40 transition-all ${step === 2 ? 'bg-[#efe6dc] text-[#4a2815]' : ''}`}
-                >
-                  2. Especialista
-                </button>
-                <button
-                  onClick={() => selectedDate && setStep(3)}
-                  disabled={!selectedDate}
-                  className={`flex-1 py-3 text-center border-r border-[#efe6dc]/40 transition-all ${step === 3 ? 'bg-[#efe6dc] text-[#4a2815]' : ''}`}
-                >
-                  3. Horario
-                </button>
-                <button
-                  disabled
-                  className={`flex-1 py-3 text-center transition-all ${step === 4 ? 'bg-[#efe6dc] text-[#4a2815]' : ''}`}
-                >
-                  4. Confirmación
-                </button>
+                {(['1. Ritual', '2. Especialista', '3. Horario', '4. Confirmación'] as const).map((label, i) => {
+                  const s = (i + 1) as 1 | 2 | 3 | 4;
+                  const clickable = s < step;
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => { if (clickable) { prevStep.current = step; setStep(s); } }}
+                      disabled={!clickable && step !== s}
+                      className={`flex-1 py-3 text-center border-r border-[#efe6dc]/40 transition-all last:border-r-0 ${
+                        step === s ? 'bg-[#efe6dc] text-[#4a2815]' : ''
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
             )}
 
-            {/* Main Interactive Content Panel */}
+            {/* Content */}
             <div id="booking-wizard-content" className="p-6 overflow-y-auto flex-1">
               {success ? (
-                /* SUCCESS SCREEN — WhatsApp enviado */
+                /* ── SUCCESS ── */
                 <motion.div
                   id="booking-success-pnl"
                   initial={{ opacity: 0, scale: 0.96, y: 8 }}
@@ -286,7 +356,6 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                     Tu mensaje fue enviado a Anel Reyna por WhatsApp. Ella confirmará tu cita en breve.
                   </p>
 
-                  {/* Resumen */}
                   <div className="w-full bg-[#f2eae4] rounded-xl p-5 text-left border border-[#efe6dc] space-y-3 max-w-sm mb-6">
                     <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
                       <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Servicio</span>
@@ -298,7 +367,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                     </div>
                     <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
                       <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Fecha y Hora</span>
-                      <span className="text-stone-700 text-right max-w-[150px]">{datesList.find(d => d.raw === selectedDate)?.formatted} • {selectedTime}</span>
+                      <span className="text-stone-700 text-right max-w-[150px]">{fmtDisplay(selectedDate)} · {selectedTime}</span>
                     </div>
                     <div className="flex justify-between text-xs pt-1">
                       <span className="text-[#764229] uppercase tracking-widest font-sans font-bold">Precio</span>
@@ -319,13 +388,11 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                   </button>
                 </motion.div>
               ) : (
-                /* STEPPING LOGIC — direction-aware step transitions */
                 <AnimatePresence mode="wait" initial={false}>
+                  {/* ── PASO 1: RITUAL ── */}
                   {step === 1 && (
-                    /* STEP 1: SELECT RITUAL */
                     <motion.div
                       key="step1"
-                      id="step1-ritual-select"
                       initial={{ opacity: 0, x: direction * 20 }}
                       animate={{ opacity: 1, x: 0, transition: { duration: 0.22, ease: [0.23, 1, 0.32, 1] } }}
                       exit={{ opacity: 0, x: direction * -20, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
@@ -336,11 +403,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                         {RITUALS.map((r) => (
                           <button
                             key={r.id}
-                            id={`select-ritual-opt-${r.id}`}
-                            onClick={() => {
-                              setSelectedRitual(r);
-                              setSelectedSpecialist(null);
-                            }}
+                            onClick={() => { setSelectedRitual(r); setSelectedSpecialist(null); }}
                             className={`p-4 rounded-xl text-left border transition-all flex items-center justify-between group ${
                               selectedRitual?.id === r.id
                                 ? 'bg-[#efe6dc]/50 border-[#764229] shadow-md'
@@ -348,12 +411,8 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                             }`}
                           >
                             <div className="flex gap-3 items-center">
-                              <img
-                                src={r.imageUrl}
-                                alt={r.name}
-                                referrerPolicy="no-referrer"
-                                className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-                              />
+                              <img src={r.imageUrl} alt={r.name} referrerPolicy="no-referrer"
+                                className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
                               <div>
                                 <div className="flex items-center gap-2">
                                   <span className="text-sm font-serif font-semibold text-[#4a2815] group-hover:text-[#764229] transition-colors">
@@ -366,11 +425,15 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                   )}
                                 </div>
                                 <p className="text-[10px] text-stone-500 mt-0.5 max-w-sm line-clamp-1">{r.shortDescription}</p>
+                                {/* Anticipo mínimo */}
+                                <span className="text-[9px] font-mono text-[#764229]/70 mt-0.5 block">
+                                  ⏱ {advanceDaysLabel(r.id)}
+                                </span>
                               </div>
                             </div>
-                            <div className="text-right">
+                            <div className="text-right flex-shrink-0 ml-2">
                               <span className="text-sm font-serif font-bold text-[#764229] block">${r.price}</span>
-                              <span className="text-[9px] font-mono text-stone-400 block">{r.duration} Mins</span>
+                              <span className="text-[9px] font-mono text-stone-400 block">{r.duration} min</span>
                             </div>
                           </button>
                         ))}
@@ -378,11 +441,10 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                     </motion.div>
                   )}
 
+                  {/* ── PASO 2: ESPECIALISTA ── */}
                   {step === 2 && (
-                    /* STEP 2: SELECT THERAPIST */
                     <motion.div
                       key="step2"
-                      id="step2-therapist-select"
                       initial={{ opacity: 0, x: direction * 20 }}
                       animate={{ opacity: 1, x: 0, transition: { duration: 0.22, ease: [0.23, 1, 0.32, 1] } }}
                       exit={{ opacity: 0, x: direction * -20, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
@@ -395,7 +457,6 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                         {filteredSpecialists.map((s) => (
                           <button
                             key={s.id}
-                            id={`select-specialist-opt-${s.id}`}
                             onClick={() => setSelectedSpecialist(s)}
                             className={`p-4 rounded-xl text-left border transition-all flex gap-4 items-start ${
                               selectedSpecialist?.id === s.id
@@ -403,16 +464,12 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                 : 'bg-white border-[#efe6dc] hover:border-stone-300'
                             }`}
                           >
-                            <img
-                              src={s.avatarUrl}
-                              alt={s.name}
-                              referrerPolicy="no-referrer"
-                              className="w-16 h-16 rounded-full object-cover border-2 border-white flex-shrink-0 shadow-sm"
-                            />
+                            <img src={s.avatarUrl} alt={s.name} referrerPolicy="no-referrer"
+                              className="w-16 h-16 rounded-full object-cover border-2 border-white flex-shrink-0 shadow-sm" />
                             <div>
                               <span className="text-sm font-serif font-semibold text-[#4a2815] block">{s.name}</span>
                               <span className="text-[10px] font-sans tracking-wider text-[#764229] uppercase font-semibold block">{s.role}</span>
-                              <p className="text-[10px] text-stone-600 mt-1 lines-clamp-3 leading-relaxed">{s.bio}</p>
+                              <p className="text-[10px] text-stone-600 mt-1 leading-relaxed">{s.bio}</p>
                             </div>
                           </button>
                         ))}
@@ -420,43 +477,98 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                     </motion.div>
                   )}
 
+                  {/* ── PASO 3: FECHA Y HORA ── */}
                   {step === 3 && (
-                    /* STEP 3: DATE & TIME slots */
                     <motion.div
                       key="step3"
-                      id="step3-schedule-select"
                       initial={{ opacity: 0, x: direction * 20 }}
                       animate={{ opacity: 1, x: 0, transition: { duration: 0.22, ease: [0.23, 1, 0.32, 1] } }}
                       exit={{ opacity: 0, x: direction * -20, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
                       className="space-y-6"
                     >
-                      {/* Date Carousel Grid */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-sans font-semibold uppercase tracking-wider text-[#4a2815]">Seleccionar Fecha</label>
-                        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-                          {datesList.map((d) => (
-                            <button
-                              key={d.raw}
-                              id={`select-date-opt-${d.raw}`}
-                              type="button"
-                              onClick={() => setSelectedDate(d.raw)}
-                              className={`p-2 rounded-xl text-center border transition-all ${
-                                selectedDate === d.raw
-                                  ? 'bg-[#764229] border-[#764229] text-white shadow-md'
-                                  : 'bg-white border-[#efe6dc] hover:border-stone-300 text-stone-700'
-                              }`}
-                            >
-                              <span className="text-[9px] font-mono block uppercase tracking-wider opacity-80">{d.shortName}</span>
-                              <span className="text-lg font-serif font-bold block leading-none my-1">{d.dayNum}</span>
-                              <span className="text-[8px] font-sans block uppercase opacity-85">Mayo</span>
-                            </button>
+                      {/* ── Calendario mensual ── */}
+                      <div className="space-y-3">
+                        {/* Encabezado de mes con navegación */}
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-sans font-semibold uppercase tracking-wider text-[#4a2815] flex items-center gap-1.5">
+                            <CalendarDays className="w-3.5 h-3.5" />
+                            Seleccionar Fecha
+                          </label>
+                          {selectedRitual && (
+                            <span className="text-[9px] font-mono text-[#764229]/80 bg-[#efe6dc]/60 px-2 py-0.5 rounded-full">
+                              ⏱ {advanceDaysLabel(selectedRitual.id)}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Navegación mes */}
+                        <div className="flex items-center justify-between bg-white border border-[#efe6dc] rounded-xl px-3 py-2">
+                          <button
+                            type="button"
+                            onClick={goPrevMonth}
+                            disabled={isPrevMonthDisabled()}
+                            className="p-1 rounded-lg text-stone-400 hover:text-[#764229] disabled:opacity-25 disabled:cursor-not-allowed transition-colors active:scale-[0.92]"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </button>
+                          <span className="text-sm font-serif font-semibold text-[#4a2815] capitalize">
+                            {MONTHS_ES[calMonth]} {calYear}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={goNextMonth}
+                            className="p-1 rounded-lg text-stone-400 hover:text-[#764229] transition-colors active:scale-[0.92]"
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        {/* Cabecera de días de la semana */}
+                        <div className="grid grid-cols-7 text-center">
+                          {DAYS_ES.map(d => (
+                            <span key={d} className="text-[9px] font-sans font-bold text-stone-400 uppercase py-1">
+                              {d}
+                            </span>
                           ))}
+                        </div>
+
+                        {/* Celdas del calendario */}
+                        <div className="grid grid-cols-7 gap-1">
+                          {calCells().map((day, i) => {
+                            if (!day) return <div key={`e-${i}`} />;
+                            const raw      = fmtRaw(calYear, calMonth, day);
+                            const disabled = isDateDisabled(calYear, calMonth, day);
+                            const isToday  = raw === todayRaw;
+                            const isSelected = raw === selectedDate;
+                            return (
+                              <button
+                                key={raw}
+                                type="button"
+                                disabled={disabled}
+                                onClick={() => handleSelectDate(day)}
+                                className={`aspect-square flex flex-col items-center justify-center rounded-lg text-xs font-sans transition-[background-color,color,transform] duration-150
+                                  ${isSelected
+                                    ? 'bg-[#764229] text-white font-bold shadow-md'
+                                    : disabled
+                                    ? 'text-stone-300 cursor-not-allowed'
+                                    : isToday
+                                    ? 'border border-[#764229]/40 text-[#764229] font-semibold hover:bg-[#efe6dc]/60'
+                                    : 'text-stone-700 hover:bg-[#efe6dc]/50 active:scale-[0.94]'
+                                  }`}
+                              >
+                                <span className="leading-none">{day}</span>
+                                {isToday && !isSelected && (
+                                  <span className="w-1 h-1 rounded-full bg-[#764229] mt-0.5 block" />
+                                )}
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
 
-                      {/* Hour List */}
-                      <div className="space-y-2 pt-2">
-                        <div className="flex items-center justify-between">
+                      {/* ── Horarios disponibles ── */}
+                      <div className="space-y-2 pt-1 border-t border-[#efe6dc]">
+                        <div className="flex items-center justify-between pt-2">
                           <label className="text-xs font-sans font-semibold uppercase tracking-wider text-[#4a2815]">
                             Horarios Disponibles
                           </label>
@@ -466,109 +578,97 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                             </span>
                           )}
                         </div>
-                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                          {timesList.map((t) => {
-                            const isBooked = !isSlotAvailable(t, selectedRitual?.duration ?? 60, bookedSlots);
-                            const isSelected = selectedTime === t;
-                            return (
-                              <button
-                                key={t}
-                                id={`select-time-opt-${t.replace(' ', '-')}`}
-                                type="button"
-                                disabled={isBooked || loadingSlots}
-                                onClick={() => !isBooked && setSelectedTime(t)}
-                                className={`py-3 px-4 rounded-xl text-center border text-xs font-mono transition-[background-color,border-color,opacity] duration-150 flex items-center justify-center gap-2 ${
-                                  isBooked
-                                    ? 'bg-stone-100 border-stone-200 text-stone-300 cursor-not-allowed line-through'
-                                    : isSelected
-                                    ? 'bg-[#efe6dc] border-[#764229] text-[#4a2815] font-semibold shadow-sm'
-                                    : 'bg-white border-[#efe6dc] hover:border-stone-300 text-stone-600 cursor-pointer'
-                                }`}
-                              >
-                                <Clock className={`w-3.5 h-3.5 ${isBooked ? 'text-stone-300' : 'text-[#5e6c58] opacity-70'}`} />
-                                {isBooked ? `${t}` : t}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        {selectedDate && !loadingSlots && (
-                          <p className="text-[10px] text-stone-400 font-serif italic mt-1">
-                            Horarios en gris sin disponibilidad · mín. {SESSION_BUFFER} min entre sesiones · último turno a las {timesList[timesList.length - 1]}
+
+                        {!selectedDate ? (
+                          <p className="text-xs text-stone-400 font-serif italic py-2">
+                            Selecciona una fecha para ver los horarios disponibles.
                           </p>
+                        ) : (
+                          <>
+                            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                              {timesList.map((t) => {
+                                const unavailable = !isSlotAvailable(t, selectedRitual?.duration ?? 60, bookedSlots)
+                                                 || isTimePast(t);
+                                const isSelected  = selectedTime === t;
+                                return (
+                                  <button
+                                    key={t}
+                                    type="button"
+                                    disabled={unavailable || loadingSlots}
+                                    onClick={() => !unavailable && setSelectedTime(t)}
+                                    className={`py-3 px-2 rounded-xl text-center border text-xs font-mono transition-[background-color,border-color,opacity] duration-150 flex items-center justify-center gap-1.5
+                                      ${unavailable
+                                        ? 'bg-stone-100 border-stone-200 text-stone-300 cursor-not-allowed line-through'
+                                        : isSelected
+                                        ? 'bg-[#efe6dc] border-[#764229] text-[#4a2815] font-semibold shadow-sm'
+                                        : 'bg-white border-[#efe6dc] hover:border-stone-300 text-stone-600 cursor-pointer active:scale-[0.96]'
+                                      }`}
+                                  >
+                                    <Clock className={`w-3 h-3 flex-shrink-0 ${unavailable ? 'text-stone-300' : 'text-[#5e6c58] opacity-70'}`} />
+                                    {t}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <p className="text-[10px] text-stone-400 font-serif italic">
+                              Horarios sin disponibilidad en gris · mín. {SESSION_BUFFER} min entre sesiones · último turno: {timesList[timesList.length - 1]}
+                            </p>
+                          </>
                         )}
                       </div>
                     </motion.div>
                   )}
 
+                  {/* ── PASO 4: DATOS DE CONTACTO ── */}
                   {step === 4 && (
-                    /* STEP 4: CONTACT & SECURE REGISTER */
                     <motion.div
                       key="step4"
-                      id="step4-contact"
                       initial={{ opacity: 0, x: direction * 20 }}
                       animate={{ opacity: 1, x: 0, transition: { duration: 0.22, ease: [0.23, 1, 0.32, 1] } }}
                       exit={{ opacity: 0, x: direction * -20, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
                       className="space-y-4"
                     >
-                      <p className="text-xs text-stone-500 font-serif italic">Proporciona los datos del huésped para completar el registro de la sesión:</p>
+                      <p className="text-xs text-stone-500 font-serif italic">
+                        Proporciona los datos del huésped para completar el registro de la sesión:
+                      </p>
                       <form onSubmit={handleConfirmReservation} className="space-y-4">
-                        {/* Summary preview */}
+                        {/* Resumen de reserva */}
                         <div className="p-4 bg-white border border-[#efe6dc] rounded-xl flex gap-3 text-xs leading-normal">
-                          <img
-                            src={selectedRitual?.imageUrl}
-                            alt="ritual"
-                            referrerPolicy="no-referrer"
-                            className="w-12 h-12 object-cover rounded-lg"
-                          />
-                          <div>
-                            <span className="font-serif font-bold text-[#4a2815] block">{selectedRitual?.name}</span>
+                          <img src={selectedRitual?.imageUrl} alt="ritual" referrerPolicy="no-referrer"
+                            className="w-12 h-12 object-cover rounded-lg" />
+                          <div className="min-w-0">
+                            <span className="font-serif font-bold text-[#4a2815] block truncate">{selectedRitual?.name}</span>
                             <span className="text-[10px] text-stone-500 block">Especialista: {selectedSpecialist?.name}</span>
                             <span className="text-[10px] text-stone-500 block font-mono">
-                              {datesList.find(d => d.raw === selectedDate)?.formatted} a las {selectedTime}
+                              {selectedDate ? fmtDisplay(selectedDate) : '—'} · {selectedTime}
                             </span>
                           </div>
-                          <span className="ml-auto font-serif font-bold text-[#764229] text-sm">${selectedRitual?.price}</span>
+                          <span className="ml-auto font-serif font-bold text-[#764229] text-sm flex-shrink-0">${selectedRitual?.price}</span>
                         </div>
 
-                        {/* Name input */}
                         <div className="space-y-1">
                           <label className="text-[10px] font-sans font-bold tracking-widest text-stone-500 uppercase">Nombre del Huésped</label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="Ej. Heberto R. G."
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="w-full p-3 text-xs rounded-xl border border-[#efe6dc] bg-white focus:outline-none focus:border-[#764229]"
-                          />
+                          <input type="text" required placeholder="Ej. Heberto R. G."
+                            value={name} onChange={(e) => setName(e.target.value)}
+                            className="w-full p-3 text-xs rounded-xl border border-[#efe6dc] bg-white focus:outline-none focus:border-[#764229]" />
                         </div>
 
-                        {/* Email input */}
                         <div className="space-y-1">
                           <label className="text-[10px] font-sans font-bold tracking-widest text-stone-500 uppercase">Correo Electrónico</label>
-                          <input
-                            type="email"
-                            required
-                            placeholder="Ej. Heberto.R.G@gmail.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full p-3 text-xs rounded-xl border border-[#efe6dc] bg-white focus:outline-none focus:border-[#764229]"
-                          />
+                          <input type="email" required placeholder="Ej. heberto@gmail.com"
+                            value={email} onChange={(e) => setEmail(e.target.value)}
+                            className="w-full p-3 text-xs rounded-xl border border-[#efe6dc] bg-white focus:outline-none focus:border-[#764229]" />
                         </div>
 
-                        {/* Guest messages */}
                         <div className="space-y-1">
-                          <label className="text-[10px] font-sans font-bold tracking-widest text-stone-500 uppercase">Alergias o Notas de la Piel (Opcional)</label>
-                          <textarea
-                            rows={3}
+                          <label className="text-[10px] font-sans font-bold tracking-widest text-stone-500 uppercase">
+                            Alergias o Notas de la Piel (Opcional)
+                          </label>
+                          <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)}
                             placeholder="Cuéntanos sobre sensibilidades cutáneas, zonas secas o preferencias de presión..."
-                            value={notes}
-                            onChange={(e) => setNotes(e.target.value)}
-                            className="w-full p-3 text-xs rounded-xl border border-[#efe6dc] bg-white focus:outline-none focus:border-[#764229] resize-none"
-                          />
+                            className="w-full p-3 text-xs rounded-xl border border-[#efe6dc] bg-white focus:outline-none focus:border-[#764229] resize-none" />
                         </div>
 
-                        {/* Invisible Submit trigger */}
                         <button type="submit" className="hidden" id="booking-submit-trigger" />
                       </form>
                     </motion.div>
@@ -577,7 +677,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
               )}
             </div>
 
-            {/* Sticky Actions Footer */}
+            {/* Footer de acciones */}
             {!success && (
               <div id="booking-wizard-footer" className="p-5 border-t border-[#efe6dc] flex justify-between gap-3 bg-white/50">
                 {step > 1 && (
@@ -590,7 +690,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                     Atrás
                   </button>
                 )}
-                
+
                 {step < 4 ? (
                   <button
                     id="booking-next-step-btn"
@@ -606,7 +706,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                     onClick={(e) => {
                       const trigger = document.getElementById('booking-submit-trigger');
                       if (trigger) trigger.click();
-                      else handleConfirmReservation(e);
+                      else handleConfirmReservation(e as unknown as FormEvent);
                     }}
                     disabled={submitting}
                     className="ml-auto py-3 px-6 bg-[#25D366] hover:bg-[#1da851] active:scale-[0.97] disabled:opacity-60 text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center justify-center gap-2"
