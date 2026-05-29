@@ -53,7 +53,7 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
                 <div>
                   <h3 className="font-serif text-lg text-[#4a2815] font-medium">Cuidado Personalizado</h3>
                   <p className="text-xs text-stone-600 mt-1 leading-relaxed">
-                    Cada servicio comienza con un diagnóstico de tu piel. Adaptamos cada servicio a tus necesidades específicas para que veas resultados reales desde la primera sesión.
+                    Cada servicio comienza con un análisis de tu piel. Adaptamos cada servicio a tus necesidades específicas para que veas resultados reales desde la primera sesión.
                   </p>
                 </div>
               </div>
