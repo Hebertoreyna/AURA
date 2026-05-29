@@ -153,13 +153,13 @@ export default function ProfileScreen({
         {appointments.filter(a => a.status === 'scheduled').length === 0 ? (
           <div className="text-center py-10 bg-white border border-[#efe6dc]/50 rounded-xl space-y-2">
             <Clock className="w-10 h-10 text-stone-300 mx-auto stroke-1" />
-            <p className="text-xs text-stone-500 italic font-serif">No cuenta con reservaciones programadas para tratamientos.</p>
+            <p className="text-xs text-stone-500 italic font-serif">No cuenta con reservaciones programadas para servicios.</p>
             <button
               id="profile-empty-book-btn"
               onClick={() => onNavigateToTab('rituals')}
               className="py-1.5 px-4 bg-transparent border border-[#764229] hover:bg-[#764229] text-[#764229] hover:text-white text-[10px] font-sans font-bold tracking-wider rounded-lg uppercase transition-all cursor-pointer"
             >
-              Reservar un Ritual de Spa
+              Reservar un Servicio
             </button>
           </div>
         ) : (
