@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Clock, ChevronRight, ChevronLeft, AlertTriangle, MessageCircle, Loader2, CalendarDays, Check, Sparkles } from 'lucide-react';
+import { X, Clock, ChevronRight, ChevronLeft, AlertTriangle, MessageCircle, Loader2, CalendarDays, Check, Sparkles, Leaf } from 'lucide-react';
 import { Ritual, Specialist } from '../types';
 import { RITUALS, SPECIALISTS } from '../data';
 import {
@@ -90,6 +90,9 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
   const [email, setEmail] = useState('');
   const [notes, setNotes] = useState('');
 
+  // Categoría principal seleccionada en paso 1
+  const [selectedCategory, setSelectedCategory] = useState<'cabina' | 'maquillaje' | null>(null);
+
   // Facial AURA como add-on (solo cuando se selecciona un facial distinto al propio AURA)
   const [withAuraAddon, setWithAuraAddon] = useState(false);
 
@@ -110,9 +113,14 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
   useEffect(() => {
     if (preSelectedRitualId) {
       const ritual = RITUALS.find(r => r.id === preSelectedRitualId);
-      if (ritual) { setSelectedRitual(ritual); setStep(2); }
+      if (ritual) {
+        setSelectedRitual(ritual);
+        setSelectedCategory(ritual.category);
+        setStep(2);
+      }
     } else {
       setSelectedRitual(null);
+      setSelectedCategory(null);
       setStep(1);
     }
     setWithAuraAddon(false);
@@ -192,8 +200,12 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
   // ── Navegación por pasos ─────────────────────────────────────────────────
   const handleNextStep = () => {
     setValidationError('');
+    if (step === 1 && !selectedCategory) {
+      setValidationError('Por favor selecciona una categoría para continuar.');
+      return;
+    }
     if (step === 1 && !selectedRitual) {
-      setValidationError('Por favor seleccione un ritual para continuar.');
+      setValidationError('Por favor selecciona un servicio de la lista para continuar.');
       return;
     }
     if (step === 2 && !selectedSpecialist) {
@@ -287,6 +299,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
 
   const handleReset = () => {
     setStep(1);
+    setSelectedCategory(null);
     setSelectedRitual(null);
     setSelectedSpecialist(null);
     setSelectedDate('');
@@ -469,114 +482,179 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                       exit={{ opacity: 0, x: direction * -20, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
                       className="space-y-4"
                     >
-                      <p className="text-xs text-stone-500 font-serif italic">Selecciona el servicio que deseas reservar:</p>
+                      {/* ── Selector de categoría principal ── */}
+                      <div>
+                        <p className="text-xs text-stone-500 font-serif italic mb-3">¿Qué tipo de servicio buscas?</p>
+                        <div className="grid grid-cols-2 gap-3">
+                          {([
+                            {
+                              key: 'cabina' as const,
+                              label: 'Cabina',
+                              sub: 'Faciales & Corporales',
+                              icon: <Leaf className="w-5 h-5" />,
+                            },
+                            {
+                              key: 'maquillaje' as const,
+                              label: 'Maquillaje',
+                              sub: 'Arte & Imagen',
+                              icon: <Sparkles className="w-5 h-5" />,
+                            },
+                          ]).map(cat => {
+                            const active = selectedCategory === cat.key;
+                            return (
+                              <button
+                                key={cat.key}
+                                onClick={() => {
+                                  setSelectedCategory(cat.key);
+                                  // Si el ritual seleccionado no es de esta categoría, limpiar
+                                  if (selectedRitual && selectedRitual.category !== cat.key) {
+                                    setSelectedRitual(null);
+                                    setSelectedSpecialist(null);
+                                    setWithAuraAddon(false);
+                                  }
+                                }}
+                                className={`p-4 rounded-xl border-2 text-left transition-[border-color,background-color,transform] duration-150 active:scale-[0.97] ${
+                                  active
+                                    ? 'border-[#764229] bg-[#764229] text-white shadow-md'
+                                    : 'border-[#efe6dc] bg-white text-[#4a2815] hover:border-[#764229]/40'
+                                }`}
+                              >
+                                <div className={`mb-2 ${active ? 'text-white/90' : 'text-[#764229]'}`}>
+                                  {cat.icon}
+                                </div>
+                                <span className="text-sm font-serif font-bold block leading-tight">{cat.label}</span>
+                                <span className={`text-[10px] font-sans mt-0.5 block ${active ? 'text-white/70' : 'text-stone-400'}`}>
+                                  {cat.sub}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
 
-                      {/* ── Tres grupos: Faciales / Corporales / Maquillaje ── */}
+                      {/* ── Lista de rituales (aparece al seleccionar categoría) ── */}
+                      <AnimatePresence mode="wait">
+                        {selectedCategory && (
+                          <motion.div
+                            key={selectedCategory}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0, transition: { duration: 0.22, ease: [0.23, 1, 0.32, 1] } }}
+                            exit={{ opacity: 0, y: -6, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
+                            className="space-y-4"
+                          >
+                            {([
+                              { key: 'facial',     label: 'Faciales',    filter: (r: typeof RITUALS[0]) => r.subcategory === 'facial' },
+                              { key: 'corporal',   label: 'Corporales',  filter: (r: typeof RITUALS[0]) => r.subcategory === 'corporal' },
+                              { key: 'maquillaje', label: 'Maquillaje',  filter: (r: typeof RITUALS[0]) => r.category === 'maquillaje' },
+                            ] as const)
+                              .filter(grp =>
+                                selectedCategory === 'cabina'
+                                  ? grp.key !== 'maquillaje'
+                                  : grp.key === 'maquillaje'
+                              )
+                              .map(grp => {
+                              const group = RITUALS.filter(grp.filter);
+                              return (
+                                <div key={grp.key} className="space-y-2">
+                                  {/* Encabezado de subgrupo */}
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[9px] font-sans font-bold tracking-[0.25em] text-[#764229]/70 uppercase">
+                                      — {grp.label}
+                                    </span>
+                                    <div className="flex-1 h-px bg-[#efe6dc]" />
+                                  </div>
 
-                      {([
-                        { key: 'facial',     label: 'Cabina · Faciales',    filter: (r: typeof RITUALS[0]) => r.subcategory === 'facial' },
-                        { key: 'corporal',   label: 'Cabina · Corporales',  filter: (r: typeof RITUALS[0]) => r.subcategory === 'corporal' },
-                        { key: 'maquillaje', label: 'Maquillaje',           filter: (r: typeof RITUALS[0]) => r.category === 'maquillaje' },
-                      ] as const).map(grp => {
-                        const group = RITUALS.filter(grp.filter);
-                        return (
-                          <div key={grp.key} className="space-y-2">
-                            {/* Encabezado de grupo */}
-                            <div className="flex items-center gap-2 pt-1">
-                              <span className="text-[9px] font-sans font-bold tracking-[0.25em] text-[#764229]/70 uppercase">
-                                — {grp.label}
-                              </span>
-                              <div className="flex-1 h-px bg-[#efe6dc]" />
-                            </div>
+                                  {/* Items del grupo */}
+                                  <div className="grid grid-cols-1 gap-2">
+                                    {group.map((r) => (
+                                      <button
+                                        key={r.id}
+                                        onClick={() => { setSelectedRitual(r); setSelectedSpecialist(null); }}
+                                        className={`p-4 rounded-xl text-left border transition-all flex items-center justify-between group ${
+                                          selectedRitual?.id === r.id
+                                            ? 'bg-[#efe6dc]/50 border-[#764229] shadow-md'
+                                            : 'bg-white border-[#efe6dc] hover:border-stone-300'
+                                        }`}
+                                      >
+                                        <div className="flex gap-3 items-center min-w-0">
+                                          <img src={r.imageUrl} alt={r.name} referrerPolicy="no-referrer"
+                                            className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
+                                          <div className="min-w-0">
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                              <span className="text-sm font-serif font-semibold text-[#4a2815] group-hover:text-[#764229] transition-colors">
+                                                {r.name}
+                                              </span>
+                                              {r.badge && (
+                                                <span className={`text-[8px] font-sans px-1.5 py-0.5 rounded-full font-bold ${
+                                                  r.customQuote
+                                                    ? 'bg-sky-100 text-sky-700'
+                                                    : 'bg-[#efe6dc] text-[#764229]'
+                                                }`}>
+                                                  {r.badge}
+                                                </span>
+                                              )}
+                                            </div>
+                                            <p className="text-[10px] text-stone-500 mt-0.5 line-clamp-1">{r.shortDescription}</p>
+                                          </div>
+                                        </div>
+                                        <div className="text-right flex-shrink-0 ml-3 space-y-0.5">
+                                          {r.customQuote
+                                            ? <span className="text-xs font-serif font-bold text-sky-700 block">Cotización</span>
+                                            : <span className="text-sm font-serif font-bold text-[#764229] block">${r.price}</span>
+                                          }
+                                          <span className="text-[9px] font-mono text-stone-400 block">{r.duration} min</span>
+                                          {r.customQuote
+                                            ? <span className="text-[9px] font-mono text-sky-600/80 block">Eval. gratis</span>
+                                            : depositPct(r.id) > 0
+                                              ? <span className="text-[9px] font-mono text-amber-700/80 block">Anticipo {depositPct(r.id)}%</span>
+                                              : <span className="text-[9px] font-mono text-emerald-600/70 block">Sin anticipo</span>
+                                          }
+                                        </div>
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            })}
 
-                            {/* Items del grupo */}
-                            <div className="grid grid-cols-1 gap-2">
-                              {group.map((r) => (
-                                <button
-                                  key={r.id}
-                                  onClick={() => { setSelectedRitual(r); setSelectedSpecialist(null); }}
-                                  className={`p-4 rounded-xl text-left border transition-all flex items-center justify-between group ${
-                                    selectedRitual?.id === r.id
-                                      ? 'bg-[#efe6dc]/50 border-[#764229] shadow-md'
-                                      : 'bg-white border-[#efe6dc] hover:border-stone-300'
-                                  }`}
-                                >
-                                  <div className="flex gap-3 items-center min-w-0">
-                                    <img src={r.imageUrl} alt={r.name} referrerPolicy="no-referrer"
-                                      className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
-                                    <div className="min-w-0">
-                                      <div className="flex items-center gap-1.5 flex-wrap">
-                                        <span className="text-sm font-serif font-semibold text-[#4a2815] group-hover:text-[#764229] transition-colors">
-                                          {r.name}
-                                        </span>
-                                        {r.badge && (
-                                          <span className={`text-[8px] font-sans px-1.5 py-0.5 rounded-full font-bold ${
-                                            r.customQuote
-                                              ? 'bg-sky-100 text-sky-700'
-                                              : 'bg-[#efe6dc] text-[#764229]'
-                                          }`}>
-                                            {r.badge}
-                                          </span>
-                                        )}
-                                      </div>
-                                      <p className="text-[10px] text-stone-500 mt-0.5 line-clamp-1">{r.shortDescription}</p>
+                            {/* ── Facial AURA add-on toggle ── */}
+                            {canHaveAuraAddon && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.23, 1, 0.32, 1] } }}
+                                className={`p-4 rounded-xl border-2 cursor-pointer transition-[border-color,background-color] duration-150 ${
+                                  withAuraAddon
+                                    ? 'border-[#764229] bg-[#efe6dc]/40'
+                                    : 'border-[#efe6dc] bg-white hover:border-[#764229]/30'
+                                }`}
+                                onClick={() => setWithAuraAddon(v => !v)}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors duration-150 ${
+                                    withAuraAddon ? 'bg-[#764229] border-[#764229]' : 'border-stone-300'
+                                  }`}>
+                                    {withAuraAddon && <Check className="w-3 h-3 text-white" />}
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                      <Sparkles className="w-3.5 h-3.5 text-[#764229]" />
+                                      <span className="text-xs font-serif font-semibold text-[#4a2815]">
+                                        Potenciar con Facial AURA
+                                      </span>
+                                      <span className="text-[9px] font-mono font-bold text-[#764229] bg-[#efe6dc] px-2 py-0.5 rounded-full">
+                                        +${AURA_ADDON_PRICE}
+                                      </span>
                                     </div>
+                                    <p className="text-[10px] text-stone-500 mt-0.5">
+                                      Activos exclusivos AURA · vitamina C · péptidos tensores · +30 min de sesión
+                                    </p>
                                   </div>
-                                  <div className="text-right flex-shrink-0 ml-3 space-y-0.5">
-                                    {r.customQuote
-                                      ? <span className="text-xs font-serif font-bold text-sky-700 block">Cotización</span>
-                                      : <span className="text-sm font-serif font-bold text-[#764229] block">${r.price}</span>
-                                    }
-                                    <span className="text-[9px] font-mono text-stone-400 block">{r.duration} min</span>
-                                    {r.customQuote
-                                      ? <span className="text-[9px] font-mono text-sky-600/80 block">Eval. gratis</span>
-                                      : depositPct(r.id) > 0
-                                        ? <span className="text-[9px] font-mono text-amber-700/80 block">Anticipo {depositPct(r.id)}%</span>
-                                        : <span className="text-[9px] font-mono text-emerald-600/70 block">Sin anticipo</span>
-                                    }
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-
-                      {/* ── Facial AURA add-on toggle ── */}
-                      {canHaveAuraAddon && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.23, 1, 0.32, 1] } }}
-                          className={`mt-1 p-4 rounded-xl border-2 cursor-pointer transition-[border-color,background-color] duration-150 ${
-                            withAuraAddon
-                              ? 'border-[#764229] bg-[#efe6dc]/40'
-                              : 'border-[#efe6dc] bg-white hover:border-[#764229]/30'
-                          }`}
-                          onClick={() => setWithAuraAddon(v => !v)}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors duration-150 ${
-                              withAuraAddon ? 'bg-[#764229] border-[#764229]' : 'border-stone-300'
-                            }`}>
-                              {withAuraAddon && <Check className="w-3 h-3 text-white" />}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <Sparkles className="w-3.5 h-3.5 text-[#764229]" />
-                                <span className="text-xs font-serif font-semibold text-[#4a2815]">
-                                  Potenciar con Facial AURA
-                                </span>
-                                <span className="text-[9px] font-mono font-bold text-[#764229] bg-[#efe6dc] px-2 py-0.5 rounded-full">
-                                  +${AURA_ADDON_PRICE}
-                                </span>
-                              </div>
-                              <p className="text-[10px] text-stone-500 mt-0.5">
-                                Activos exclusivos AURA · vitamina C · péptidos tensores · +30 min de sesión
-                              </p>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
+                                </div>
+                              </motion.div>
+                            )}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
                   )}
 
