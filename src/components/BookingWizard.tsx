@@ -434,54 +434,73 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                       exit={{ opacity: 0, x: direction * -20, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
                       className="space-y-4"
                     >
-                      <p className="text-xs text-stone-500 font-serif italic">Selecciona uno de nuestros icónicos rituales de bienestar dérmico:</p>
-                      <div className="grid grid-cols-1 gap-3">
-                        {RITUALS.map((r) => (
-                          <button
-                            key={r.id}
-                            onClick={() => { setSelectedRitual(r); setSelectedSpecialist(null); }}
-                            className={`p-4 rounded-xl text-left border transition-all flex items-center justify-between group ${
-                              selectedRitual?.id === r.id
-                                ? 'bg-[#efe6dc]/50 border-[#764229] shadow-md'
-                                : 'bg-white border-[#efe6dc] hover:border-stone-300'
-                            }`}
-                          >
-                            <div className="flex gap-3 items-center">
-                              <img src={r.imageUrl} alt={r.name} referrerPolicy="no-referrer"
-                                className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm font-serif font-semibold text-[#4a2815] group-hover:text-[#764229] transition-colors">
-                                    {r.name}
-                                  </span>
-                                  {r.badge && (
-                                    <span className="text-[8px] font-sans bg-[#efe6dc] text-[#764229] px-2 py-0.5 rounded-full font-bold">
-                                      {r.badge}
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-[10px] text-stone-500 mt-0.5 max-w-sm line-clamp-1">{r.shortDescription}</p>
-                              </div>
+                      <p className="text-xs text-stone-500 font-serif italic">Selecciona el servicio que deseas reservar:</p>
+
+                      {/* ── Grupos por categoría ── */}
+                      {(['cabina', 'maquillaje'] as const).map(cat => {
+                        const group = RITUALS.filter(r => r.category === cat);
+                        return (
+                          <div key={cat} className="space-y-2">
+                            {/* Encabezado de grupo */}
+                            <div className="flex items-center gap-2 pt-1">
+                              <span className="text-[9px] font-sans font-bold tracking-[0.25em] text-[#764229]/70 uppercase">
+                                {cat === 'cabina' ? '— Cabina' : '— Maquillaje'}
+                              </span>
+                              <div className="flex-1 h-px bg-[#efe6dc]" />
                             </div>
-                            <div className="text-right flex-shrink-0 ml-2 space-y-0.5">
-                              {r.customQuote
-                                ? <>
-                                    <span className="text-xs font-serif font-bold text-[#764229] block leading-tight">Cotización</span>
-                                    <span className="text-[9px] font-mono text-[#764229]/60 block">personalizada</span>
-                                  </>
-                                : <span className="text-sm font-serif font-bold text-[#764229] block">${r.price}</span>
-                              }
-                              <span className="text-[9px] font-mono text-stone-400 block">{r.duration} min</span>
-                              {r.customQuote
-                                ? <span className="text-[9px] font-mono text-sky-600/80 block">Gratis</span>
-                                : depositPct(r.id) > 0
-                                  ? <span className="text-[9px] font-mono text-amber-700/80 block">Anticipo {depositPct(r.id)}%</span>
-                                  : <span className="text-[9px] font-mono text-emerald-600/70 block">Sin anticipo</span>
-                              }
+
+                            {/* Items del grupo */}
+                            <div className="grid grid-cols-1 gap-2">
+                              {group.map((r) => (
+                                <button
+                                  key={r.id}
+                                  onClick={() => { setSelectedRitual(r); setSelectedSpecialist(null); }}
+                                  className={`p-4 rounded-xl text-left border transition-all flex items-center justify-between group ${
+                                    selectedRitual?.id === r.id
+                                      ? 'bg-[#efe6dc]/50 border-[#764229] shadow-md'
+                                      : 'bg-white border-[#efe6dc] hover:border-stone-300'
+                                  }`}
+                                >
+                                  <div className="flex gap-3 items-center min-w-0">
+                                    <img src={r.imageUrl} alt={r.name} referrerPolicy="no-referrer"
+                                      className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="text-sm font-serif font-semibold text-[#4a2815] group-hover:text-[#764229] transition-colors">
+                                          {r.name}
+                                        </span>
+                                        {r.badge && (
+                                          <span className={`text-[8px] font-sans px-1.5 py-0.5 rounded-full font-bold ${
+                                            r.customQuote
+                                              ? 'bg-sky-100 text-sky-700'
+                                              : 'bg-[#efe6dc] text-[#764229]'
+                                          }`}>
+                                            {r.badge}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <p className="text-[10px] text-stone-500 mt-0.5 line-clamp-1">{r.shortDescription}</p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right flex-shrink-0 ml-3 space-y-0.5">
+                                    {r.customQuote
+                                      ? <span className="text-xs font-serif font-bold text-sky-700 block">Cotización</span>
+                                      : <span className="text-sm font-serif font-bold text-[#764229] block">${r.price}</span>
+                                    }
+                                    <span className="text-[9px] font-mono text-stone-400 block">{r.duration} min</span>
+                                    {r.customQuote
+                                      ? <span className="text-[9px] font-mono text-sky-600/80 block">Eval. gratis</span>
+                                      : depositPct(r.id) > 0
+                                        ? <span className="text-[9px] font-mono text-amber-700/80 block">Anticipo {depositPct(r.id)}%</span>
+                                        : <span className="text-[9px] font-mono text-emerald-600/70 block">Sin anticipo</span>
+                                    }
+                                  </div>
+                                </button>
+                              ))}
                             </div>
-                          </button>
-                        ))}
-                      </div>
+                          </div>
+                        );
+                      })}
                     </motion.div>
                   )}
 
