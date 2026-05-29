@@ -112,28 +112,50 @@ export default function RitualsScreen({
         </div>
       </section>
 
-      {/* 3. RITUALS — CABINA + MAQUILLAJE */}
-      {(['cabina', 'maquillaje'] as const).map((cat) => {
-        const catRituals = RITUALS.filter(r => r.category === cat);
-        const isCabina   = cat === 'cabina';
+      {/* 3. RITUALS — FACIALES / CORPORALES / MAQUILLAJE */}
+      {([
+        {
+          key:      'facial',
+          label:    'Faciales',
+          eyebrow:  'Cabina · Tratamientos',
+          desc:     'Protocolos clínicos y rituales faciales diseñados para cada tipo de piel.',
+          filter:   (r: (typeof RITUALS)[0]) => r.subcategory === 'facial',
+          border:   false,
+        },
+        {
+          key:      'corporal',
+          label:    'Corporales',
+          eyebrow:  'Cabina · Tratamientos',
+          desc:     'Masajes, reafirmantes y tratamientos dermatológicos para el cuerpo.',
+          filter:   (r: (typeof RITUALS)[0]) => r.subcategory === 'corporal',
+          border:   true,
+        },
+        {
+          key:      'maquillaje',
+          label:    'Maquillaje',
+          eyebrow:  'Arte & Imagen',
+          desc:     'Looks profesionales de larga duración para cada ocasión.',
+          filter:   (r: (typeof RITUALS)[0]) => r.category === 'maquillaje',
+          border:   true,
+        },
+      ] as const).map((section) => {
+        const sectionRituals = RITUALS.filter(section.filter);
         return (
           <section
-            key={cat}
-            id={`rituals-section-${cat}`}
-            className={`py-16 px-6 max-w-6xl mx-auto ${!isCabina ? 'border-t border-[#efe6dc]/50' : ''}`}
+            key={section.key}
+            id={`rituals-section-${section.key}`}
+            className={`py-16 px-6 max-w-6xl mx-auto ${section.border ? 'border-t border-[#efe6dc]/50' : ''}`}
           >
             <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
               <div>
                 <span className="text-[10px] font-sans font-bold tracking-[0.3em] text-[#764229]/70 uppercase block mb-1">
-                  {isCabina ? 'Tratamientos' : 'Arte & Imagen'}
+                  {section.eyebrow}
                 </span>
                 <h3 className="text-3xl sm:text-4xl font-serif text-[#4a2815] font-light">
-                  {isCabina ? 'Servicios de Cabina' : 'Maquillaje'}
+                  {section.label}
                 </h3>
                 <p className="text-xs text-stone-500 mt-1.5 max-w-lg leading-relaxed">
-                  {isCabina
-                    ? 'Tratamientos faciales, corporales y dermatológicos especializados para el cuidado profundo de tu piel.'
-                    : 'Looks profesionales para cada ocasión, desde eventos sociales hasta el altar.'}
+                  {section.desc}
                 </p>
               </div>
               <button
@@ -144,16 +166,16 @@ export default function RitualsScreen({
               </button>
             </div>
 
-            {/* Horizontal scroll — stagger entrance */}
+            {/* Scroll horizontal con stagger */}
             <motion.div
-              id={`rituals-slider-${cat}`}
+              id={`rituals-slider-${section.key}`}
               className="flex gap-6 overflow-x-auto pb-6 pt-2 no-scrollbar snap-x cursor-grab active:cursor-grabbing"
               variants={{ visible: { transition: { staggerChildren: 0.07, delayChildren: 0.04 } } }}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: '-60px' }}
             >
-              {catRituals.map((ritual) => (
+              {sectionRituals.map((ritual) => (
                 <motion.div
                   key={ritual.id}
                   id={`ritual-card-${ritual.id}`}
@@ -171,8 +193,6 @@ export default function RitualsScreen({
                       referrerPolicy="no-referrer"
                       className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                     />
-
-                    {/* Badge */}
                     {ritual.badge && (
                       <span className={`absolute top-4 right-4 backdrop-blur-xs border text-[9px] font-sans font-bold tracking-widest px-3 py-1 rounded-sm uppercase ${
                         ritual.customQuote
@@ -182,14 +202,10 @@ export default function RitualsScreen({
                         {ritual.badge}
                       </span>
                     )}
-
-                    {/* Duration Overlay */}
                     <div className="absolute bottom-3 left-3 bg-[#1c130d]/45 text-[#efe6dc] font-mono text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider backdrop-blur-xs">
                       {ritual.duration} MIN
                     </div>
                   </div>
-
-                  {/* Info */}
                   <div className="flex flex-col">
                     <div className="flex justify-between items-baseline mb-1">
                       <h4 className="text-xl font-serif text-[#4a2815] group-hover:text-[#764229] transition-colors duration-200 leading-snug">
