@@ -101,18 +101,20 @@ export default function RitualDetailModal({ ritual, isOpen, onClose, onBookRitua
               </div>
 
               {/* Chronological Steps */}
-              <div className="mb-4">
-                <h4 className="text-xs font-sans font-semibold tracking-wider uppercase text-[#4a2815] mb-2">Pasos Cronológicos</h4>
-                <div className="space-y-2 border-l-2 border-[#efe6dc] pl-4 py-1">
-                  {ritual.steps.map((step, i) => (
-                    <div key={i} className="relative">
-                      <span className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-[#764229] border border-[#faf6f0]" />
-                      <span className="text-[10px] font-mono text-[#764229] uppercase block tracking-wider font-semibold font-bold">Fase {i + 1}</span>
-                      <p className="text-stone-600 text-xs mt-0.5 leading-snug">{step}</p>
-                    </div>
-                  ))}
+              {ritual.steps.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-xs font-sans font-semibold tracking-wider uppercase text-[#4a2815] mb-2">Pasos Cronológicos</h4>
+                  <div className="space-y-2 border-l-2 border-[#efe6dc] pl-4 py-1">
+                    {ritual.steps.map((step, i) => (
+                      <div key={i} className="relative">
+                        <span className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-[#764229] border border-[#faf6f0]" />
+                        <span className="text-[10px] font-mono text-[#764229] uppercase block tracking-wider font-semibold font-bold">Fase {i + 1}</span>
+                        <p className="text-stone-600 text-xs mt-0.5 leading-snug">{step}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Recommended Therapists */}
               <div className="mb-6">
