@@ -49,7 +49,7 @@ export const RITUALS: Ritual[] = [
       'Aparatología profesional para resultados visibles'
     ],
     steps: [
-      'Diagnóstico y análisis del tipo de piel',
+      'Análisis del tipo de piel',
       'Limpieza desmaquillante inicial',
       'Exfoliación y apertura de poros',
       'Extracción profesional de comedones',
@@ -205,7 +205,7 @@ export const RITUALS: Ritual[] = [
       'El servicio más completo e integral de la cabina'
     ],
     steps: [
-      'Diagnóstico cutáneo profundo e independiente',
+      'Análisis cutáneo profundo e independiente',
       'Diseño del protocolo y selección de aparatología',
       'Limpieza y preparación a medida',
       'Aplicación de aparatología seleccionada por Anel',
@@ -216,7 +216,7 @@ export const RITUALS: Ritual[] = [
   },
   {
     id: 'r15',
-    name: 'Facial AURA',
+    name: 'Ritual AURA',
     badge: 'SIGNATURE',
     category: 'cabina',
     subcategory: 'facial',
@@ -359,7 +359,7 @@ export const RITUALS: Ritual[] = [
       'Maquillajes prácticos y adaptados a tu estilo'
     ],
     steps: [
-      'Diagnóstico de facciones y tono de piel',
+      'Análisis de facciones y tono de piel',
       'Explicación de bases y preparación de la piel',
       'Práctica guiada: base, corrección y cejas',
       'Técnicas de ojos adaptadas a tu forma',
