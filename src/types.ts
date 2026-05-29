@@ -24,6 +24,7 @@ export interface Ritual {
   id: string;
   name: string;
   badge?: string;
+  category: 'cabina' | 'maquillaje';
   duration: number; // in minutes
   price: number;    // 0 si customQuote = true
   customQuote?: boolean; // true = precio personalizado, primera cita es evaluación gratuita
