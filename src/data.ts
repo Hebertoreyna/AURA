@@ -222,14 +222,14 @@ export const RITUALS: Ritual[] = [
     subcategory: 'facial',
     isAddon: true,
     duration: 30,
-    price: 500,
+    price: 400,
     imageUrl: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80',
-    shortDescription: 'El servicio exclusivo de AURA. Luminosidad, firmeza y glow — independiente o como extra en cualquier facial (+$500).',
+    shortDescription: 'El servicio exclusivo de AURA. Luminosidad, firmeza y glow — independiente o como extra en cualquier facial (+$400).',
     description: 'El facial que lleva el nombre del salón. Combina activos exclusivos de alta concentración — vitamina C encapsulada, péptidos tensores y ácido hialurónico de triple peso molecular — en un protocolo diseñado para transformar la piel en una sola sesión. Puede reservarse como servicio independiente o añadirse como extra a cualquier otro facial de cabina para potenciar sus resultados.',
     benefits: [
       'Luminosidad y glow intensos desde la primera sesión',
       'Efecto tensor y reafirmante con péptidos activos',
-      'Combinable con cualquier facial como extra (+$500)'
+      'Combinable con cualquier facial como extra (+$400)'
     ],
     steps: [
       'Limpieza y preparación de la piel',
