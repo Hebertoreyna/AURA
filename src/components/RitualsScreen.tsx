@@ -216,7 +216,7 @@ export default function RitualsScreen({
                   onClick={() => onViewProduct(featuredProduct)}
                   className="inline-block text-[10px] font-sans font-bold tracking-widest text-[#764229] uppercase border-b border-[#764229] pb-0.5 mb-8 hover:text-[#4a2815] hover:border-[#4a2815] transition-colors cursor-pointer"
                 >
-                  Comprar Ahora
+                  Ver Detalles
                 </button>
               </div>
 
@@ -231,6 +231,7 @@ export default function RitualsScreen({
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover rounded-md group-hover:scale-102 transition-transform duration-500"
                 />
+                {/* Botón de añadir al carrito ocultado temporalmente
                 <div className="absolute right-4 bottom-4 w-10 h-10 rounded-full bg-[#764229]/95 text-white flex items-center justify-center shadow-md hover:bg-[#4a2815] transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -239,6 +240,7 @@ export default function RitualsScreen({
                 >
                   <ShoppingBag className="w-4 h-4" />
                 </div>
+                */}
               </div>
             </div>
 
@@ -269,6 +271,7 @@ export default function RitualsScreen({
                       </div>
                     </div>
 
+                    {/* Botón de añadir al carrito ocultado temporalmente
                     <button
                       id={`essential-add-btn-${p.id}`}
                       onClick={(e) => {
@@ -279,11 +282,12 @@ export default function RitualsScreen({
                     >
                       <ShoppingBag className="w-4 h-4" />
                     </button>
+                    */}
                   </div>
                 ))}
               </div>
 
-              {/* apothecary shelf promo */}
+              {/* apothecary shelf promo - OCULTADO TEMPORALMENTE
               <div className="bg-[#efe6dc]/20 border border-dashed border-[#efe6dc] rounded-lg p-5 text-center mt-4">
                 <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">¿Necesitas fórmulas específicas?</span>
                 <p className="text-xs text-stone-600 mt-1 max-w-xs mx-auto mb-4 font-serif italic">
@@ -298,6 +302,7 @@ export default function RitualsScreen({
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
               </div>
+              */}
 
             </div>
 
@@ -352,7 +357,7 @@ export default function RitualsScreen({
           <div className="flex gap-6 text-[10px] font-sans font-semibold tracking-widest uppercase">
             <button onClick={onOpenPhilosophy} className="hover:text-stone-700 transition-[#764229] cursor-pointer">Filosofía</button>
             <button onClick={() => onNavigateToTab('refine')} className="hover:text-stone-700 transition-[#764229] cursor-pointer">Diagnóstico</button>
-            <button onClick={() => onNavigateToTab('shop')} className="hover:text-stone-700 transition-[#764229] cursor-pointer">Tienda</button>
+            {/* <button onClick={() => onNavigateToTab('shop')} className="hover:text-stone-700 transition-[#764229] cursor-pointer">Tienda</button> */}
             <button onClick={onBookAppointment} className="hover:text-stone-700 transition-[#764229] cursor-pointer">Reservar</button>
           </div>
           <p className="text-[9px] font-mono text-center md:text-right">

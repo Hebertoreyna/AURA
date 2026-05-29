@@ -113,18 +113,14 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                 </p>
               </div>
 
-              {/* CTA Add to Cart */}
+              {/* CTA Add to Cart - OCULTADO TEMPORALMENTE (Para reactivar, descomentar el código superior) */}
               <div className="mt-auto pt-4 flex gap-3">
                 <button
-                  id={`product-add-to-cart-${product.id}`}
-                  onClick={() => {
-                    onAddToCart(product);
-                    onClose();
-                  }}
-                  className="flex-1 py-3 px-4 bg-[#764229] hover:bg-[#4a2815] text-white text-xs font-semibold tracking-wider rounded-xl transition-all font-sans uppercase flex items-center justify-center gap-2 shadow-lg"
+                  id={`product-close-detail-${product.id}`}
+                  onClick={onClose}
+                  className="flex-1 py-3 px-4 bg-[#764229] hover:bg-[#4a2815] text-white text-xs font-semibold tracking-wider rounded-xl transition-all font-sans uppercase flex items-center justify-center gap-2 shadow-lg cursor-pointer"
                 >
-                  <ShoppingBag className="w-4 h-4" />
-                  Añadir a la Bolsa — ${product.price.toFixed(2)}
+                  Cerrar Detalles
                 </button>
               </div>
             </div>

@@ -307,7 +307,7 @@ export default function App() {
           <span className="text-[10px] sm:text-xs font-sans font-medium tracking-wide">Rituales</span>
         </button>
 
-        {/* TAB 3: SHOP */}
+        {/* TAB 3: SHOP - OCULTADO TEMPORALMENTE (Para reactivar en el futuro, descomentar el bloque inferior)
         <button
           id="nav-tab-shop"
           onClick={() => {
@@ -326,6 +326,7 @@ export default function App() {
             </span>
           )}
         </button>
+        */}
 
         {/* TAB 4: PROFILE */}
         <button

@@ -404,15 +404,9 @@ export default function RefineScreen({
                     <div className="bg-[#efe6dc]/25 p-3 flex gap-2 border-t border-[#efe6dc]/40">
                       <button
                         onClick={() => onViewProduct(p)}
-                        className="flex-1 py-1.5 px-3 bg-white border border-[#efe6dc] hover:border-stone-300 text-stone-700 text-[10px] font-sans font-bold tracking-wider rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer"
+                        className="flex-1 py-2 px-3 bg-white border border-[#efe6dc] hover:border-[#764229] hover:text-[#764229] text-stone-700 text-[10px] font-sans font-bold tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                       >
-                        <Eye className="w-3 h-3 text-[#764229]" /> Ver Detalles
-                      </button>
-                      <button
-                        onClick={() => onAddToCart(p)}
-                        className="py-1.5 px-3 bg-[#764229] hover:bg-[#4a2815] text-white text-[10px] font-sans font-bold tracking-wider rounded-lg transition-all flex items-center justify-center gap-1 shadow-sm cursor-pointer"
-                      >
-                        <ShoppingBag className="w-3 h-3 text-[#efe6dc]" /> Añadir
+                        <Eye className="w-3.5 h-3.5 text-[#764229]" /> Ver Detalles del Producto
                       </button>
                     </div>
                   </div>
