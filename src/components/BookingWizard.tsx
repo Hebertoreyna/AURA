@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Clock, ChevronRight, ChevronLeft, Sparkles, AlertTriangle, MessageCircle, Loader2 } from 'lucide-react';
 import { Ritual, Specialist } from '../types';
 import { RITUALS, SPECIALISTS } from '../data';
-import { getBookedSlots, saveBooking } from '../lib/bookings';
+import { BookedSlot, getBookedSlots, saveBooking, generateTimeSlots, isSlotAvailable, SESSION_BUFFER } from '../lib/bookings';
 
 // ─── CONFIGURACIÓN DEL SALÓN ────────────────────────────────────────────────
 // Reemplaza con el número de WhatsApp de Anel (formato: 52 + número sin espacios)
@@ -35,8 +35,8 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Firestore — slots ya reservados para la fecha seleccionada
-  const [bookedSlots, setBookedSlots] = useState<Set<string>>(new Set());
+  // Firestore — slots ya reservados para la fecha + especialista seleccionados
+  const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
   // Sync pre-selected ritual
@@ -53,16 +53,16 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
     }
   }, [preSelectedRitualId, isOpen]);
 
-  // Cargar horarios ocupados de Firestore cuando cambia la fecha seleccionada
+  // Cargar horarios ocupados de Firestore cuando cambia la fecha o el especialista
   useEffect(() => {
     if (!selectedDate) return;
     setLoadingSlots(true);
     setSelectedTime(''); // resetear hora si cambia la fecha
-    getBookedSlots(selectedDate)
+    getBookedSlots(selectedDate, selectedSpecialist?.name)
       .then(slots => setBookedSlots(slots))
-      .catch(() => setBookedSlots(new Set()))
+      .catch(() => setBookedSlots([]))
       .finally(() => setLoadingSlots(false));
-  }, [selectedDate]);
+  }, [selectedDate, selectedSpecialist]);
 
   // Generate date options for the next 7 days in May 2026
   const getDatesList = () => {
@@ -90,7 +90,8 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
   };
 
   const datesList = getDatesList();
-  const timesList = ['09:00 AM', '11:00 AM', '01:30 PM', '03:30 PM', '05:30 PM'];
+  // Slots dinámicos: cada 30 min desde 8:00 AM hasta que el último slot + duración ≤ 7:00 PM
+  const timesList = generateTimeSlots(selectedRitual?.duration ?? 60);
 
   const filteredSpecialists = selectedRitual
     ? SPECIALISTS.filter(s => selectedRitual.therapists.includes(s.name))
@@ -162,6 +163,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
     saveBooking({
       date: selectedDate,
       time: selectedTime,
+      duration: selectedRitual.duration, // necesario para calcular solapamientos futuros
       ritualName: selectedRitual.name,
       specialistName: selectedSpecialist.name,
       clientName: name.trim(),
@@ -464,9 +466,9 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                             </span>
                           )}
                         </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                           {timesList.map((t) => {
-                            const isBooked = bookedSlots.has(t);
+                            const isBooked = !isSlotAvailable(t, selectedRitual?.duration ?? 60, bookedSlots);
                             const isSelected = selectedTime === t;
                             return (
                               <button
@@ -489,9 +491,9 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                             );
                           })}
                         </div>
-                        {selectedDate && !loadingSlots && bookedSlots.size > 0 && (
+                        {selectedDate && !loadingSlots && (
                           <p className="text-[10px] text-stone-400 font-serif italic mt-1">
-                            Los horarios tachados ya tienen reserva pendiente.
+                            Horarios en gris sin disponibilidad · mín. {SESSION_BUFFER} min entre sesiones · último turno a las {timesList[timesList.length - 1]}
                           </p>
                         )}
                       </div>
