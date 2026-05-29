@@ -101,7 +101,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
 
               {/* Directions */}
               <div className="mb-4 bg-[#f2eae4] p-3 rounded-xl border border-[#efe6dc]">
-                <h4 className="text-[10px] font-sans font-bold tracking-widest uppercase text-[#764229] mb-1">Instrucciones del Ritual</h4>
+                <h4 className="text-[10px] font-sans font-bold tracking-widest uppercase text-[#764229] mb-1">Modo de Uso</h4>
                 <p className="text-xs text-[#54311f] italic">{product.howToUse}</p>
               </div>
 
