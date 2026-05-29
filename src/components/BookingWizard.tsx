@@ -373,7 +373,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
             {/* Step tabs */}
             {!success && (
               <div id="booking-steps-nav" className="flex bg-[#efe6dc]/40 border-b border-[#efe6dc]/50 text-[10px] font-sans font-semibold uppercase tracking-wider text-stone-500">
-                {(['1. Ritual', '2. Especialista', '3. Horario', '4. Confirmación'] as const).map((label, i) => {
+                {(['1. Servicio', '2. Especialista', '3. Horario', '4. Confirmación'] as const).map((label, i) => {
                   const s = (i + 1) as 1 | 2 | 3 | 4;
                   const clickable = s < step;
                   return (
