@@ -14,7 +14,7 @@ const WHATSAPP_PHONE = '526381285959';
 /**
  * Porcentaje de anticipo (depósito) requerido por tipo de servicio.
  * Criterio: servicios cotidianos sin anticipo (pago al llegar);
- * servicios de maquillaje y tratamientos de mayor inversión requieren 30 %;
+ * servicios de maquillaje y servicios de mayor inversión requieren 30 %;
  * eventos especiales (novia, XV años) requieren 50 % por el compromiso de fecha.
  */
 const DEPOSIT_PCT: Record<string, number> = {
@@ -32,7 +32,7 @@ const DEPOSIT_PCT: Record<string, number> = {
   r12:  0,  // Eliminación de Verrugas — evaluación gratuita
   r13:  0,  // Facial Ejecutivo
   r14: 30,  // Facial Personalizado
-  r15:  0,  // Facial AURA (standalone o add-on)
+  r15:  0,  // Ritual AURA (standalone o add-on)
   r16: 50,  // Velo de Novia
   r17: 30,  // Maquillaje Graduación
   r18: 50,  // Curso de Automaquillaje
@@ -79,8 +79,8 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
   const prevStep = useRef<number>(1);
   const direction = step > prevStep.current ? 1 : -1;
 
-  // Selecciones del usuario
-  const [selectedRitual,     setSelectedRitual]     = useState<Ritual | null>(null);
+  // Selecciones del usuario — múltiples servicios
+  const [selectedRituals,    setSelectedRituals]    = useState<Ritual[]>([]);
   const [selectedSpecialist, setSelectedSpecialist] = useState<Specialist | null>(null);
   const [selectedDate,       setSelectedDate]       = useState<string>('');
   const [selectedTime,       setSelectedTime]       = useState<string>('');
@@ -93,7 +93,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
   // Categoría principal seleccionada en paso 1
   const [selectedCategory, setSelectedCategory] = useState<'cabina' | 'maquillaje' | null>(null);
 
-  // Facial AURA como add-on (solo cuando se selecciona un facial distinto al propio AURA)
+  // Ritual AURA como add-on (solo cuando todos los servicios son de cabina y ninguno es el propio AURA)
   const [withAuraAddon, setWithAuraAddon] = useState(false);
 
   // UI feedback
@@ -106,20 +106,20 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
   const [calMonth, setCalMonth] = useState(() => new Date().getMonth());
 
   // Firestore — slots reservados para la fecha + especialista seleccionados
-  const [bookedSlots,   setBookedSlots]   = useState<BookedSlot[]>([]);
-  const [loadingSlots, setLoadingSlots]   = useState(false);
+  const [bookedSlots,  setBookedSlots]  = useState<BookedSlot[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   // ── Sincronizar ritual pre-seleccionado ─────────────────────────────────
   useEffect(() => {
     if (preSelectedRitualId) {
       const ritual = RITUALS.find(r => r.id === preSelectedRitualId);
       if (ritual) {
-        setSelectedRitual(ritual);
+        setSelectedRituals([ritual]);
         setSelectedCategory(ritual.category);
         setStep(2);
       }
     } else {
-      setSelectedRitual(null);
+      setSelectedRituals([]);
       setSelectedCategory(null);
       setStep(1);
     }
@@ -136,6 +136,35 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
       .catch(() => setBookedSlots([]))
       .finally(() => setLoadingSlots(false));
   }, [selectedDate, selectedSpecialist]);
+
+  // ── Helpers de anticipo (depósito) ───────────────────────────────────────
+  const depositPct = (ritualId: string): number => DEPOSIT_PCT[ritualId] ?? 0;
+  const depositAmt = (ritualId: string, price: number): number =>
+    Math.round(price * depositPct(ritualId) / 100);
+
+  // ── Precio y duración efectivos (suman todos los servicios + add-on) ────
+  const canHaveAuraAddon =
+    selectedRituals.length > 0 &&
+    selectedRituals.every(r => r.category === 'cabina' && !r.customQuote) &&
+    !selectedRituals.some(r => r.id === 'r15');   // AURA no se agrega a sí mismo
+
+  const isEvalAppointment = selectedRituals.some(r => r.customQuote === true);
+  const basePrice         = selectedRituals.reduce((sum, r) => sum + r.price, 0);
+  const baseDuration      = selectedRituals.reduce((sum, r) => sum + r.duration, 0);
+  const effectivePrice    = basePrice    + (canHaveAuraAddon && withAuraAddon ? AURA_ADDON_PRICE : 0);
+  const effectiveDuration = baseDuration + (canHaveAuraAddon && withAuraAddon ? 30 : 0);
+  const effectiveDepPct   = selectedRituals.length > 0
+    ? Math.max(...selectedRituals.map(r => depositPct(r.id)))
+    : 0;
+  const effectiveDepAmt   = Math.round(effectivePrice * effectiveDepPct / 100);
+
+  // ── Slots de tiempo ──────────────────────────────────────────────────────
+  const timesList = generateTimeSlots(effectiveDuration);
+
+  // Solo muestran especialistas que atienden TODOS los servicios seleccionados
+  const filteredSpecialists = selectedRituals.length > 0
+    ? SPECIALISTS.filter(s => selectedRituals.every(r => r.therapists.includes(s.name)))
+    : SPECIALISTS;
 
   // ── Helpers del calendario ───────────────────────────────────────────────
   const isDateDisabled = (y: number, m: number, d: number): boolean => {
@@ -180,22 +209,19 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
     setSelectedDate(fmtRaw(calYear, calMonth, day));
   };
 
-  // ── Precio y duración efectivos (incluye add-on si aplica) ──────────────
-  const canHaveAuraAddon = !!(
-    selectedRitual &&
-    selectedRitual.category === 'cabina' &&  // faciales y corporales
-    selectedRitual.id !== 'r15' &&           // Ritual AURA no se añade a sí mismo
-    !selectedRitual.customQuote
-  );
-  const effectivePrice    = (selectedRitual?.price ?? 0) + (canHaveAuraAddon && withAuraAddon ? AURA_ADDON_PRICE : 0);
-  const effectiveDuration = (selectedRitual?.duration ?? 60) + (canHaveAuraAddon && withAuraAddon ? 30 : 0);
+  // ── Toggle de selección de ritual (checkbox multi-select) ───────────────
+  const isRitualSelected = (r: Ritual) => selectedRituals.some(s => s.id === r.id);
 
-  // ── Slots de tiempo ──────────────────────────────────────────────────────
-  const timesList = generateTimeSlots(effectiveDuration);
-
-  const filteredSpecialists = selectedRitual
-    ? SPECIALISTS.filter(s => selectedRitual.therapists.includes(s.name))
-    : SPECIALISTS;
+  const handleToggleRitual = (r: Ritual) => {
+    setSelectedRituals(prev => {
+      const already = prev.some(s => s.id === r.id);
+      if (already) return prev.filter(s => s.id !== r.id);
+      return [...prev, r];
+    });
+    setSelectedSpecialist(null);
+    // Si se des-selecciona todo servicio cabina, resetear addon
+    setWithAuraAddon(false);
+  };
 
   // ── Navegación por pasos ─────────────────────────────────────────────────
   const handleNextStep = () => {
@@ -204,8 +230,8 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
       setValidationError('Por favor selecciona una categoría para continuar.');
       return;
     }
-    if (step === 1 && !selectedRitual) {
-      setValidationError('Por favor selecciona un servicio de la lista para continuar.');
+    if (step === 1 && selectedRituals.length === 0) {
+      setValidationError('Por favor selecciona al menos un servicio para continuar.');
       return;
     }
     if (step === 2 && !selectedSpecialist) {
@@ -237,46 +263,48 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
       setValidationError('Por favor ingresa un correo electrónico válido.');
       return;
     }
-    if (!selectedRitual || !selectedSpecialist) return;
+    if (selectedRituals.length === 0 || !selectedSpecialist) return;
 
     setValidationError('');
 
-    const appDate = fmtDisplay(selectedDate);
+    const appDate  = fmtDisplay(selectedDate);
+    const hasAddon = canHaveAuraAddon && withAuraAddon;
+    const svcName  = [
+      ...selectedRituals.map(r => r.name),
+      ...(hasAddon ? ['Ritual AURA'] : []),
+    ].join(' + ');
 
-    const pct  = depositPct(selectedRitual.id);
-    const dep  = depositAmt(selectedRitual.id, effectivePrice);
+    const pct  = effectiveDepPct;
+    const dep  = effectiveDepAmt;
     const rest = effectivePrice - dep;
-    const isEval    = selectedRitual.customQuote === true;
-    const hasAddon  = canHaveAuraAddon && withAuraAddon;
-    const svcName   = hasAddon
-      ? `${selectedRitual.name} + Ritual AURA`
-      : selectedRitual.name;
 
     const msg = [
-      isEval
+      isEvalAppointment
         ? `¡Hola Anel! Me gustaría agendar una cita de evaluación 🌿`
         : `¡Hola Anel! Me gustaría reservar una cita 🌿`,
       ``,
-      `*Servicio:* ${svcName}`,
-      isEval ? `*Tipo:* Evaluación gratuita (presupuesto personalizado)` : null,
-      hasAddon ? `*Complemento:* Ritual AURA · activos exclusivos, vitamina C y péptidos tensores` : null,
+      selectedRituals.length > 1
+        ? `*Servicios:* ${selectedRituals.map(r => r.name).join(' + ')}`
+        : `*Servicio:* ${selectedRituals[0]?.name ?? ''}`,
+      isEvalAppointment ? `*Tipo:* Evaluación gratuita (presupuesto personalizado)` : null,
+      hasAddon ? `*Complemento:* Ritual AURA · relajación profunda, rostro, cuello y cuero cabelludo (+30 min)` : null,
       `*Especialista:* ${selectedSpecialist.name}`,
       `*Fecha:* ${appDate}`,
       `*Hora:* ${selectedTime}`,
       `*Duración aprox.:* ${effectiveDuration} min`,
       ``,
-      isEval
+      isEvalAppointment
         ? `*Precio:* Por definir (presupuesto personalizado durante la evaluación)`
         : `*Precio total:* $${effectivePrice} MXN`,
-      !isEval && pct > 0  ? `*Anticipo (${pct}%):* $${dep} MXN`           : null,
-      !isEval && pct > 0  ? `*Resto al llegar:* $${rest} MXN`              : null,
-      !isEval && pct === 0 ? `*Anticipo:* Sin anticipo — pago al llegar`   : null,
+      !isEvalAppointment && pct > 0  ? `*Anticipo (${pct}%):* $${dep} MXN`         : null,
+      !isEvalAppointment && pct > 0  ? `*Resto al llegar:* $${rest} MXN`            : null,
+      !isEvalAppointment && pct === 0 ? `*Anticipo:* Sin anticipo — pago al llegar` : null,
       ``,
       `*Nombre:* ${name.trim()}`,
       `*Correo:* ${email.trim()}`,
       notes.trim() ? `*Notas:* ${notes.trim()}` : null,
       ``,
-      isEval ? `¡Gracias! Quedo pendiente del presupuesto 🙏` : `¡Gracias! 💆‍♀️`,
+      isEvalAppointment ? `¡Gracias! Quedo pendiente del presupuesto 🙏` : `¡Gracias! 💆‍♀️`,
     ].filter(line => line !== null).join('\n');
 
     // Abrir WhatsApp PRIMERO — respuesta directa al click, sin await
@@ -300,7 +328,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
   const handleReset = () => {
     setStep(1);
     setSelectedCategory(null);
-    setSelectedRitual(null);
+    setSelectedRituals([]);
     setSelectedSpecialist(null);
     setSelectedDate('');
     setSelectedTime('');
@@ -311,11 +339,6 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
     setSuccess(false);
     onClose();
   };
-
-  // ── Helpers de anticipo (depósito) ───────────────────────────────────────
-  const depositPct = (ritualId: string): number => DEPOSIT_PCT[ritualId] ?? 0;
-  const depositAmt = (ritualId: string, price: number): number =>
-    Math.round(price * depositPct(ritualId) / 100);
 
   const todayRaw = fmtRaw(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
 
@@ -411,9 +434,13 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
 
                   <div className="w-full bg-[#f2eae4] rounded-xl p-5 text-left border border-[#efe6dc] space-y-3 max-w-sm mb-6">
                     <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
-                      <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Servicio</span>
+                      <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">
+                        {selectedRituals.length > 1 ? 'Servicios' : 'Servicio'}
+                      </span>
                       <div className="text-right">
-                        <span className="font-serif font-semibold text-[#4a2815] block">{selectedRitual?.name}</span>
+                        {selectedRituals.map(r => (
+                          <span key={r.id} className="font-serif font-semibold text-[#4a2815] block">{r.name}</span>
+                        ))}
                         {canHaveAuraAddon && withAuraAddon && (
                           <span className="text-[9px] font-sans font-semibold text-[#764229] flex items-center justify-end gap-1 mt-0.5">
                             <Sparkles className="w-2.5 h-2.5" /> + Ritual AURA
@@ -429,7 +456,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                       <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Fecha y Hora</span>
                       <span className="text-stone-700 text-right max-w-[150px]">{fmtDisplay(selectedDate)} · {selectedTime}</span>
                     </div>
-                    {selectedRitual?.customQuote ? (
+                    {isEvalAppointment ? (
                       <div className="flex justify-between text-xs pt-1">
                         <span className="text-sky-700 uppercase tracking-widest font-sans font-bold">Precio</span>
                         <span className="font-sans font-semibold text-sky-700">Presupuesto personalizado</span>
@@ -440,13 +467,13 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                           <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Precio Total</span>
                           <span className="font-serif font-semibold text-[#4a2815]">${effectivePrice} MXN</span>
                         </div>
-                        {selectedRitual && depositPct(selectedRitual.id) > 0 ? (
+                        {effectiveDepPct > 0 ? (
                           <div className="flex justify-between text-xs pt-1">
                             <span className="text-amber-700 uppercase tracking-widest font-sans font-bold">
-                              Anticipo ({depositPct(selectedRitual.id)}%)
+                              Anticipo ({effectiveDepPct}%)
                             </span>
                             <span className="font-serif font-bold text-amber-700 text-base">
-                              ${depositAmt(selectedRitual.id, effectivePrice)} MXN
+                              ${effectiveDepAmt} MXN
                             </span>
                           </div>
                         ) : (
@@ -473,7 +500,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                 </motion.div>
               ) : (
                 <AnimatePresence mode="wait" initial={false}>
-                  {/* ── PASO 1: RITUAL ── */}
+                  {/* ── PASO 1: SERVICIOS ── */}
                   {step === 1 && (
                     <motion.div
                       key="step1"
@@ -506,9 +533,9 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                 key={cat.key}
                                 onClick={() => {
                                   setSelectedCategory(cat.key);
-                                  // Si el ritual seleccionado no es de esta categoría, limpiar
-                                  if (selectedRitual && selectedRitual.category !== cat.key) {
-                                    setSelectedRitual(null);
+                                  // Si los rituales seleccionados no son de esta categoría, limpiar
+                                  if (selectedRituals.some(r => r.category !== cat.key)) {
+                                    setSelectedRituals([]);
                                     setSelectedSpecialist(null);
                                     setWithAuraAddon(false);
                                   }
@@ -532,7 +559,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                         </div>
                       </div>
 
-                      {/* ── Lista de rituales (aparece al seleccionar categoría) ── */}
+                      {/* ── Lista de servicios (aparece al seleccionar categoría) ── */}
                       <AnimatePresence mode="wait">
                         {selectedCategory && (
                           <motion.div
@@ -542,6 +569,12 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                             exit={{ opacity: 0, y: -6, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
                             className="space-y-4"
                           >
+                            {selectedCategory === 'cabina' && (
+                              <p className="text-[10px] text-stone-400 font-serif italic -mb-1">
+                                Puedes seleccionar más de un servicio para combinarlos en una misma cita.
+                              </p>
+                            )}
+
                             {([
                               { key: 'facial',     label: 'Faciales',    filter: (r: typeof RITUALS[0]) => r.subcategory === 'facial' },
                               { key: 'corporal',   label: 'Corporales',  filter: (r: typeof RITUALS[0]) => r.subcategory === 'corporal' },
@@ -564,94 +597,127 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                     <div className="flex-1 h-px bg-[#efe6dc]" />
                                   </div>
 
-                                  {/* Items del grupo */}
+                                  {/* Items del grupo — checkbox multi-select */}
                                   <div className="grid grid-cols-1 gap-2">
-                                    {group.map((r) => (
-                                      <button
-                                        key={r.id}
-                                        onClick={() => { setSelectedRitual(r); setSelectedSpecialist(null); }}
-                                        className={`p-4 rounded-xl text-left border transition-all flex items-center justify-between group ${
-                                          selectedRitual?.id === r.id
-                                            ? 'bg-[#efe6dc]/50 border-[#764229] shadow-md'
-                                            : 'bg-white border-[#efe6dc] hover:border-stone-300'
-                                        }`}
-                                      >
-                                        <div className="flex gap-3 items-center min-w-0">
-                                          <img src={r.imageUrl} alt={r.name} referrerPolicy="no-referrer"
-                                            className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
-                                          <div className="min-w-0">
-                                            <div className="flex items-center gap-1.5 flex-wrap">
-                                              <span className="text-sm font-serif font-semibold text-[#4a2815] group-hover:text-[#764229] transition-colors">
-                                                {r.name}
-                                              </span>
-                                              {r.badge && (
-                                                <span className={`text-[8px] font-sans px-1.5 py-0.5 rounded-full font-bold ${
-                                                  r.customQuote
-                                                    ? 'bg-sky-100 text-sky-700'
-                                                    : 'bg-[#efe6dc] text-[#764229]'
-                                                }`}>
-                                                  {r.badge}
-                                                </span>
-                                              )}
+                                    {group.map((r) => {
+                                      const selected = isRitualSelected(r);
+                                      return (
+                                        <button
+                                          key={r.id}
+                                          onClick={() => handleToggleRitual(r)}
+                                          className={`p-4 rounded-xl text-left border transition-all flex items-center justify-between group ${
+                                            selected
+                                              ? 'bg-[#efe6dc]/50 border-[#764229] shadow-md'
+                                              : 'bg-white border-[#efe6dc] hover:border-stone-300'
+                                          }`}
+                                        >
+                                          <div className="flex gap-3 items-center min-w-0">
+                                            {/* Checkbox visual */}
+                                            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors duration-150 ${
+                                              selected ? 'bg-[#764229] border-[#764229]' : 'border-stone-300'
+                                            }`}>
+                                              {selected && <Check className="w-3 h-3 text-white" />}
                                             </div>
-                                            <p className="text-[10px] text-stone-500 mt-0.5 line-clamp-1">{r.shortDescription}</p>
+                                            <img src={r.imageUrl} alt={r.name} referrerPolicy="no-referrer"
+                                              className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
+                                            <div className="min-w-0">
+                                              <div className="flex items-center gap-1.5 flex-wrap">
+                                                <span className="text-sm font-serif font-semibold text-[#4a2815] group-hover:text-[#764229] transition-colors">
+                                                  {r.name}
+                                                </span>
+                                                {r.badge && (
+                                                  <span className={`text-[8px] font-sans px-1.5 py-0.5 rounded-full font-bold ${
+                                                    r.customQuote
+                                                      ? 'bg-sky-100 text-sky-700'
+                                                      : 'bg-[#efe6dc] text-[#764229]'
+                                                  }`}>
+                                                    {r.badge}
+                                                  </span>
+                                                )}
+                                              </div>
+                                              <p className="text-[10px] text-stone-500 mt-0.5 line-clamp-1">{r.shortDescription}</p>
+                                            </div>
                                           </div>
-                                        </div>
-                                        <div className="text-right flex-shrink-0 ml-3 space-y-0.5">
-                                          {r.customQuote
-                                            ? <span className="text-xs font-serif font-bold text-sky-700 block">Cotización</span>
-                                            : <span className="text-sm font-serif font-bold text-[#764229] block">${r.price}</span>
-                                          }
-                                          <span className="text-[9px] font-mono text-stone-400 block">{r.duration} min</span>
-                                          {r.customQuote
-                                            ? <span className="text-[9px] font-mono text-sky-600/80 block">Eval. gratis</span>
-                                            : depositPct(r.id) > 0
-                                              ? <span className="text-[9px] font-mono text-amber-700/80 block">Anticipo {depositPct(r.id)}%</span>
-                                              : <span className="text-[9px] font-mono text-emerald-600/70 block">Sin anticipo</span>
-                                          }
-                                        </div>
-                                      </button>
-                                    ))}
+                                          <div className="text-right flex-shrink-0 ml-3 space-y-0.5">
+                                            {r.customQuote
+                                              ? <span className="text-xs font-serif font-bold text-sky-700 block">Cotización</span>
+                                              : <span className="text-sm font-serif font-bold text-[#764229] block">${r.price}</span>
+                                            }
+                                            <span className="text-[9px] font-mono text-stone-400 block">{r.duration} min</span>
+                                            {r.customQuote
+                                              ? <span className="text-[9px] font-mono text-sky-600/80 block">Eval. gratis</span>
+                                              : depositPct(r.id) > 0
+                                                ? <span className="text-[9px] font-mono text-amber-700/80 block">Anticipo {depositPct(r.id)}%</span>
+                                                : <span className="text-[9px] font-mono text-emerald-600/70 block">Sin anticipo</span>
+                                            }
+                                          </div>
+                                        </button>
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               );
                             })}
 
-                            {/* ── Facial AURA add-on toggle ── */}
-                            {canHaveAuraAddon && (
-                              <motion.div
-                                initial={{ opacity: 0, y: 6 }}
-                                animate={{ opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.23, 1, 0.32, 1] } }}
-                                className={`p-4 rounded-xl border-2 cursor-pointer transition-[border-color,background-color] duration-150 ${
-                                  withAuraAddon
-                                    ? 'border-[#764229] bg-[#efe6dc]/40'
-                                    : 'border-[#efe6dc] bg-white hover:border-[#764229]/30'
-                                }`}
-                                onClick={() => setWithAuraAddon(v => !v)}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors duration-150 ${
-                                    withAuraAddon ? 'bg-[#764229] border-[#764229]' : 'border-stone-300'
-                                  }`}>
-                                    {withAuraAddon && <Check className="w-3 h-3 text-white" />}
+                            {/* ── Resumen de selección ── */}
+                            <AnimatePresence>
+                              {selectedRituals.length > 0 && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 6 }}
+                                  animate={{ opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.23, 1, 0.32, 1] } }}
+                                  exit={{ opacity: 0, y: -4, transition: { duration: 0.15 } }}
+                                  className="bg-[#f2eae4] rounded-xl px-4 py-3 flex items-center justify-between border border-[#efe6dc]"
+                                >
+                                  <div className="flex items-center gap-2 text-[11px] text-stone-500 font-sans">
+                                    <span className="font-semibold text-[#4a2815]">
+                                      {selectedRituals.length} {selectedRituals.length === 1 ? 'servicio' : 'servicios'}
+                                    </span>
+                                    <span>·</span>
+                                    <span>{baseDuration} min</span>
                                   </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                      <Sparkles className="w-3.5 h-3.5 text-[#764229]" />
-                                      <span className="text-xs font-serif font-semibold text-[#4a2815]">
-                                        Potenciar con Ritual AURA
-                                      </span>
-                                      <span className="text-[9px] font-mono font-bold text-[#764229] bg-[#efe6dc] px-2 py-0.5 rounded-full">
-                                        +${AURA_ADDON_PRICE}
-                                      </span>
+                                  <span className="font-serif font-bold text-[#764229] text-sm">${basePrice} MXN</span>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+
+                            {/* ── Ritual AURA add-on — siempre al final, tras seleccionar servicios de cabina ── */}
+                            <AnimatePresence>
+                              {canHaveAuraAddon && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 6 }}
+                                  animate={{ opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.23, 1, 0.32, 1] } }}
+                                  exit={{ opacity: 0, y: -4, transition: { duration: 0.15 } }}
+                                  className={`p-4 rounded-xl border-2 cursor-pointer transition-[border-color,background-color] duration-150 ${
+                                    withAuraAddon
+                                      ? 'border-[#764229] bg-[#efe6dc]/40'
+                                      : 'border-[#efe6dc] bg-white hover:border-[#764229]/30'
+                                  }`}
+                                  onClick={() => setWithAuraAddon(v => !v)}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors duration-150 ${
+                                      withAuraAddon ? 'bg-[#764229] border-[#764229]' : 'border-stone-300'
+                                    }`}>
+                                      {withAuraAddon && <Check className="w-3 h-3 text-white" />}
                                     </div>
-                                    <p className="text-[10px] text-stone-500 mt-0.5">
-                                      Activos exclusivos AURA · vitamina C · péptidos tensores · +30 min de sesión
-                                    </p>
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2">
+                                        <Sparkles className="w-3.5 h-3.5 text-[#764229]" />
+                                        <span className="text-xs font-serif font-semibold text-[#4a2815]">
+                                          Agregar Ritual AURA
+                                        </span>
+                                        <span className="text-[9px] font-mono font-bold text-[#764229] bg-[#efe6dc] px-2 py-0.5 rounded-full">
+                                          +${AURA_ADDON_PRICE} · +30 min
+                                        </span>
+                                      </div>
+                                      <p className="text-[10px] text-stone-500 mt-0.5">
+                                        Relajación profunda en rostro, cuello, brazos y cuero cabelludo
+                                      </p>
+                                    </div>
                                   </div>
-                                </div>
-                              </motion.div>
-                            )}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -668,7 +734,11 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                       className="space-y-4"
                     >
                       <p className="text-xs text-stone-500 font-serif italic">
-                        Especialistas disponibles para <strong className="text-[#4a2815]">{selectedRitual?.name}</strong>:
+                        Especialistas disponibles para{' '}
+                        <strong className="text-[#4a2815]">
+                          {selectedRituals.map(r => r.name).join(' + ')}
+                          {canHaveAuraAddon && withAuraAddon ? ' + Ritual AURA' : ''}
+                        </strong>:
                       </p>
                       <div className="grid grid-cols-1 gap-3">
                         {filteredSpecialists.map((s) => (
@@ -711,9 +781,9 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                             <CalendarDays className="w-3.5 h-3.5" />
                             Seleccionar Fecha
                           </label>
-                          {selectedRitual && depositPct(selectedRitual.id) > 0 && (
+                          {effectiveDepPct > 0 && (
                             <span className="text-[9px] font-mono text-amber-700/80 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded-full">
-                              Anticipo {depositPct(selectedRitual.id)}% al confirmar
+                              Anticipo {effectiveDepPct}% al confirmar
                             </span>
                           )}
                         </div>
@@ -828,7 +898,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                               })}
                             </div>
                             <p className="text-[10px] text-stone-400 font-serif italic">
-                              Horarios sin disponibilidad en gris · mín. {SESSION_BUFFER} min entre sesiones · último turno: {timesList[timesList.length - 1]}
+                              Horarios sin disponibilidad en gris · mín. {SESSION_BUFFER} min entre sesiones · duración total: {effectiveDuration} min
                             </p>
                           </>
                         )}
@@ -851,70 +921,94 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                       <form onSubmit={handleConfirmReservation} className="space-y-4">
                         {/* Resumen de reserva con desglose de anticipo */}
                         <div className="bg-white border border-[#efe6dc] rounded-xl overflow-hidden text-xs">
-                          {/* Fila principal del ritual */}
-                          <div className="p-4 flex gap-3 leading-normal">
-                            <img src={selectedRitual?.imageUrl} alt="ritual" referrerPolicy="no-referrer"
-                              className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
-                            <div className="min-w-0">
-                              <span className="font-serif font-bold text-[#4a2815] block truncate">{selectedRitual?.name}</span>
-                              {canHaveAuraAddon && withAuraAddon && (
-                                <span className="text-[9px] font-sans font-semibold text-[#764229] flex items-center gap-1 mt-0.5">
-                                  <Sparkles className="w-2.5 h-2.5" /> Ritual AURA incluido · +30 min
+                          {/* Lista de servicios seleccionados */}
+                          {selectedRituals.map((r, idx) => (
+                            <div
+                              key={r.id}
+                              className={`p-4 flex gap-3 leading-normal ${idx > 0 ? 'border-t border-[#efe6dc]' : ''}`}
+                            >
+                              <img src={r.imageUrl} alt={r.name} referrerPolicy="no-referrer"
+                                className="w-10 h-10 object-cover rounded-lg flex-shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <span className="font-serif font-bold text-[#4a2815] block truncate">{r.name}</span>
+                                <span className="text-[10px] text-stone-400 font-mono">
+                                  {r.duration} min{r.customQuote ? ' · Cotización' : ` · $${r.price} MXN`}
                                 </span>
-                              )}
-                              <span className="text-[10px] text-stone-500 block mt-0.5">Especialista: {selectedSpecialist?.name}</span>
-                              <span className="text-[10px] text-stone-500 block font-mono">
+                              </div>
+                            </div>
+                          ))}
+
+                          {/* Ritual AURA addon row */}
+                          {canHaveAuraAddon && withAuraAddon && (
+                            <div className="p-4 border-t border-[#efe6dc] flex gap-3 leading-normal bg-[#efe6dc]/20">
+                              <div className="w-10 h-10 rounded-lg bg-[#764229]/10 flex items-center justify-center flex-shrink-0">
+                                <Sparkles className="w-4 h-4 text-[#764229]" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <span className="font-serif font-bold text-[#4a2815] block">Ritual AURA</span>
+                                <span className="text-[10px] text-stone-400 font-mono">+30 min · +$400 MXN</span>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Info de cita */}
+                          <div className="px-4 py-3 border-t border-[#efe6dc] bg-[#faf6f0]/60 space-y-1.5">
+                            <div className="flex justify-between">
+                              <span className="text-stone-500">Especialista</span>
+                              <span className="text-stone-700">{selectedSpecialist?.name}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-stone-500">Fecha & Hora</span>
+                              <span className="text-stone-700 text-right max-w-[160px]">
                                 {selectedDate ? fmtDisplay(selectedDate) : '—'} · {selectedTime}
                               </span>
                             </div>
-                            <span className="ml-auto font-serif font-bold text-[#764229] text-sm flex-shrink-0">${effectivePrice} MXN</span>
+                            <div className="flex justify-between">
+                              <span className="text-stone-500">Duración total</span>
+                              <span className="text-stone-700 font-mono">{effectiveDuration} min</span>
+                            </div>
                           </div>
+
                           {/* Desglose anticipo / evaluación gratuita */}
-                          {selectedRitual && (
-                            <div className={`px-4 py-3 border-t border-[#efe6dc] flex items-center justify-between ${
-                              selectedRitual.customQuote
-                                ? 'bg-sky-50/60'
-                                : depositPct(selectedRitual.id) > 0
-                                ? 'bg-amber-50/60'
-                                : 'bg-emerald-50/40'
-                            }`}>
-                              {selectedRitual.customQuote ? (
-                                <>
-                                  <div>
-                                    <span className="font-sans font-semibold text-sky-800 block">
-                                      Esta es una cita de evaluación gratuita
-                                    </span>
-                                    <span className="text-[10px] text-sky-700/70 leading-relaxed">
-                                      Anel evaluará tu caso y te dará un presupuesto personalizado sin compromiso
-                                    </span>
-                                  </div>
-                                  <span className="font-serif font-bold text-sky-700 text-base ml-4 flex-shrink-0">
-                                    Gratis
-                                  </span>
-                                </>
-                              ) : depositPct(selectedRitual.id) > 0 ? (
-                                <>
-                                  <div>
-                                    <span className="font-sans font-semibold text-amber-800 block">
-                                      Anticipo requerido — {depositPct(selectedRitual.id)}%
-                                    </span>
-                                    <span className="text-[10px] text-amber-700/70">Resto se paga al llegar al salón</span>
-                                  </div>
-                                  <div className="text-right">
-                                    <span className="font-serif font-bold text-amber-800 text-base block">
-                                      ${depositAmt(selectedRitual.id, effectivePrice)} MXN
-                                    </span>
-                                    <span className="text-[9px] text-stone-400 font-mono">
-                                      Resto: ${effectivePrice - depositAmt(selectedRitual.id, effectivePrice)} MXN
-                                    </span>
-                                  </div>
-                                </>
-                              ) : (
-                                <>
-                                  <span className="font-sans font-semibold text-emerald-700">Sin anticipo</span>
-                                  <span className="text-[10px] text-emerald-700/70">Pago completo al llegar</span>
-                                </>
-                              )}
+                          {isEvalAppointment ? (
+                            <div className="px-4 py-3 border-t border-[#efe6dc] bg-sky-50/60 flex items-center justify-between">
+                              <div>
+                                <span className="font-sans font-semibold text-sky-800 block">
+                                  Esta es una cita de evaluación gratuita
+                                </span>
+                                <span className="text-[10px] text-sky-700/70 leading-relaxed">
+                                  Anel evaluará tu caso y te dará un presupuesto personalizado sin compromiso
+                                </span>
+                              </div>
+                              <span className="font-serif font-bold text-sky-700 text-base ml-4 flex-shrink-0">
+                                Gratis
+                              </span>
+                            </div>
+                          ) : effectiveDepPct > 0 ? (
+                            <div className="px-4 py-3 border-t border-[#efe6dc] bg-amber-50/60 flex items-center justify-between">
+                              <div>
+                                <span className="font-sans font-semibold text-amber-800 block">
+                                  Total: ${effectivePrice} MXN · Anticipo {effectiveDepPct}%
+                                </span>
+                                <span className="text-[10px] text-amber-700/70">Resto se paga al llegar al salón</span>
+                              </div>
+                              <div className="text-right ml-4 flex-shrink-0">
+                                <span className="font-serif font-bold text-amber-800 text-base block">
+                                  ${effectiveDepAmt} MXN
+                                </span>
+                                <span className="text-[9px] text-stone-400 font-mono">
+                                  Resto: ${effectivePrice - effectiveDepAmt} MXN
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="px-4 py-3 border-t border-[#efe6dc] bg-emerald-50/40 flex items-center justify-between">
+                              <div>
+                                <span className="font-sans font-semibold text-emerald-700 block">
+                                  Total: ${effectivePrice} MXN
+                                </span>
+                                <span className="text-[10px] text-emerald-700/70">Sin anticipo — pago completo al llegar</span>
+                              </div>
                             </div>
                           )}
                         </div>
