@@ -436,15 +436,19 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                     >
                       <p className="text-xs text-stone-500 font-serif italic">Selecciona el servicio que deseas reservar:</p>
 
-                      {/* ── Grupos por categoría ── */}
-                      {(['cabina', 'maquillaje'] as const).map(cat => {
-                        const group = RITUALS.filter(r => r.category === cat);
+                      {/* ── Tres grupos: Faciales / Corporales / Maquillaje ── */}
+                      {([
+                        { key: 'facial',     label: 'Cabina · Faciales',    filter: (r: typeof RITUALS[0]) => r.subcategory === 'facial' },
+                        { key: 'corporal',   label: 'Cabina · Corporales',  filter: (r: typeof RITUALS[0]) => r.subcategory === 'corporal' },
+                        { key: 'maquillaje', label: 'Maquillaje',           filter: (r: typeof RITUALS[0]) => r.category === 'maquillaje' },
+                      ] as const).map(grp => {
+                        const group = RITUALS.filter(grp.filter);
                         return (
-                          <div key={cat} className="space-y-2">
+                          <div key={grp.key} className="space-y-2">
                             {/* Encabezado de grupo */}
                             <div className="flex items-center gap-2 pt-1">
                               <span className="text-[9px] font-sans font-bold tracking-[0.25em] text-[#764229]/70 uppercase">
-                                {cat === 'cabina' ? '— Cabina' : '— Maquillaje'}
+                                — {grp.label}
                               </span>
                               <div className="flex-1 h-px bg-[#efe6dc]" />
                             </div>
