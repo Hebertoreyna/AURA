@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, useRef, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Clock, ChevronRight, ChevronLeft, Check, Sparkles, AlertTriangle } from 'lucide-react';
 import { Ritual, Specialist, Appointment } from '../types';
@@ -13,6 +13,8 @@ interface BookingWizardProps {
 
 export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, onSaveAppointment }: BookingWizardProps) {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const prevStep = useRef<number>(1);
+  const direction = step > prevStep.current ? 1 : -1;
   
   // Selections state
   const [selectedRitual, setSelectedRitual] = useState<Ritual | null>(null);
@@ -87,11 +89,13 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, on
       setValidationError('Por favor elija una fecha y un horario.');
       return;
     }
+    prevStep.current = step;
     setStep((prev) => (prev + 1) as any);
   };
 
   const handlePrevStep = () => {
     setValidationError('');
+    prevStep.current = step;
     setStep((prev) => (prev - 1) as any);
   };
 
@@ -157,9 +161,9 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, on
           {/* Dialog Container */}
           <motion.div
             id="booking-dialog"
-            initial={{ opacity: 0, scale: 0.95, y: 30 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 30 }}
+            initial={{ opacity: 0, scale: 0.96, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.35, ease: [0.23, 1, 0.32, 1] } }}
+            exit={{ opacity: 0, scale: 0.97, y: 10, transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] } }}
             className="relative w-full max-w-xl bg-[#faf6f0] rounded-2xl overflow-hidden shadow-2xl border border-[#efe6dc] flex flex-col"
             style={{ maxHeight: '90vh' }}
           >
@@ -273,14 +277,16 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, on
                   </button>
                 </motion.div>
               ) : (
-                /* STEPPING LOGIC */
-                <div>
+                /* STEPPING LOGIC — direction-aware step transitions */
+                <AnimatePresence mode="wait" initial={false}>
                   {step === 1 && (
                     /* STEP 1: SELECT RITUAL */
                     <motion.div
+                      key="step1"
                       id="step1-ritual-select"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
+                      initial={{ opacity: 0, x: direction * 20 }}
+                      animate={{ opacity: 1, x: 0, transition: { duration: 0.22, ease: [0.23, 1, 0.32, 1] } }}
+                      exit={{ opacity: 0, x: direction * -20, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
                       className="space-y-4"
                     >
                       <p className="text-xs text-stone-500 font-serif italic">Selecciona uno de nuestros icónicos rituales de bienestar dérmico:</p>
@@ -333,9 +339,11 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, on
                   {step === 2 && (
                     /* STEP 2: SELECT THERAPIST */
                     <motion.div
+                      key="step2"
                       id="step2-therapist-select"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
+                      initial={{ opacity: 0, x: direction * 20 }}
+                      animate={{ opacity: 1, x: 0, transition: { duration: 0.22, ease: [0.23, 1, 0.32, 1] } }}
+                      exit={{ opacity: 0, x: direction * -20, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
                       className="space-y-4"
                     >
                       <p className="text-xs text-stone-500 font-serif italic">
@@ -373,9 +381,11 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, on
                   {step === 3 && (
                     /* STEP 3: DATE & TIME slots */
                     <motion.div
+                      key="step3"
                       id="step3-schedule-select"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
+                      initial={{ opacity: 0, x: direction * 20 }}
+                      animate={{ opacity: 1, x: 0, transition: { duration: 0.22, ease: [0.23, 1, 0.32, 1] } }}
+                      exit={{ opacity: 0, x: direction * -20, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
                       className="space-y-6"
                     >
                       {/* Date Carousel Grid */}
@@ -430,9 +440,11 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, on
                   {step === 4 && (
                     /* STEP 4: CONTACT & SECURE REGISTER */
                     <motion.div
+                      key="step4"
                       id="step4-contact"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
+                      initial={{ opacity: 0, x: direction * 20 }}
+                      animate={{ opacity: 1, x: 0, transition: { duration: 0.22, ease: [0.23, 1, 0.32, 1] } }}
+                      exit={{ opacity: 0, x: direction * -20, transition: { duration: 0.15, ease: [0.32, 0.72, 0, 1] } }}
                       className="space-y-4"
                     >
                       <p className="text-xs text-stone-500 font-serif italic">Proporciona los datos del huésped para completar el registro de la sesión:</p>
@@ -498,7 +510,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, on
                       </form>
                     </motion.div>
                   )}
-                </div>
+                </AnimatePresence>
               )}
             </div>
 
@@ -509,7 +521,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, on
                   <button
                     id="booking-prev-step-btn"
                     onClick={handlePrevStep}
-                    className="py-3 px-4 border border-[#efe6dc] hover:bg-[#efe6dc]/20 text-stone-700 text-xs font-semibold tracking-wider rounded-xl transition-all font-sans uppercase flex items-center gap-1.5"
+                    className="py-3 px-4 border border-[#efe6dc] hover:bg-[#efe6dc]/20 active:scale-[0.97] text-stone-700 text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center gap-1.5"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     Atrás
@@ -520,7 +532,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, on
                   <button
                     id="booking-next-step-btn"
                     onClick={handleNextStep}
-                    className="ml-auto py-3 px-6 bg-[#764229] hover:bg-[#4a2815] text-white text-xs font-semibold tracking-wider rounded-xl transition-all font-sans uppercase flex items-center gap-1.5"
+                    className="ml-auto py-3 px-6 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center gap-1.5"
                   >
                     Continuar
                     <ChevronRight className="w-4 h-4" />
@@ -533,7 +545,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose, on
                       if (trigger) trigger.click();
                       else handleConfirmReservation(e);
                     }}
-                    className="ml-auto py-3 px-6 bg-[#764229] hover:bg-[#4a2815] text-white text-xs font-semibold tracking-wider rounded-xl transition-all font-sans uppercase flex items-center justify-center gap-2"
+                    className="ml-auto py-3 px-6 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center justify-center gap-2"
                   >
                     <Sparkles className="w-4 h-4 text-[#efe6dc]" />
                     Confirmar Cita
