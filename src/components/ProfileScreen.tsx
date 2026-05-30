@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Calendar, Trash2, ShieldCheck, DollarSign, Sparkles, 
   CheckCircle2, XCircle, Search, MessageSquare, Check, Eye,
-  Lock, ArrowRight, LogOut, Info, AlertTriangle
+  Lock, ArrowRight, LogOut, Info, AlertTriangle, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { Appointment, SkinProfile } from '../types';
 
@@ -41,9 +41,13 @@ export default function ProfileScreen({
   const [passcodeInput, setPasscodeInput] = useState<string>('');
   const [loginError, setLoginError] = useState<string | null>(null);
   
-  // Admin search and filter states
+  // Admin search and list filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'scheduled' | 'completed' | 'cancelled'>('all');
+  
+  // Interactive Monthly Calendar states
+  const [currentCalendarMonth, setCurrentCalendarMonth] = useState<Date>(() => new Date());
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null); // "YYYY-MM-DD" style
   
   // Note inline editing dictionary
   const [localNotes, setLocalNotes] = useState<Record<string, string>>({});
@@ -100,7 +104,7 @@ export default function ProfileScreen({
     .filter(a => a.status !== 'cancelled')
     .reduce((sum, a) => sum + a.price, 0);
 
-  // Filter based on search criteria and state
+  // Filter based on search criteria, state, and calendar clicked date
   const filteredBookings = appointments.filter(apt => {
     const term = searchTerm.toLowerCase();
     const matchesSearch = 
@@ -109,8 +113,10 @@ export default function ProfileScreen({
       (apt.ritualName || '').toLowerCase().includes(term) ||
       (apt.specialistName || '').toLowerCase().includes(term);
     
-    if (statusFilter === 'all') return matchesSearch;
-    return matchesSearch && apt.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' ? true : apt.status === statusFilter;
+    const matchesCalendarDate = !selectedCalendarDate ? true : apt.rawDate === selectedCalendarDate;
+    
+    return matchesSearch && matchesStatus && matchesCalendarDate;
   });
 
   // Handle local note changes before saving
@@ -137,8 +143,96 @@ export default function ProfileScreen({
     setDeletingId(null);
   };
 
+  // --- CALENDAR GENERATION LOGIC ---
+  const handlePrevMonth = () => {
+    setCurrentCalendarMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentCalendarMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+
+  const generateMonthDays = () => {
+    const year = currentCalendarMonth.getFullYear();
+    const month = currentCalendarMonth.getMonth(); // 0-indexed
+
+    // Day of week of the first day (0=Sunday, 1=Monday... 6=Saturday)
+    const firstDay = new Date(year, month, 1);
+    
+    // Map to Monday-first: Monday is 0, Tuesday is 1... Sunday is 6
+    let startDayOfWeek = firstDay.getDay() - 1;
+    if (startDayOfWeek === -1) startDayOfWeek = 6; 
+
+    const numDaysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysList: { dateString: string; dayNum: number; isCurrentMonth: boolean; key: string }[] = [];
+
+    // 1. Fill previous month padding days
+    const prevMonthYear = month === 0 ? year - 1 : year;
+    const prevMonthIdx = month === 0 ? 11 : month - 1;
+    const numDaysInPrevMonth = new Date(prevMonthYear, prevMonthIdx + 1, 0).getDate();
+
+    for (let i = startDayOfWeek - 1; i >= 0; i--) {
+      const dayVal = numDaysInPrevMonth - i;
+      const dStr = `${prevMonthYear}-${String(prevMonthIdx + 1).padStart(2, '0')}-${String(dayVal).padStart(2, '0')}`;
+      daysList.push({
+        dateString: dStr,
+        dayNum: dayVal,
+        isCurrentMonth: false,
+        key: `prev-${dayVal}`
+      });
+    }
+
+    // 2. Fill current month days
+    for (let i = 1; i <= numDaysInMonth; i++) {
+      const dStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+      daysList.push({
+        dateString: dStr,
+        dayNum: i,
+        isCurrentMonth: true,
+        key: `curr-${i}`
+      });
+    }
+
+    // 3. Fill next month padding days to complete 6-week layout grids (42 elements)
+    const totalSlots = 42;
+    const remainingSlots = totalSlots - daysList.length;
+    const nextMonthYear = month === 11 ? year + 1 : year;
+    const nextMonthIdx = month === 11 ? 0 : month + 1;
+
+    for (let i = 1; i <= remainingSlots; i++) {
+      const dStr = `${nextMonthYear}-${String(nextMonthIdx + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+      daysList.push({
+        dateString: dStr,
+        dayNum: i,
+        isCurrentMonth: false,
+        key: `next-${i}`
+      });
+    }
+
+    return daysList;
+  };
+
+  const calendarDays = generateMonthDays();
+  const monthNamesSpanish = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+  const displayedMonthLabel = `${monthNamesSpanish[currentCalendarMonth.getMonth()]} ${currentCalendarMonth.getFullYear()}`;
+
+  // Formatter for calendar date selected indicator
+  const formatCalendarDateSpanish = (dateStr: string) => {
+    try {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return new Date(y, m - 1, d).toLocaleDateString('es-MX', {
+        day: 'numeric', month: 'long', year: 'numeric'
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
   return (
-    <div id="admin-control-center" className="py-8 px-4 sm:px-6 max-w-5xl mx-auto min-h-[85vh] pb-24 font-sans">
+    <div id="admin-control-center" className="py-8 px-4 sm:px-6 max-w-6xl mx-auto min-h-[85vh] pb-24 font-sans">
       <AnimatePresence mode="wait">
         
         {/* ========================================== */}
@@ -189,7 +283,7 @@ export default function ProfileScreen({
                   readOnly
                   value={passcodeInput}
                   placeholder="PIN administrativo"
-                  className="hidden" // hidden, interaction is managed via visual keypad for premium mobile touch feel
+                  className="hidden" 
                 />
               </div>
 
@@ -246,7 +340,7 @@ export default function ProfileScreen({
               {/* Secure note for staff */}
               <div className="pt-4 border-t border-dashed border-[#efe6dc] text-center font-sans">
                 <p className="text-[10px] text-stone-400">
-                  <span className="font-semibold text-stone-500">Aviso:</span> Conexión cifrada de uso exclusivo de AURA. Se registrará la dirección IP y el navegador al iniciar sesión.
+                  <span className="font-semibold text-stone-500">Aviso:</span> Conexión cifrada de uso exclusivo de AURA. Se registrará la dirección IP y el navegador al iniciar sesión. Con este PIN persistirá la sesión en este dispositivo.
                 </p>
               </div>
             </form>
@@ -254,7 +348,7 @@ export default function ProfileScreen({
         ) : (
           
           /* ========================================== */
-          /* VIEW B: FULL ADMINISTRATIVE WORKSPACE      */
+          /* VIEW B: INTEGRATED ADMIN WORKSPACE         */
           /* ========================================== */
           <motion.div
             key="admin-management-module"
@@ -285,7 +379,7 @@ export default function ProfileScreen({
               </button>
             </div>
 
-            {/* ADMIN KPI METRICS DASHBOARD */}
+            {/* ADMON METRIC CARDS */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
               <div className="bg-white p-4 rounded-xl border border-[#efe6dc] shadow-2xs">
                 <span className="text-[9px] font-sans font-bold tracking-widest text-stone-400 uppercase flex items-center gap-1">
@@ -320,216 +414,394 @@ export default function ProfileScreen({
               </div>
             </div>
 
-            {/* FILTER SEARCH AND CALENDAR RECORDS BOARD */}
-            <div className="bg-white rounded-xl border border-[#efe6dc] p-5 space-y-4 shadow-2xs">
-              <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
-                <h4 className="text-xs font-sans font-bold tracking-wider text-[#4a2815] uppercase self-start flex items-center gap-1.5">
-                  <Eye className="w-4 h-4 text-[#764229]" />
-                  Calendario Maestro AURA Skincare & Wellness
-                </h4>
-                
-                {/* Search query frame */}
-                <div className="relative w-full md:w-72">
-                  <Search className="absolute left-3 top-2.5 w-4 h-4 text-stone-400" />
-                  <input
-                    type="text"
-                    placeholder="Búsqueda rápida (nombre, ritual)..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full text-xs pl-9 pr-4 py-2 bg-stone-50 border border-[#efe6dc] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#764229]"
-                  />
-                </div>
+            {/* SYNC NOTI ALERT (REVERSION DIRECTIVE INSTRUCTIONS) */}
+            <div className="bg-[#fcfaf7] border-l-4 border-[#764229] rounded-xl p-4 sm:p-5 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between shadow-2xs">
+              <div className="space-y-1">
+                <h5 className="font-serif font-bold text-stone-800 text-sm flex items-center gap-1.5">
+                  <Info className="w-4 h-4 text-[#764229]" /> ¿Los cambios se revierten al actualizar?
+                </h5>
+                <p className="text-xs text-stone-600 max-w-3xl leading-relaxed">
+                  Firestore requiere permisos explícitos para modificar o borrar documentos en producción. Ya hemos generado el archivo de configuración ideal en <strong>/firestore.rules</strong> en tu servidor. Solo debes copiar su contenido y pegarlo en la pestaña <strong>Rules</strong> de tu Firebase Console para permitir cambios permanentes en tus citas.
+                </p>
               </div>
-
-              {/* CRM status filter tabs bar */}
-              <div className="flex flex-wrap gap-1.5 border-b border-[#efe6dc]/50 pb-2">
-                {[
-                  { value: 'all', label: 'Todos los registros' },
-                  { value: 'scheduled', label: 'Vigentes / Confirmadas' },
-                  { value: 'completed', label: 'Completados' },
-                  { value: 'cancelled', label: 'Canceladas ✖' }
-                ].map((tab) => (
-                  <button
-                    key={tab.value}
-                    onClick={() => setStatusFilter(tab.value as any)}
-                    className={`px-3 py-1.5 text-[11px] font-sans font-bold tracking-wider rounded-lg uppercase cursor-pointer transition-colors ${
-                      statusFilter === tab.value
-                        ? 'bg-[#764229]/10 text-[#764229] border border-[#764229]/20 font-extrabold'
-                        : 'text-stone-500 hover:bg-stone-50 border border-transparent'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
+              <div className="bg-[#764229]/5 text-[#764229] border border-[#764229]/20 px-3 py-1.5 rounded-lg text-[10px] font-mono whitespace-nowrap self-stretch md:self-auto text-center font-bold">
+                Copia firestore.rules
               </div>
+            </div>
 
-              {/* RECORDS LIST BOARD */}
-              {filteredBookings.length === 0 ? (
-                <div className="text-center py-16 text-stone-500 font-serif italic space-y-2">
-                  <Calendar className="w-10 h-10 text-stone-300 mx-auto stroke-1 mb-2" />
-                  <p className="text-sm">No se encontraron citas que coincidan con la búsqueda actual.</p>
-                  <p className="text-[11px] font-sans uppercase tracking-[0.1em] text-stone-400">Pruebe limpiando el campo de búsqueda</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-[#efe6dc]/50">
-                  {filteredBookings.map((apt) => {
-                    const currentNoteVal = localNotes[apt.id] !== undefined ? localNotes[apt.id] : (apt.notes || '');
-                    const hasUnsavedNotes = localNotes[apt.id] !== undefined && localNotes[apt.id] !== (apt.notes || '');
-                    const isConfirmingErase = deletingId === apt.id;
+            {/* BENTO LAYOUT: INTERACTIVE CALENDAR + AGENDA AGENDA LIST */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+              {/* COL 1: INTERACTIVE CALENDAR SECTION */}
+              <div className="space-y-4">
+                <div className="bg-white rounded-xl border border-[#efe6dc] p-4 shadow-2xs space-y-4">
+                  
+                  {/* Calendar Widget Title / Month Navigation */}
+                  <div className="flex items-center justify-between pb-2 border-b border-[#efe6dc]/50">
+                    <span className="text-xs font-serif font-bold text-[#4a2815] flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4 text-[#764229]" />
+                      Agenda Mensual
+                    </span>
                     
-                    return (
-                      <div key={apt.id} className="py-5 first:pt-0 last:pb-0 flex flex-col md:flex-row gap-4 justify-between items-start transition-all">
-                        {/* LEFT DETAIL META */}
-                        <div className="flex gap-4 items-start flex-1 min-w-0">
-                          <div className="w-12 h-12 rounded-lg bg-stone-100 overflow-hidden flex-shrink-0 border border-stone-200">
-                            <img src={apt.ritualImageUrl} alt={apt.ritualName} className="w-full h-full object-cover" />
-                          </div>
+                    <div className="flex items-center gap-1 bg-stone-50 border border-stone-200/60 rounded-lg p-0.5">
+                      <button 
+                        onClick={handlePrevMonth}
+                        className="p-1 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-md transition-colors cursor-pointer"
+                        title="Mes anterior"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={handleNextMonth}
+                        className="p-1 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-md transition-colors cursor-pointer"
+                        title="Mes siguiente"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Spanish Month Year Title */}
+                  <div className="text-center">
+                    <h4 className="font-serif font-semibold text-stone-800 text-sm">{displayedMonthLabel}</h4>
+                  </div>
+
+                  {/* Grid of Day-of-week Headers */}
+                  <div className="grid grid-cols-7 gap-1 text-center font-mono text-[9px] font-bold text-stone-400 uppercase tracking-wider">
+                    <span>L</span>
+                    <span>M</span>
+                    <span>M</span>
+                    <span>J</span>
+                    <span>V</span>
+                    <span>S</span>
+                    <span>D</span>
+                  </div>
+
+                  {/* Calendar Grid of Month Days */}
+                  <div className="grid grid-cols-7 gap-1.5">
+                    {calendarDays.map((day) => {
+                      const dayBookings = appointments.filter(apt => apt.rawDate === day.dateString);
+                      const isSelected = selectedCalendarDate === day.dateString;
+                      
+                      // Count appointments of each status on this day
+                      const counts = {
+                        scheduled: dayBookings.filter(b => b.status === 'scheduled').length,
+                        completed: dayBookings.filter(b => b.status === 'completed').length,
+                        cancelled: dayBookings.filter(b => b.status === 'cancelled').length
+                      };
+
+                      return (
+                        <button
+                          key={day.key}
+                          onClick={() => {
+                            // Toggle filter
+                            if (selectedCalendarDate === day.dateString) {
+                              setSelectedCalendarDate(null);
+                            } else {
+                              setSelectedCalendarDate(day.dateString);
+                            }
+                          }}
+                          className={`min-h-[44px] p-1 flex flex-col justify-between items-center rounded-lg cursor-pointer transition-all border ${
+                            day.isCurrentMonth 
+                              ? isSelected 
+                                ? 'bg-[#764229] border-[#764229] text-white font-bold scale-102 shadow-xs' 
+                                : 'bg-stone-50 hover:bg-[#764229]/5 border-stone-200/50 text-stone-800'
+                              : 'bg-stone-100/40 border-transparent text-stone-300'
+                          }`}
+                        >
+                          {/* Day number */}
+                          <span className="text-[10px] font-serif mt-0.5">{day.dayNum}</span>
                           
-                          <div className="space-y-1 flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h5 className="font-serif font-bold text-stone-900 text-sm sm:text-base pr-2">{apt.ritualName}</h5>
-                              
-                              {/* Status pill styles in CRM */}
-                              {apt.status === 'scheduled' && (
-                                <span className="text-[9px] uppercase font-bold tracking-wider bg-[#5e6c58]/10 text-[#5e6c58] border border-[#5e6c58]/20 px-2 py-0.5 rounded-full">
-                                  Vigente
-                                </span>
-                              )}
-                              {apt.status === 'completed' && (
-                                <span className="text-[9px] uppercase font-bold tracking-wider bg-indigo-550/10 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full">
-                                  Atendido ✨
-                                </span>
-                              )}
-                              {apt.status === 'cancelled' && (
-                                <span className="text-[9px] uppercase font-bold tracking-wider bg-rose-100 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full">
-                                  Cancelado
-                                </span>
-                              )}
-                            </div>
-                            
-                            {/* Personal Details */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-stone-500 font-sans mt-1.5">
-                              <p className="flex items-center gap-1 text-stone-700">
-                                <span className="font-mono text-[9px] uppercase text-stone-400">Huésped:</span>
-                                <span className="font-semibold">{apt.clientName || 'Invitado Aura'}</span>
-                              </p>
-                              <p className="flex items-center gap-1 font-mono text-[11px] truncate">
-                                <span className="text-stone-400">Email:</span>
-                                <span className="text-stone-600">{apt.clientEmail || 'sin dirección'}</span>
-                              </p>
-                              <p className="flex items-center gap-1 text-[#764229] font-medium mt-0.5">
-                                <span className="font-mono text-[9px] uppercase text-stone-400">Horario Cita:</span>
-                                <span>{apt.dateTime}</span>
-                              </p>
-                              <p className="flex items-center gap-1 text-stone-600">
-                                <span className="font-mono text-[9px] uppercase text-stone-400">Especialista:</span>
-                                <span>{apt.specialistName || 'Especialista Aura'}</span>
-                              </p>
-                              <p className="flex items-center gap-1 text-stone-800 font-mono text-[11px]">
-                                <span className="font-mono text-[9px] uppercase text-stone-400">Precio Servicio:</span>
-                                <span className="font-bold">${apt.price || 0} MXN</span>
-                              </p>
-                            </div>
-
-                            {/* SECURE CLINICAL NOTE EDITOR */}
-                            <div className="mt-3.5 bg-stone-50 rounded-xl p-3 border border-[#efe6dc]/50 max-w-xl">
-                              <span className="text-[9px] font-bold tracking-wider text-[#764229] uppercase flex items-center gap-1 mb-1.5">
-                                <MessageSquare className="w-3.5 h-3.5" /> Notas Clínicas de la Cita (Para Terapeutas):
-                              </span>
-                              <textarea
-                                value={currentNoteVal}
-                                onChange={(e) => handleNoteChangeLocal(apt.id, e.target.value)}
-                                placeholder="Escribe aquí observaciones útiles (Ej. alergias, dolores de hombros, nivel de fuerza deseada, tipo de piel)..."
-                                className="w-full text-xs bg-white border border-stone-200 rounded-lg p-2 text-stone-700 focus:outline-none focus:ring-1 focus:ring-[#764229] placeholder:italic"
-                                rows={2}
-                              />
-                              {hasUnsavedNotes && (
-                                <button
-                                  onClick={() => handleSaveNotes(apt.id)}
-                                  className="mt-2 px-3 py-1 bg-[#5e6c58] text-white font-sans text-[10px] font-bold uppercase rounded-md flex items-center gap-1 shadow-2xs hover:bg-[#4b5746] cursor-pointer"
-                                >
-                                  <Check className="w-3.5 h-3.5" /> Guardar Notas de Terapeuta
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* RIGHT ACTIONS BLOCK */}
-                        <div className="flex md:flex-col gap-1.5 justify-end w-full md:w-44 pt-2 md:pt-0 self-stretch md:self-auto border-t md:border-t-0 border-stone-100 mt-2 md:mt-0">
-                          
-                          {/* 1. Complete booking action */}
-                          {onUpdateAppointmentStatus && apt.status !== 'completed' && (
-                            <button
-                              onClick={() => onUpdateAppointmentStatus(apt.id, 'completed')}
-                              className="flex-1 md:flex-none px-3 py-2 bg-stone-50 hover:bg-stone-100 text-stone-700 hover:text-stone-900 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-stone-200 flex items-center justify-center gap-1 cursor-pointer"
-                              title="Marcar como Atendido / Completado"
-                            >
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Atendido
-                            </button>
-                          )}
-
-                          {/* 2. Reactive booking action */}
-                          {onUpdateAppointmentStatus && apt.status !== 'scheduled' && (
-                            <button
-                              onClick={() => onUpdateAppointmentStatus(apt.id, 'scheduled')}
-                              className="flex-1 md:flex-none px-3 py-2 bg-stone-50 hover:bg-stone-100 text-[#5e6c58] text-[10px] font-bold uppercase tracking-wider rounded-lg border border-[#5e6c58]/30 flex items-center justify-center gap-1 cursor-pointer"
-                              title="Colocar como reserva activa de nuevo"
-                            >
-                              <Calendar className="w-3.5 h-3.5" /> Reactivar
-                            </button>
-                          )}
-
-                          {/* 3. Cancel booking action */}
-                          {onUpdateAppointmentStatus && apt.status !== 'cancelled' && (
-                            <button
-                              onClick={() => onUpdateAppointmentStatus(apt.id, 'cancelled')}
-                              className="flex-1 md:flex-none px-3 py-2 bg-white hover:bg-stone-50 text-stone-500 hover:text-stone-700 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-stone-200 flex items-center justify-center gap-1 cursor-pointer"
-                              title="Cancelar Reserva"
-                            >
-                              <XCircle className="w-3.5 h-3.5 text-rose-500" /> Cancelar
-                            </button>
-                          )}
-
-                          {/* 4. PERMANENT SYSTEM ERASE (BORRAR) */}
-                          <div className="flex-1 md:flex-none mt-0 md:mt-2 border-l md:border-l-0 md:border-t border-stone-100 pt-0 md:pt-2 pl-2 md:p-0">
-                            {isConfirmingErase ? (
-                              <div className="bg-amber-50 p-1.5 rounded-lg border border-amber-200 flex flex-col gap-1 items-center">
-                                <span className="text-[8px] font-extrabold text-amber-800 text-center uppercase flex items-center gap-1">
-                                  <AlertTriangle className="w-2.5 h-2.5 text-amber-500" /> ¿Eliminar de BD?
-                                </span>
-                                <div className="flex gap-1 w-full justify-center">
-                                  <button
-                                    onClick={() => handleExecuteDelete(apt.id)}
-                                    className="bg-rose-600 hover:bg-rose-700 text-white font-sans text-[8px] font-bold uppercase py-1 px-2 rounded cursor-pointer"
-                                  >
-                                    Sí, borrar
-                                  </button>
-                                  <button
-                                    onClick={() => setDeletingId(null)}
-                                    className="bg-stone-200 text-stone-700 font-sans text-[8px] font-bold uppercase py-1 px-2 rounded cursor-pointer"
-                                  >
-                                    No
-                                  </button>
-                                </div>
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => setDeletingId(apt.id)}
-                                className="w-full px-3 py-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-dashed border-rose-200 hover:border-rose-300 flex items-center justify-center gap-1 transition-colors cursor-pointer"
-                                title="Borrar definitivamente de la Base de Datos"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" /> Borrar de DB
-                              </button>
+                          {/* Colored Dots Indicators under the day */}
+                          <div className="flex gap-0.5 justify-center mt-1 w-full flex-wrap h-1.5 mb-0.5">
+                            {counts.scheduled > 0 && (
+                              <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[#e5d4cb]' : 'bg-[#5e6c58]'} inline-block`} title={`${counts.scheduled} cita(s) vigentes`} />
+                            )}
+                            {counts.completed > 0 && (
+                              <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-indigo-200' : 'bg-indigo-500'} inline-block`} title={`${counts.completed} completadas`} />
+                            )}
+                            {counts.cancelled > 0 && (
+                              <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-rose-200' : 'bg-rose-500'} inline-block`} title={`${counts.cancelled} canceladas`} />
                             )}
                           </div>
+                        </button>
+                      );
+                    })}
+                  </div>
 
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {/* Calendar explanatory legend */}
+                  <div className="pt-2 border-t border-[#efe6dc]/50 flex items-center justify-between text-[9px] text-[#764229]/80 font-mono">
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#5e6c58]" /> Vigente
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#4338ca]" /> Atendida
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-550" /> Cancelada
+                    </span>
+                  </div>
+
                 </div>
-              )}
+
+                {/* Info block for selected date */}
+                {selectedCalendarDate && (
+                  <div className="bg-[#f0ece6] border border-[#efe6dc] rounded-xl p-3.5 space-y-2">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-0.5">
+                        <span className="text-[9px] uppercase font-mono tracking-wider text-stone-400 font-bold block">Filtro de fecha activo</span>
+                        <p className="text-[11px] font-serif font-semibold text-stone-800">
+                          {formatCalendarDateSpanish(selectedCalendarDate)}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setSelectedCalendarDate(null)}
+                        className="text-[10px] font-mono text-[#764229] hover:underline cursor-pointer border border-[#764229]/20 bg-[#f4ece1] px-2 py-0.5 rounded-md hover:bg-[#efe6dc] transition-colors"
+                      >
+                        Limpiar
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-stone-500 font-sans leading-tight">
+                      La lista del consultorio a la derecha ahora muestra únicamente las reservaciones agendadas para el día seleccionado.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* COL 2 & 3: CENTRAL AGENDA AGENDA LIST */}
+              <div className="lg:col-span-2 space-y-4">
+                <div className="bg-white rounded-xl border border-[#efe6dc] p-5 space-y-4 shadow-2xs">
+                  
+                  {/* List Header Search query bar */}
+                  <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
+                    <div className="space-y-0.5 self-start">
+                      <h4 className="text-xs font-sans font-bold tracking-wider text-[#4a2815] uppercase flex items-center gap-1.5">
+                        <Eye className="w-4 h-4 text-[#764229]" />
+                        Listado de Citas ({filteredBookings.length})
+                      </h4>
+                      {selectedCalendarDate ? (
+                        <p className="text-[10px] font-mono text-stone-500">
+                          Filtrando día: <span className="font-semibold">{selectedCalendarDate}</span>
+                        </p>
+                      ) : (
+                        <p className="text-[10px] font-mono text-stone-500">Mostrando todas las fechas de la agenda</p>
+                      )}
+                    </div>
+                    
+                    {/* Search query frame */}
+                    <div className="relative w-full md:w-64">
+                      <Search className="absolute left-3 top-2.5 w-4 h-4 text-stone-400" />
+                      <input
+                        type="text"
+                        placeholder="Busca por huésped, ritual, especialista..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full text-xs pl-9 pr-4 py-2 bg-stone-50 border border-[#efe6dc] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#764229]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* CRM status filter tabs bar */}
+                  <div className="flex flex-wrap gap-1.5 border-b border-[#efe6dc]/50 pb-2">
+                    {[
+                      { value: 'all', label: 'Todas' },
+                      { value: 'scheduled', label: 'Vigentes' },
+                      { value: 'completed', label: 'Completadas' },
+                      { value: 'cancelled', label: 'Canceladas ✖' }
+                    ].map((tab) => (
+                      <button
+                        key={tab.value}
+                        onClick={() => setStatusFilter(tab.value as any)}
+                        className={`px-3 py-1 text-[10px] font-sans font-bold tracking-wider rounded-lg uppercase cursor-pointer transition-colors ${
+                          statusFilter === tab.value
+                            ? 'bg-[#764229]/10 text-[#764229] border border-[#764229]/20 font-extrabold'
+                            : 'text-stone-500 hover:bg-stone-50 border border-transparent'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* RECORDS LIST BOARD */}
+                  {filteredBookings.length === 0 ? (
+                    <div className="text-center py-16 text-stone-500 font-serif italic space-y-2">
+                      <Calendar className="w-10 h-10 text-stone-300 mx-auto stroke-1 mb-2" />
+                      <p className="text-sm">No se encontraron citas que coincidan con los filtros activos.</p>
+                      <button
+                        onClick={() => {
+                          setSearchTerm('');
+                          setStatusFilter('all');
+                          setSelectedCalendarDate(null);
+                        }}
+                        className="text-[11px] font-sans uppercase tracking-[0.1em] text-[#764229] underline hover:text-[#5c331f] cursor-pointer"
+                      >
+                        Limpiar todos los filtros
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-[#efe6dc]/50">
+                      {filteredBookings.map((apt) => {
+                        const currentNoteVal = localNotes[apt.id] !== undefined ? localNotes[apt.id] : (apt.notes || '');
+                        const hasUnsavedNotes = localNotes[apt.id] !== undefined && localNotes[apt.id] !== (apt.notes || '');
+                        const isConfirmingErase = deletingId === apt.id;
+                        
+                        return (
+                          <div key={apt.id} className="py-5 first:pt-0 last:pb-0 flex flex-col md:flex-row gap-4 justify-between items-start transition-all">
+                            {/* LEFT DETAIL META */}
+                            <div className="flex gap-4 items-start flex-1 min-w-0">
+                              <div className="w-12 h-12 rounded-lg bg-[#efe6dc]/40 overflow-hidden flex-shrink-0 border border-stone-200">
+                                <img src={apt.ritualImageUrl} alt={apt.ritualName} className="w-full h-full object-cover" />
+                              </div>
+                              
+                              <div className="space-y-1 flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h5 className="font-serif font-bold text-stone-900 text-sm sm:text-base pr-2">{apt.ritualName}</h5>
+                                  
+                                  {/* Status pill styles in CRM */}
+                                  {apt.status === 'scheduled' && (
+                                    <span className="text-[9px] uppercase font-bold tracking-wider bg-[#5e6c58]/10 text-[#5e6c58] border border-[#5e6c58]/20 px-2 py-0.5 rounded-full">
+                                      Vigente
+                                    </span>
+                                  )}
+                                  {apt.status === 'completed' && (
+                                    <span className="text-[9px] uppercase font-bold tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full">
+                                      Atendida ✨
+                                    </span>
+                                  )}
+                                  {apt.status === 'cancelled' && (
+                                    <span className="text-[9px] uppercase font-bold tracking-wider bg-rose-100 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full">
+                                      Cancelada
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                {/* Personal Details */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-stone-500 font-sans mt-1.5">
+                                  <p className="flex items-center gap-1 text-stone-700">
+                                    <span className="font-mono text-[9px] uppercase text-stone-400">Huésped:</span>
+                                    <span className="font-semibold">{apt.clientName || 'Invitado Aura'}</span>
+                                  </p>
+                                  <p className="flex items-center gap-1 font-mono text-[11px] truncate">
+                                    <span className="text-stone-400">Email:</span>
+                                    <span className="text-stone-600">{apt.clientEmail || 'sin dirección'}</span>
+                                  </p>
+                                  <p className="flex items-center gap-1 text-[#764229] font-medium mt-0.5">
+                                    <span className="font-mono text-[9px] uppercase text-stone-400">Horario Cita:</span>
+                                    <span>{apt.dateTime}</span>
+                                  </p>
+                                  <p className="flex items-center gap-1 text-stone-600">
+                                    <span className="font-mono text-[9px] uppercase text-stone-400">Especialista:</span>
+                                    <span>{apt.specialistName || 'Especialista Aura'}</span>
+                                  </p>
+                                  <p className="flex items-center gap-1 text-stone-800 font-mono text-[11px]">
+                                    <span className="font-mono text-[9px] uppercase text-stone-400">Precio Servicio:</span>
+                                    <span className="font-bold">${apt.price || 0} MXN</span>
+                                  </p>
+                                </div>
+
+                                {/* SECURE CLINICAL NOTE EDITOR */}
+                                <div className="mt-3.5 bg-stone-50 rounded-xl p-3 border border-[#efe6dc]/50 max-w-xl">
+                                  <span className="text-[9px] font-bold tracking-wider text-[#764229] uppercase flex items-center gap-1 mb-1.5">
+                                    <MessageSquare className="w-3.5 h-3.5" /> Notas Clínicas de la Cita (Para Terapeutas):
+                                  </span>
+                                  <textarea
+                                    value={currentNoteVal}
+                                    onChange={(e) => handleNoteChangeLocal(apt.id, e.target.value)}
+                                    placeholder="Escribe aquí observaciones útiles (Ej. alergias, dolores, nivel de fuerza deseada, tipo de piel para productos AURA)..."
+                                    className="w-full text-xs bg-white border border-stone-200 rounded-lg p-2 text-stone-700 focus:outline-none focus:ring-1 focus:ring-[#764229] placeholder:italic"
+                                    rows={2}
+                                  />
+                                  {hasUnsavedNotes && (
+                                    <button
+                                      onClick={() => handleSaveNotes(apt.id)}
+                                      className="mt-2 px-3 py-1 bg-[#5e6c58] text-white font-sans text-[10px] font-bold uppercase rounded-md flex items-center gap-1 shadow-2xs hover:bg-[#4b5746] cursor-pointer"
+                                    >
+                                      <Check className="w-3.5 h-3.5" /> Guardar Notas de Terapeuta
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* RIGHT ACTIONS BLOCK */}
+                            <div className="flex md:flex-col gap-1.5 justify-end w-full md:w-44 pt-2 md:pt-0 self-stretch md:self-auto border-t md:border-t-0 border-stone-100 mt-2 md:mt-0">
+                              
+                              {/* 1. Complete booking action */}
+                              {onUpdateAppointmentStatus && apt.status !== 'completed' && (
+                                <button
+                                  onClick={() => onUpdateAppointmentStatus(apt.id, 'completed')}
+                                  className="flex-1 md:flex-none px-3 py-2 bg-stone-50 hover:bg-stone-100 text-stone-700 hover:text-stone-900 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-stone-200 flex items-center justify-center gap-1 cursor-pointer"
+                                  title="Marcar como Atendido / Completado"
+                                >
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Atendida
+                                </button>
+                              )}
+
+                              {/* 2. Reactive booking action */}
+                              {onUpdateAppointmentStatus && apt.status !== 'scheduled' && (
+                                <button
+                                  onClick={() => onUpdateAppointmentStatus(apt.id, 'scheduled')}
+                                  className="flex-1 md:flex-none px-3 py-2 bg-stone-50 hover:bg-stone-100 text-[#5e6c58] text-[10px] font-bold uppercase tracking-wider rounded-lg border border-[#5e6c58]/30 flex items-center justify-center gap-1 cursor-pointer"
+                                  title="Colocar como reserva activa de nuevo"
+                                >
+                                  <Calendar className="w-3.5 h-3.5" /> Reactivar
+                                </button>
+                              )}
+
+                              {/* 3. Cancel booking action */}
+                              {onUpdateAppointmentStatus && apt.status !== 'cancelled' && (
+                                <button
+                                  onClick={() => onUpdateAppointmentStatus(apt.id, 'cancelled')}
+                                  className="flex-1 md:flex-none px-3 py-2 bg-white hover:bg-stone-50 text-stone-500 hover:text-stone-700 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-stone-200 flex items-center justify-center gap-1 cursor-pointer"
+                                  title="Cancelar Reserva"
+                                >
+                                  <XCircle className="w-3.5 h-3.5 text-rose-500" /> Cancelar
+                                </button>
+                              )}
+
+                              {/* 4. PERMANENT SYSTEM ERASE (BORRAR) */}
+                              <div className="flex-1 md:flex-none mt-0 md:mt-2 border-l md:border-l-0 md:border-t border-stone-100 pt-0 md:pt-2 pl-2 md:p-0">
+                                {isConfirmingErase ? (
+                                  <div className="bg-amber-50 p-1.5 rounded-lg border border-amber-200 flex flex-col gap-1 items-center">
+                                    <span className="text-[8px] font-extrabold text-amber-800 text-center uppercase flex items-center gap-1">
+                                      <AlertTriangle className="w-2.5 h-2.5 text-amber-500" /> ¿Eliminar de BD?
+                                    </span>
+                                    <div className="flex gap-1 w-full justify-center">
+                                      <button
+                                        onClick={() => handleExecuteDelete(apt.id)}
+                                        className="bg-rose-600 hover:bg-rose-700 text-white font-sans text-[8px] font-bold uppercase py-1 px-2 rounded cursor-pointer"
+                                      >
+                                        Sí, borrar
+                                      </button>
+                                      <button
+                                        onClick={() => setDeletingId(null)}
+                                        className="bg-stone-200 text-stone-700 font-sans text-[8px] font-bold uppercase py-1 px-2 rounded cursor-pointer"
+                                      >
+                                        No
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => setDeletingId(apt.id)}
+                                    className="w-full px-3 py-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-dashed border-rose-200 hover:border-rose-300 flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                                    title="Borrar definitivamente de la Base de Datos"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" /> Borrar de DB
+                                  </button>
+                                )}
+                              </div>
+
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
             </div>
             
           </motion.div>

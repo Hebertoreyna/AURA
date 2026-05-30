@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Reglas AURA - Control de Reservas
+    match /bookings/{bookingId} {
+      // Permite a cualquier persona consultar y agendar citas
+      allow read, create: if true;
+      
+      // Permite modificar y borrar citas (para personal administrativo/terapeutas)
+      // Puede restringirse según requisitos, pero para el panel de administración
+      // debe permitir 'update' y 'delete' para que los cambios persistan en el servidor.
+      allow update, delete: if true;
+    }
+  }
+}
