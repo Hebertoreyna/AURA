@@ -34,8 +34,8 @@ export default function ProfileScreen({
   onUpdateAppointmentNotes,
   onDeleteAppointment,
 }: ProfileScreenProps) {
-  // Master authentication passcode for administration block
-  const MASTER_PIN = '2026';
+  // Master authentication passcode for administration block (configurable via env)
+  const MASTER_PIN = (import.meta as any).env?.VITE_ADMIN_PIN || '2026';
   
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [passcodeInput, setPasscodeInput] = useState<string>('');
@@ -54,7 +54,7 @@ export default function ProfileScreen({
   // Check persistent login session on load ("este desde donde entre tiene mi sesion")
   useEffect(() => {
     const sessionToken = localStorage.getItem('aura_admin_session');
-    if (sessionToken === 'authenticated-2026') {
+    if (sessionToken === 'authenticated_aura_admin') {
       setIsAuthenticated(true);
     }
   }, []);
@@ -63,7 +63,7 @@ export default function ProfileScreen({
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (passcodeInput === MASTER_PIN) {
-      localStorage.setItem('aura_admin_session', 'authenticated-2026');
+      localStorage.setItem('aura_admin_session', 'authenticated_aura_admin');
       setIsAuthenticated(true);
       setLoginError(null);
       setPasscodeInput('');
@@ -243,15 +243,11 @@ export default function ProfileScreen({
                 </button>
               </div>
 
-              {/* Secure note and default instructions */}
-              <div className="pt-4 border-t border-dashed border-[#efe6dc] text-center font-sans space-y-1">
+              {/* Secure note for staff */}
+              <div className="pt-4 border-t border-dashed border-[#efe6dc] text-center font-sans">
                 <p className="text-[10px] text-stone-400">
-                  <span className="font-semibold text-stone-500">Nota:</span> Use el código de acceso del año en curso para ver las reservaciones en vigor.
+                  <span className="font-semibold text-stone-500">Aviso:</span> Conexión cifrada de uso exclusivo de AURA. Se registrará la dirección IP y el navegador al iniciar sesión.
                 </p>
-                <div className="inline-flex items-center gap-1.5 bg-[#faf6f0] border border-[#efe6dc] px-2.5 py-1 rounded text-[10px] text-[#764229]/80 font-mono">
-                  <Info className="w-3 h-3 flex-shrink-0" />
-                  PIN por defecto: <span className="font-bold underline">2026</span>
-                </div>
               </div>
             </form>
           </motion.div>
