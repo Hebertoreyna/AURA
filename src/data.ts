@@ -3,7 +3,7 @@ import { Product, Ritual, Specialist } from './types';
 export const SPECIALISTS: Specialist[] = [
   {
     id: 's1',
-    name: 'Anel Reyna',
+    name: 'Anel, Especialista Aura',
     role: 'Lic. Cosmetología e Imagen',
     bio: 'Licenciada en Cosmetología e Imagen, especializada en maquillaje artístico, técnicas faciales avanzadas y servicios corporales. Cada visita es una experiencia diseñada para realzar tu belleza natural con técnicas profesionales y atención personalizada.',
     avatarUrl: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=250&q=80'
@@ -57,7 +57,7 @@ export const RITUALS: Ritual[] = [
       'Mascarilla y sérum finalizador',
       'Crema hidratante y protector solar'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   {
     id: 'r2',
@@ -83,7 +83,7 @@ export const RITUALS: Ritual[] = [
       'Mascarilla hidratante de sellado',
       'Crema hidratante y protector solar'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   {
     id: 'r3',
@@ -109,7 +109,7 @@ export const RITUALS: Ritual[] = [
       'Mascarilla tensor de efecto inmediato',
       'Crema hidratante y protector solar'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   {
     id: 'r4',
@@ -135,7 +135,7 @@ export const RITUALS: Ritual[] = [
       'Mascarilla calmante',
       'Crema hidratante y protector solar'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   {
     id: 'r5',
@@ -161,7 +161,7 @@ export const RITUALS: Ritual[] = [
       'Mascarilla reparadora',
       'Crema hidratante y protector solar'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   {
     id: 'r13',
@@ -186,7 +186,7 @@ export const RITUALS: Ritual[] = [
       'Mascarilla tratante express',
       'Crema hidratante y protector solar'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   {
     id: 'r14',
@@ -212,7 +212,7 @@ export const RITUALS: Ritual[] = [
       'Activos personalizados y mascarilla a medida',
       'Crema hidratante y protector solar'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   {
     id: 'r15',
@@ -232,7 +232,7 @@ export const RITUALS: Ritual[] = [
       'Ideal para complementar cualquier servicio de cabina como extra (+$400)'
     ],
     steps: [],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   // ── MAQUILLAJE ───────────────────────────────────────────────
   {
@@ -258,7 +258,7 @@ export const RITUALS: Ritual[] = [
       'Maquillaje de ojos y acabado final',
       'Fijación de larga duración'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   {
     id: 'r7',
@@ -283,7 +283,7 @@ export const RITUALS: Ritual[] = [
       'Diseño y definición de cejas',
       'Labios y fijación de larga duración garantizada'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   {
     id: 'r8',
@@ -308,7 +308,7 @@ export const RITUALS: Ritual[] = [
       'Maquillaje de ojos adaptado al look',
       'Labial y fijación final de larga duración'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   {
     id: 'r17',
@@ -333,7 +333,7 @@ export const RITUALS: Ritual[] = [
       'Maquillaje de ojos festivo y acabado final',
       'Fijación de larga duración'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   {
     id: 'r18',
@@ -358,7 +358,7 @@ export const RITUALS: Ritual[] = [
       'Contouring, iluminación y labial personalizado',
       'Resolución de dudas y productos recomendados'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   // ── CABINA: CORPORALES ───────────────────────────────────────
   {
@@ -384,7 +384,7 @@ export const RITUALS: Ritual[] = [
       'Masaje de piernas y pies',
       'Técnica de presión profunda en puntos de tensión'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   {
     id: 'r10',
@@ -408,7 +408,7 @@ export const RITUALS: Ritual[] = [
       'Drenaje linfático manual de zonas tratadas',
       'Masaje reafirmante con crema activa'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   {
     id: 'r11',
@@ -434,7 +434,7 @@ export const RITUALS: Ritual[] = [
       'Envoltura para potenciar absorción de activos',
       'Hidratación profunda finalizadora'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   {
     id: 'r12',
@@ -460,7 +460,7 @@ export const RITUALS: Ritual[] = [
       'Entrega de presupuesto personalizado',
       'Agendamiento de la sesión si se acepta el presupuesto'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   },
   {
     id: 'r16',
@@ -487,6 +487,6 @@ export const RITUALS: Ritual[] = [
       'Hidratación selladora final',
       'Masaje de relajación final'
     ],
-    therapists: ['Anel Reyna']
+    therapists: ['Anel, Especialista Aura']
   }
 ];

@@ -243,7 +243,7 @@ export default function RitualsScreen({
             <div className="w-full sm:w-64 h-64 sm:h-auto flex-shrink-0 bg-[#efe6dc]">
               <img
                 src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80"
-                alt="Anel Reyna"
+                alt="Anel, Especialista Aura"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover"
               />
@@ -252,7 +252,7 @@ export default function RitualsScreen({
               <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#764229] uppercase block mb-2">
                 Especialista Certificada
               </span>
-              <h4 className="text-3xl font-serif text-[#4a2815] leading-tight mb-1">Anel Reyna</h4>
+              <h4 className="text-3xl font-serif text-[#4a2815] leading-tight mb-1">Anel (Especialista Aura)</h4>
               <p className="text-xs font-mono text-stone-500 mb-4 uppercase tracking-wider">Lic. Cosmetología e Imagen</p>
               <p className="text-sm text-stone-600 leading-relaxed font-serif mb-6">
                 Licenciada en Cosmetología e Imagen, especializada en maquillaje artístico, técnicas faciales avanzadas y servicios corporales. Cada visita es una experiencia diseñada para realzar tu belleza natural con técnicas profesionales y atención personalizada.
@@ -298,7 +298,7 @@ export default function RitualsScreen({
           </blockquote>
           
           <cite className="text-[10px] sm:text-xs not-italic font-sans tracking-[0.2em] font-semibold text-stone-500 uppercase">
-            — Anel Reyna, Lic. Cosmetología e Imagen
+            — Anel, Lic. Cosmetología e Imagen
           </cite>
         </div>
       </section>

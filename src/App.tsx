@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sprout, Sparkles, User } from 'lucide-react';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { Sprout, Sparkles, ShieldCheck } from 'lucide-react';
+import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from './lib/firebase';
 import { RITUALS, SPECIALISTS } from './data';
 
@@ -88,7 +88,7 @@ export default function App() {
           duration: data.duration || 60,
           price: price,
           dateTime: displayDate,
-          specialistName: specName || 'Anel Reyna',
+          specialistName: specName || 'Anel, Especialista Aura',
           specialistAvatar: spec?.avatarUrl || 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=250&q=80',
           status: resolvedStatus,
           notes: data.notes || '',
@@ -195,6 +195,18 @@ export default function App() {
     );
   };
 
+  const handleDeleteAppointment = async (id: string) => {
+    try {
+      const docRef = doc(db, 'bookings', id);
+      await deleteDoc(docRef);
+    } catch (e) {
+      console.warn('Firestore delete failed, deleting locally:', e);
+    }
+    
+    // Optimistic local update
+    setAppointments((prev) => prev.filter((apt) => apt.id !== id));
+  };
+
   // CANCEL APPOINTMENT HANDLER (CLIENT)
   const handleCancelAppointment = async (id: string) => {
     await handleUpdateAppointmentStatus(id, 'cancelled');
@@ -260,6 +272,7 @@ export default function App() {
                 onCancelAppointment={handleCancelAppointment}
                 onUpdateAppointmentStatus={handleUpdateAppointmentStatus}
                 onUpdateAppointmentNotes={handleUpdateAppointmentNotes}
+                onDeleteAppointment={handleDeleteAppointment}
                 skinProfile={skinProfile}
                 orders={[]}
                 userAvatar="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=250&q=80"
@@ -301,7 +314,7 @@ export default function App() {
           <span className="text-[10px] sm:text-xs font-sans font-medium tracking-wide">Servicios</span>
         </button>
 
-        {/* TAB 3: REGISTRO/PERFIL */}
+        {/* TAB 3: ACCESO ADMINISTRACIÓN (SEGURO) */}
         <button
           id="nav-tab-profile"
           onClick={() => setActiveTab('profile')}
@@ -309,8 +322,8 @@ export default function App() {
             activeTab === 'profile' ? 'text-[#764229] font-bold' : 'text-stone-400 hover:text-[#764229]'
           }`}
         >
-          <User className="w-5 h-5 mb-1" />
-          <span className="text-[10px] sm:text-xs font-sans font-medium tracking-wide">Mi Perfil</span>
+          <ShieldCheck className="w-5 h-5 mb-1" />
+          <span className="text-[10px] sm:text-xs font-sans font-medium tracking-wide">Administración</span>
         </button>
 
       </nav>

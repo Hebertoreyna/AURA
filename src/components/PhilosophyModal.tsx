@@ -86,7 +86,7 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
             {/* Quote Block */}
             <div id="philosophy-quote" className="mt-8 pt-6 border-t border-[#efe6dc] text-center italic text-[#764229] text-sm font-serif">
               "Tu belleza natural es el lienzo. Mi trabajo es hacerla brillar."
-              <p className="text-[10px] mt-1 not-italic font-sans tracking-widest uppercase text-stone-500">— Anel Reyna, AURA</p>
+              <p className="text-[10px] mt-1 not-italic font-sans tracking-widest uppercase text-stone-500">— Anel, Fundadora de AURA</p>
             </div>
 
             {/* Dismiss Button */}

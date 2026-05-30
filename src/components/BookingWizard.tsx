@@ -429,7 +429,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                   <span className="text-xs font-mono tracking-widest text-[#25D366] uppercase font-semibold">Mensaje enviado</span>
                   <h4 className="text-2xl font-serif text-[#4a2815] mt-1 mb-2">¡Solicitud enviada por WhatsApp!</h4>
                   <p className="text-xs text-stone-600 max-w-sm leading-relaxed mb-6">
-                    Tu mensaje fue enviado a Anel Reyna por WhatsApp. Ella confirmará tu cita en breve.
+                    Tu mensaje fue enviado por WhatsApp. Confirmaremos tu cita en breve.
                   </p>
 
                   <div className="w-full bg-[#f2eae4] rounded-xl p-5 text-left border border-[#efe6dc] space-y-3 max-w-sm mb-6">
@@ -1015,14 +1015,14 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
 
                         <div className="space-y-1">
                           <label className="text-[10px] font-sans font-bold tracking-widest text-stone-500 uppercase">Nombre del Huésped</label>
-                          <input type="text" required placeholder="Ej. Heberto R. G."
+                          <input type="text" required placeholder="Ej. Camila Silva"
                             value={name} onChange={(e) => setName(e.target.value)}
                             className="w-full p-3 text-xs rounded-xl border border-[#efe6dc] bg-white focus:outline-none focus:border-[#764229]" />
                         </div>
 
                         <div className="space-y-1">
                           <label className="text-[10px] font-sans font-bold tracking-widest text-stone-500 uppercase">Correo Electrónico</label>
-                          <input type="email" required placeholder="Ej. heberto@gmail.com"
+                          <input type="email" required placeholder="Ej. camila@ejemplo.com"
                             value={email} onChange={(e) => setEmail(e.target.value)}
                             className="w-full p-3 text-xs rounded-xl border border-[#efe6dc] bg-white focus:outline-none focus:border-[#764229]" />
                         </div>
