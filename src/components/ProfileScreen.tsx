@@ -66,7 +66,7 @@ export default function ProfileScreen({
   const [customPriceVal, setCustomPriceVal] = useState<string>('');
   const [customFootnoteVal, setCustomFootnoteVal] = useState<string>('Reserva vía WhatsApp: 55-AURA-WELL');
   const [customDiscountText, setCustomDiscountText] = useState<string>('Piel saludable y luminosa desde la primera sesión');
-  const [assignedSpecialist, setAssignedSpecialist] = useState<string>('Con Anel, Especialista Aura');
+  const [assignedSpecialist, setAssignedSpecialist] = useState<string>('Atendido por Anel, Licenciada en Cosmetología Aura');
 
   // Catalog filtering within Card Generator block
   const [catalogSearch, setCatalogSearch] = useState<string>('');
@@ -218,7 +218,7 @@ export default function ProfileScreen({
     setCustomPriceVal(ritual.customQuote ? 'Valoración Personalizada de Piel' : `$${ritual.price} MXN`);
     setCustomDiscountText(ritual.badge ? `Ritual con Sello AURA - ${ritual.badge}` : 'Piel saludable y luminosa desde la primera sesión');
     setCustomFootnoteVal('Agenda al WhatsApp: 55-AURA-WELL');
-    setAssignedSpecialist('Atendido por Anel, Terapeuta Certificada Aura');
+    setAssignedSpecialist('Atendido por Anel, Licenciada en Cosmetología Aura');
   };
 
   const handleDownloadCard = () => {
@@ -279,7 +279,7 @@ export default function ProfileScreen({
     // Subtitle tagline
     ctx.fillStyle = theme.mutedColor;
     ctx.font = 'bold 12px "Courier New", "JetBrains Mono", monospace';
-    ctx.fillText('S A N T U A R I O   Y   B I E N E S T A R', 400, 150);
+    ctx.fillText('C O S M E T O L O G Í A   E   I M A G E N', 400, 150);
 
     // Thin luxury division line
     ctx.lineWidth = 1;
@@ -344,7 +344,7 @@ export default function ProfileScreen({
 
     // 8. Description wrapped text lines
     ctx.fillStyle = theme.mutedColor;
-    ctx.font = 'italic 16px "Times New Roman", "Georgia", serif';
+    ctx.font = 'italic 15px "Times New Roman", "Georgia", serif';
     
     // Inline utility function for safe canvas line wrapping
     const wrapCanvasText = (
@@ -376,11 +376,11 @@ export default function ProfileScreen({
 
     const descriptionY = wrapCanvasText(
       ctx,
-      `"${selectedRitualForCard.shortDescription}"`,
+      `"${selectedRitualForCard.description || selectedRitualForCard.shortDescription}"`,
       400,
       605,
-      560,
-      25
+      565,
+      22
     );
 
     // 9. Extra promo banner text line
@@ -1127,11 +1127,11 @@ export default function ProfileScreen({
                     </div>
                     <div>
                       <h4 className="font-serif font-bold text-stone-900 text-sm">Generador de Fichas Compartibles</h4>
-                      <p className="text-xs text-stone-400 font-mono">Presenta tus servicios y rituales de bienestar con elegancia sutil</p>
+                      <p className="text-xs text-stone-400 font-mono">Presenta tus servicios y rituales con elegancia sutil</p>
                     </div>
                   </div>
                   <p className="text-xs text-stone-600 leading-relaxed max-w-4xl">
-                    Selecciona cualquier ritual o servicio de tu catálogo y personaliza una ficha promocional con tu propio precio/descuento, un mensaje personalizado y un especialista asignado. Descárgala como una imagen de alta definición lista para enviarse por WhatsApp o subirse a tus redes sociales de <strong>Santuario AURA</strong>.
+                    Selecciona cualquier ritual o servicio de tu catálogo y personaliza una ficha promocional con tu propio precio/descuento, un mensaje personalizado y un especialista asignado. Descárgala como una imagen de alta definición lista para enviarse por WhatsApp o subirse a tus redes sociales de <strong>AURA Cosmetología e Imagen</strong>.
                   </p>
                 </div>
 
@@ -1321,13 +1321,13 @@ export default function ProfileScreen({
                         {/* Specialist details settings */}
                         <div className="space-y-1.5">
                           <label className="text-[10px] uppercase font-mono tracking-wider text-stone-400 font-bold block flex items-center gap-1">
-                            <User className="w-3.5 h-3.5 text-[#764229]" /> 4. Terapeuta / Especialista Recomendado:
+                            <User className="w-3.5 h-3.5 text-[#764229]" /> 4. Lic. en Cosmetología / Recomendado:
                           </label>
                           <input
                             type="text"
                             value={assignedSpecialist}
                             onChange={(e) => setAssignedSpecialist(e.target.value)}
-                            placeholder="Ej. Atendido por Anel, Terapeuta Aura"
+                            placeholder="Ej. Atendido por Anel, Licenciada en Cosmetología Aura"
                             className="w-full text-xs p-2.5 bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#764229]"
                           />
                         </div>
@@ -1375,7 +1375,7 @@ export default function ProfileScreen({
                             {/* Logo header */}
                             <div className="space-y-1">
                               <h4 style={{ color: activeTheme.textColor }} className="text-xl tracking-[0.2em] font-medium font-serif select-none">A U R A</h4>
-                              <p style={{ color: activeTheme.mutedColor }} className="text-[7px] font-sans tracking-[0.14em] uppercase select-none">Santuario & Bienestar</p>
+                              <p style={{ color: activeTheme.mutedColor }} className="text-[7.5px] font-sans tracking-[0.14em] uppercase select-none">Cosmetología e Imagen</p>
                               <div style={{ backgroundColor: activeTheme.borderColor }} className="h-[1px] w-10 mx-auto mt-1 opacity-50" />
                             </div>
 
@@ -1399,7 +1399,7 @@ export default function ProfileScreen({
                             {/* Value and duration panel mockup */}
                             <div style={{ backgroundColor: activeTheme.accentBg }} className="py-2 px-3 rounded-lg w-full max-w-[230px] space-y-0.5 border border-[#d4af37]/15">
                               <span style={{ color: activeTheme.accentText }} className="text-[8.5px] font-sans font-extrabold block uppercase tracking-wide">
-                                ⏱ {selectedRitualForCard.duration} minutos de terapia
+                                ⏱ {selectedRitualForCard.duration} minutos
                               </span>
                               <span style={{ color: activeTheme.textColor }} className="text-sm font-serif font-extrabold block">
                                 {customPriceVal ? customPriceVal : `$${selectedRitualForCard.price} MXN`}
@@ -1407,8 +1407,8 @@ export default function ProfileScreen({
                             </div>
 
                             {/* Description */}
-                            <p style={{ color: activeTheme.mutedColor }} className="text-[9px] leading-relaxed line-clamp-3 font-sans px-2 italic font-medium">
-                              "{selectedRitualForCard.shortDescription}"
+                            <p style={{ color: activeTheme.mutedColor }} className="text-[8.5px] leading-relaxed line-clamp-4 font-sans px-2 italic font-medium">
+                              "{selectedRitualForCard.description || selectedRitualForCard.shortDescription}"
                             </p>
 
                             {/* Promo footnotes info */}
