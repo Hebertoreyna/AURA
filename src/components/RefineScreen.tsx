@@ -186,8 +186,8 @@ export default function RefineScreen({
             className="space-y-6"
           >
             <div className="mb-6">
-              <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#764229] uppercase">Análisis AURA</span>
-              <h3 className="text-3xl font-serif text-[#4a2815] mt-1">¿Qué área quieres trabajar?</h3>
+              <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#35755d] uppercase">Análisis AURA</span>
+              <h3 className="text-3xl font-serif text-[#23543f] mt-1">¿Qué área quieres trabajar?</h3>
               <p className="text-xs text-stone-500 mt-1 font-serif italic">Elige el área de cuidado y te guiaremos al servicio ideal.</p>
             </div>
 
@@ -209,11 +209,11 @@ export default function RefineScreen({
                 <button
                   key={z.id}
                   onClick={() => { setZone(z.id); setStep(2); }}
-                  className="p-5 rounded-2xl border-2 border-[#efe6dc] bg-white text-left hover:border-[#764229]/40 active:scale-[0.97] transition-[border-color,transform] duration-150 flex flex-col gap-3"
+                  className="p-5 rounded-2xl border-2 border-[#dcebe2] bg-white text-left hover:border-[#35755d]/40 active:scale-[0.97] transition-[border-color,transform] duration-150 flex flex-col gap-3"
                 >
-                  <span className="text-[#764229]">{z.icon}</span>
+                  <span className="text-[#35755d]">{z.icon}</span>
                   <div>
-                    <span className="font-serif font-bold text-lg text-[#4a2815] block">{z.label}</span>
+                    <span className="font-serif font-bold text-lg text-[#23543f] block">{z.label}</span>
                     <span className="text-[10px] text-stone-400 font-sans block mt-0.5">{z.sub}</span>
                   </div>
                 </button>
@@ -232,8 +232,8 @@ export default function RefineScreen({
             className="space-y-5"
           >
             <div className="mb-4">
-              <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#764229] uppercase">Paso 1 de {totalSteps} · Facial</span>
-              <h3 className="text-2xl font-serif text-[#4a2815] mt-1">¿Cómo es tu tipo de piel?</h3>
+              <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#35755d] uppercase">Paso 1 de {totalSteps} · Facial</span>
+              <h3 className="text-2xl font-serif text-[#23543f] mt-1">¿Cómo es tu tipo de piel?</h3>
               <p className="text-xs text-stone-500 mt-1 font-serif italic">Piensa en cómo luce tu rostro a mitad del día.</p>
             </div>
 
@@ -246,13 +246,13 @@ export default function RefineScreen({
                     onClick={() => { setSkinType(type.id); setStep(3); }}
                     className={`p-4 rounded-xl border text-left transition-all active:scale-[0.97] ${
                       skinType === type.id
-                        ? 'bg-[#efe6dc] border-[#764229] shadow-sm'
-                        : 'bg-white border-[#efe6dc] hover:border-stone-300'
+                        ? 'bg-[#dcebe2] border-[#35755d] shadow-sm'
+                        : 'bg-white border-[#dcebe2] hover:border-stone-300'
                     }`}
                   >
-                    <div className="flex items-center gap-2 mb-1 text-[#764229]">
+                    <div className="flex items-center gap-2 mb-1 text-[#35755d]">
                       <Icon className="w-4 h-4 flex-shrink-0" />
-                      <span className="font-serif font-bold text-sm text-[#4a2815]">{type.label}</span>
+                      <span className="font-serif font-bold text-sm text-[#23543f]">{type.label}</span>
                     </div>
                     <p className="text-[10px] text-stone-500 leading-relaxed font-serif italic">{type.desc}</p>
                   </button>
@@ -260,7 +260,7 @@ export default function RefineScreen({
               })}
             </div>
 
-            <button onClick={() => setStep(1)} className="text-xs uppercase font-sans font-bold tracking-widest text-[#764229] hover:underline cursor-pointer">
+            <button onClick={() => setStep(1)} className="text-xs uppercase font-sans font-bold tracking-widest text-[#35755d] hover:underline cursor-pointer">
               ← Cambiar área
             </button>
           </motion.div>
@@ -276,8 +276,8 @@ export default function RefineScreen({
             className="space-y-5"
           >
             <div className="mb-4">
-              <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#764229] uppercase">Paso 1 de {totalSteps} · Corporal</span>
-              <h3 className="text-2xl font-serif text-[#4a2815] mt-1">¿Qué quieres trabajar?</h3>
+              <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#35755d] uppercase">Paso 1 de {totalSteps} · Corporal</span>
+              <h3 className="text-2xl font-serif text-[#23543f] mt-1">¿Qué quieres trabajar?</h3>
               <p className="text-xs text-stone-500 mt-1 font-serif italic">Selecciona tu objetivo principal y te mostramos el servicio ideal.</p>
             </div>
 
@@ -288,21 +288,21 @@ export default function RefineScreen({
                   onClick={() => setBodyConcern(bc.id)}
                   className={`p-4 rounded-xl border text-left transition-all active:scale-[0.97] flex items-center justify-between ${
                     bodyConcern === bc.id
-                      ? 'bg-[#efe6dc] border-[#764229] shadow-sm'
-                      : 'bg-white border-[#efe6dc] hover:border-stone-300'
+                      ? 'bg-[#dcebe2] border-[#35755d] shadow-sm'
+                      : 'bg-white border-[#dcebe2] hover:border-stone-300'
                   }`}
                 >
                   <div>
-                    <span className="font-serif font-bold text-sm text-[#4a2815] block">{bc.label}</span>
+                    <span className="font-serif font-bold text-sm text-[#23543f] block">{bc.label}</span>
                     <p className="text-[10px] text-stone-500 mt-0.5 font-serif italic">{bc.desc}</p>
                   </div>
-                  {bodyConcern === bc.id && <Sparkles className="w-4 h-4 text-[#764229] flex-shrink-0 ml-3" />}
+                  {bodyConcern === bc.id && <Sparkles className="w-4 h-4 text-[#35755d] flex-shrink-0 ml-3" />}
                 </button>
               ))}
             </div>
 
             <div className="pt-2 flex justify-between items-center">
-              <button onClick={() => setStep(1)} className="text-xs uppercase font-sans font-bold tracking-widest text-[#764229] hover:underline cursor-pointer">
+              <button onClick={() => setStep(1)} className="text-xs uppercase font-sans font-bold tracking-widest text-[#35755d] hover:underline cursor-pointer">
                 ← Cambiar área
               </button>
               <button
@@ -310,7 +310,7 @@ export default function RefineScreen({
                 disabled={!bodyConcern}
                 className={`py-3 px-7 text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase active:scale-[0.97] ${
                   bodyConcern
-                    ? 'bg-[#764229] hover:bg-[#4a2815] text-white shadow-md cursor-pointer'
+                    ? 'bg-[#35755d] hover:bg-[#23543f] text-white shadow-md cursor-pointer'
                     : 'bg-stone-200 text-stone-400 cursor-not-allowed'
                 }`}
               >
@@ -330,8 +330,8 @@ export default function RefineScreen({
             className="space-y-5"
           >
             <div className="mb-4">
-              <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#764229] uppercase">Paso 2 de {totalSteps} · Facial</span>
-              <h3 className="text-2xl font-serif text-[#4a2815] mt-1">¿Cuál es tu mayor preocupación?</h3>
+              <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#35755d] uppercase">Paso 2 de {totalSteps} · Facial</span>
+              <h3 className="text-2xl font-serif text-[#23543f] mt-1">¿Cuál es tu mayor preocupación?</h3>
               <p className="text-xs text-stone-500 mt-1 font-serif italic">Selecciona el problema que más quieres tratar.</p>
             </div>
 
@@ -342,15 +342,15 @@ export default function RefineScreen({
                   onClick={() => setConcern(fc.id)}
                   className={`p-4 rounded-xl border text-left transition-all active:scale-[0.97] flex items-center justify-between ${
                     concern === fc.id
-                      ? 'bg-[#efe6dc] border-[#764229] shadow-sm'
-                      : 'bg-white border-[#efe6dc] hover:border-stone-300'
+                      ? 'bg-[#dcebe2] border-[#35755d] shadow-sm'
+                      : 'bg-white border-[#dcebe2] hover:border-stone-300'
                   }`}
                 >
                   <div>
-                    <span className="font-serif font-bold text-sm text-[#4a2815] block">{fc.label}</span>
+                    <span className="font-serif font-bold text-sm text-[#23543f] block">{fc.label}</span>
                     <p className="text-[10px] text-stone-500 mt-0.5 font-serif italic">{fc.desc}</p>
                   </div>
-                  {concern === fc.id && <Sparkles className="w-4 h-4 text-[#764229] flex-shrink-0 ml-3" />}
+                  {concern === fc.id && <Sparkles className="w-4 h-4 text-[#35755d] flex-shrink-0 ml-3" />}
                 </button>
               ))}
             </div>
@@ -373,8 +373,8 @@ export default function RefineScreen({
                         onClick={() => setVibe(v.id)}
                         className={`py-2 px-3.5 rounded-lg border text-[10px] font-sans font-bold tracking-wide transition-[background-color,border-color,transform] duration-150 active:scale-[0.97] ${
                           vibe === v.id
-                            ? 'bg-[#764229] border-[#764229] text-white'
-                            : 'bg-white border-[#efe6dc] text-stone-600 hover:border-stone-300'
+                            ? 'bg-[#35755d] border-[#35755d] text-white'
+                            : 'bg-white border-[#dcebe2] text-stone-600 hover:border-stone-300'
                         }`}
                       >
                         {v.label}
@@ -386,7 +386,7 @@ export default function RefineScreen({
             </AnimatePresence>
 
             <div className="pt-2 flex justify-between items-center">
-              <button onClick={() => setStep(2)} className="text-xs uppercase font-sans font-bold tracking-widest text-[#764229] hover:underline cursor-pointer">
+              <button onClick={() => setStep(2)} className="text-xs uppercase font-sans font-bold tracking-widest text-[#35755d] hover:underline cursor-pointer">
                 ← Tipo de piel
               </button>
               <button
@@ -394,7 +394,7 @@ export default function RefineScreen({
                 disabled={!concern || !vibe}
                 className={`py-3 px-7 text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase active:scale-[0.97] ${
                   concern && vibe
-                    ? 'bg-[#764229] hover:bg-[#4a2815] text-white shadow-md cursor-pointer'
+                    ? 'bg-[#35755d] hover:bg-[#23543f] text-white shadow-md cursor-pointer'
                     : 'bg-stone-200 text-stone-400 cursor-not-allowed'
                 }`}
               >
@@ -413,39 +413,39 @@ export default function RefineScreen({
             className="space-y-7"
           >
             {/* Encabezado prescripción */}
-            <div className="bg-[#efe6dc]/50 border border-[#efe6dc] rounded-2xl p-5 space-y-4">
+            <div className="bg-[#dcebe2]/50 border border-[#dcebe2] rounded-2xl p-5 space-y-4">
               <div className="flex justify-between items-start gap-2">
                 <div>
-                  <span className="text-[9px] font-sans font-bold tracking-[0.2em] text-[#764229] uppercase block">
+                  <span className="text-[9px] font-sans font-bold tracking-[0.2em] text-[#35755d] uppercase block">
                     {zone === 'corporal' ? 'Análisis Corporal · AURA' : 'Análisis Facial · AURA'}
                   </span>
-                  <h3 className="text-2xl font-serif text-[#4a2815] mt-0.5">Tu Recomendación Personalizada</h3>
+                  <h3 className="text-2xl font-serif text-[#23543f] mt-0.5">Tu Recomendación Personalizada</h3>
                 </div>
                 <button
                   onClick={startQuiz}
-                  className="py-1.5 px-3 bg-white hover:bg-stone-50 border border-[#efe6dc] text-[10px] font-sans font-bold tracking-wider rounded-lg transition-colors flex items-center gap-1 text-stone-700 cursor-pointer flex-shrink-0"
+                  className="py-1.5 px-3 bg-white hover:bg-stone-50 border border-[#dcebe2] text-[10px] font-sans font-bold tracking-wider rounded-lg transition-colors flex items-center gap-1 text-stone-700 cursor-pointer flex-shrink-0"
                 >
-                  <RefreshCw className="w-3 h-3 text-[#764229]" /> Nuevo
+                  <RefreshCw className="w-3 h-3 text-[#35755d]" /> Nuevo
                 </button>
               </div>
 
               {/* Badges resumen */}
               <div className="flex flex-wrap gap-2">
-                <span className="text-[10px] bg-white text-[#764229] px-3 py-1 rounded-full font-sans font-bold uppercase tracking-wider border border-[#efe6dc]">
+                <span className="text-[10px] bg-white text-[#35755d] px-3 py-1 rounded-full font-sans font-bold uppercase tracking-wider border border-[#dcebe2]">
                   {zone === 'corporal' ? 'Corporal' : 'Facial'}
                 </span>
                 {zone === 'facial' && skinType && (
-                  <span className="text-[10px] bg-white text-[#764229] px-3 py-1 rounded-full font-sans font-bold uppercase tracking-wider border border-[#efe6dc]">
+                  <span className="text-[10px] bg-white text-[#35755d] px-3 py-1 rounded-full font-sans font-bold uppercase tracking-wider border border-[#dcebe2]">
                     Piel: {SKIN_TYPE_LABELS[skinType]}
                   </span>
                 )}
                 {zone === 'facial' && concern && (
-                  <span className="text-[10px] bg-white text-[#764229] px-3 py-1 rounded-full font-sans font-bold uppercase tracking-wider border border-[#efe6dc]">
+                  <span className="text-[10px] bg-white text-[#35755d] px-3 py-1 rounded-full font-sans font-bold uppercase tracking-wider border border-[#dcebe2]">
                     {FACIAL_CONCERN_LABELS[concern]}
                   </span>
                 )}
                 {zone === 'corporal' && bodyConcern && (
-                  <span className="text-[10px] bg-white text-[#764229] px-3 py-1 rounded-full font-sans font-bold uppercase tracking-wider border border-[#efe6dc]">
+                  <span className="text-[10px] bg-white text-[#35755d] px-3 py-1 rounded-full font-sans font-bold uppercase tracking-wider border border-[#dcebe2]">
                     {BODY_CONCERN_LABELS[bodyConcern]}
                   </span>
                 )}
@@ -456,7 +456,7 @@ export default function RefineScreen({
 
             {/* Rituales recomendados */}
             <div className="space-y-3">
-              <h4 className="text-xs font-sans font-bold tracking-widest text-[#4a2815] uppercase border-b border-[#efe6dc]/50 pb-2">
+              <h4 className="text-xs font-sans font-bold tracking-widest text-[#23543f] uppercase border-b border-[#dcebe2]/50 pb-2">
                 {zone === 'corporal' ? 'Servicio Recomendado' : 'Servicio Facial Recomendado'}
               </h4>
 
@@ -471,27 +471,27 @@ export default function RefineScreen({
                   key={r.id}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.23, 1, 0.32, 1] } }}
-                  className="bg-white rounded-xl border border-[#efe6dc]/60 overflow-hidden flex flex-col sm:flex-row"
+                  className="bg-white rounded-xl border border-[#dcebe2]/60 overflow-hidden flex flex-col sm:flex-row"
                 >
-                  <div className="sm:w-2/5 h-40 sm:h-auto bg-[#efe6dc] flex-shrink-0">
+                  <div className="sm:w-2/5 h-40 sm:h-auto bg-[#dcebe2] flex-shrink-0">
                     <img src={r.imageUrl} alt={r.name} referrerPolicy="no-referrer"
                       className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 p-5 flex flex-col justify-between">
                     <div>
                       <div className="flex justify-between items-start mb-1">
-                        <span className="text-[10px] font-mono text-[#5e6c58] uppercase tracking-wider">{r.duration} min</span>
+                        <span className="text-[10px] font-mono text-[#45705f] uppercase tracking-wider">{r.duration} min</span>
                         {r.customQuote
                           ? <span className="font-serif font-bold text-sky-700 text-sm">Evaluación gratis</span>
-                          : <span className="font-serif font-bold text-[#764229] text-base">${r.price}</span>
+                          : <span className="font-serif font-bold text-[#35755d] text-base">${r.price}</span>
                         }
                       </div>
-                      <h5 className="text-lg font-serif text-[#4a2815] font-semibold">{r.name}</h5>
+                      <h5 className="text-lg font-serif text-[#23543f] font-semibold">{r.name}</h5>
                       <p className="text-xs text-stone-500 leading-relaxed mt-1">{r.shortDescription}</p>
                     </div>
                     <button
                       onClick={() => onBookRitual(r.id)}
-                      className="mt-4 py-2.5 px-5 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-lg transition-[transform,background-color] duration-150 font-sans uppercase inline-flex items-center gap-1.5 cursor-pointer self-start"
+                      className="mt-4 py-2.5 px-5 bg-[#35755d] hover:bg-[#23543f] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-lg transition-[transform,background-color] duration-150 font-sans uppercase inline-flex items-center gap-1.5 cursor-pointer self-start"
                     >
                       <Calendar className="w-3.5 h-3.5" /> Reservar Sesión
                     </button>
@@ -503,19 +503,19 @@ export default function RefineScreen({
             {/* Producto recomendado (solo facial) */}
             {zone === 'facial' && matchedProducts.length > 0 && (
               <div className="space-y-3">
-                <h4 className="text-xs font-sans font-bold tracking-widest text-[#4a2815] uppercase border-b border-[#efe6dc]/50 pb-2">
+                <h4 className="text-xs font-sans font-bold tracking-widest text-[#23543f] uppercase border-b border-[#dcebe2]/50 pb-2">
                   Producto para Casa
                 </h4>
                 {matchedProducts.slice(0, 1).map(p => (
-                  <div key={p.id} className="bg-white rounded-xl border border-[#efe6dc]/60 p-4 flex gap-4 items-center">
+                  <div key={p.id} className="bg-white rounded-xl border border-[#dcebe2]/60 p-4 flex gap-4 items-center">
                     <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-stone-100">
                       <img src={p.imageUrl} alt={p.name} referrerPolicy="no-referrer"
                         className="w-full h-full object-cover" />
                     </div>
                     <div className="min-w-0">
-                      <span className="font-serif font-semibold text-sm text-[#4a2815] block truncate">{p.name}</span>
+                      <span className="font-serif font-semibold text-sm text-[#23543f] block truncate">{p.name}</span>
                       <span className="text-[10px] text-stone-400 font-sans block">{p.shortDescription}</span>
-                      <span className="text-sm font-serif font-bold text-[#764229] mt-1 block">${p.price.toFixed(2)}</span>
+                      <span className="text-sm font-serif font-bold text-[#35755d] mt-1 block">${p.price.toFixed(2)}</span>
                     </div>
                   </div>
                 ))}

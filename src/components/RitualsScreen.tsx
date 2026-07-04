@@ -20,10 +20,10 @@ export default function RitualsScreen({
 }: RitualsScreenProps) {
 
   return (
-    <div id="rituals-screen" className="relative w-full overflow-hidden bg-[#faf8f5]">
+    <div id="rituals-screen" className="relative w-full overflow-hidden bg-[#f7fbf9]">
       
       {/* 1. BRAND HEADER NAVIGATION */}
-      <header id="aura-header" className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-[#faf8f5]/80 backdrop-blur-md border-b border-[#efe6dc]/30">
+      <header id="aura-header" className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-[#f7fbf9]/80 backdrop-blur-md border-b border-[#dcebe2]/30">
         <button
           id="hdr-menu-btn"
           onClick={onOpenPhilosophy}
@@ -35,7 +35,7 @@ export default function RitualsScreen({
         <h1
           id="hdr-brand-logo"
           onClick={() => onNavigateToTab('rituals')}
-          className="text-3xl font-serif tracking-[0.18em] text-[#4a2815] font-light cursor-pointer select-none"
+          className="text-3xl font-serif tracking-[0.18em] text-[#23543f] font-light cursor-pointer select-none"
         >
           AURA
         </h1>
@@ -43,26 +43,29 @@ export default function RitualsScreen({
         <button
           id="hdr-book-btn"
           onClick={onBookAppointment}
-          className="flex items-center gap-1.5 py-1.5 px-3 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.95] text-white text-[10px] font-sans font-semibold tracking-widest uppercase rounded-full transition-[transform,background-color] duration-150 shadow-sm"
+          className="flex items-center gap-1.5 py-1.5 px-3 bg-[#35755d] hover:bg-[#23543f] active:scale-[0.95] text-white text-[10px] font-sans font-semibold tracking-widest uppercase rounded-full transition-[transform,background-color] duration-150 shadow-sm"
         >
           <CalendarPlus className="w-3.5 h-3.5" />
           Reservar
         </button>
       </header>
 
-      {/* 2. MAJESTIC SPA LOBBY HERO BANNER */}
-      <section id="hero-banner" className="relative w-full h-[85vh] sm:h-[90vh] overflow-hidden bg-stone-950">
-        {/* Background Image */}
+      {/* 2. LUMINOUS CLINICAL HERO BANNER */}
+      <section id="hero-banner" className="relative w-full h-[85vh] sm:h-[90vh] overflow-hidden bg-[#f7fbf9]">
+        {/* Background Image — luminosa y limpia */}
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=1200&q=80"
-            alt="Aura Spa Sanctuary"
+            src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1600&q=80"
+            alt="Tratamiento facial profesional en AURA"
             referrerPolicy="no-referrer"
-            className="w-full h-full object-cover opacity-60 scale-105"
-            style={{ objectPosition: 'center 40%' }}
+            className="w-full h-full object-cover aura-kenburns"
+            style={{ objectPosition: 'center 30%' }}
           />
-          {/* Subtle gradient overlay to enhance visual readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-stone-950/40" />
+          {/* Velo claro para legibilidad manteniendo la luminosidad */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#f7fbf9] via-[#f7fbf9]/35 to-white/10" />
+          {/* Orbes de luz flotantes — acento sutil, sin costo de carga */}
+          <div aria-hidden="true" className="aura-orb aura-orb-a w-[45vw] h-[45vw] max-w-[420px] max-h-[420px] -top-[8%] -left-[10%] bg-[#7fa892]/50" />
+          <div aria-hidden="true" className="aura-orb aura-orb-b w-[38vw] h-[38vw] max-w-[360px] max-h-[360px] bottom-[12%] -right-[8%] bg-[#dcebe2]/60" />
         </div>
 
         {/* Hero Text Alignments & Triggers */}
@@ -72,9 +75,9 @@ export default function RitualsScreen({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            className="text-xs tracking-[0.3em] font-sans text-[#efe6dc] font-semibold uppercase mb-3 drop-shadow-sm"
+            className="text-xs tracking-[0.3em] font-sans text-[#35755d] font-semibold uppercase mb-3"
           >
-            La Esencia de la Pureza
+            Cosmetología Profesional
           </motion.span>
 
           <motion.h2
@@ -82,9 +85,9 @@ export default function RitualsScreen({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.08, ease: [0.23, 1, 0.32, 1] }}
-            className="text-4xl sm:text-5xl md:text-6xl font-serif text-[#faf6f0] leading-[1.1] mb-8 max-w-2xl font-light tracking-wide"
+            className="text-4xl sm:text-5xl md:text-6xl font-serif text-[#1d3b2e] leading-[1.1] mb-8 max-w-2xl font-light tracking-wide"
           >
-            Eleva tu belleza natural con cuidado artesanal.
+            Piel sana y luminosa, con ciencia y cuidado experto.
           </motion.h2>
 
           <motion.div
@@ -97,14 +100,14 @@ export default function RitualsScreen({
             <button
               id="hero-book-btn"
               onClick={onBookAppointment}
-              className="py-4 px-8 bg-[#764229] hover:bg-[#54311f] active:scale-[0.97] text-white text-xs font-semibold tracking-[0.2em] rounded-sm transition-[transform,background-color] duration-150 font-sans uppercase shadow-lg text-center cursor-pointer"
+              className="py-4 px-8 bg-[#35755d] hover:bg-[#23543f] active:scale-[0.97] text-white text-xs font-semibold tracking-[0.2em] rounded-sm transition-[transform,background-color] duration-150 font-sans uppercase shadow-lg text-center cursor-pointer"
             >
               Reservar una cita
             </button>
             <button
               id="hero-philosophy-btn"
               onClick={onOpenPhilosophy}
-              className="py-4 px-8 border border-[#faf6f0]/60 hover:bg-white/10 active:scale-[0.97] text-[#faf6f0] text-xs font-semibold tracking-[0.2em] rounded-sm transition-[transform,background-color] duration-150 font-sans uppercase backdrop-blur-xs text-center cursor-pointer"
+              className="py-4 px-8 border border-[#35755d]/50 hover:bg-[#35755d]/5 active:scale-[0.97] text-[#23543f] text-xs font-semibold tracking-[0.2em] rounded-sm transition-[transform,background-color] duration-150 font-sans uppercase backdrop-blur-xs text-center cursor-pointer"
             >
               Nuestra filosofía
             </button>
@@ -144,14 +147,14 @@ export default function RitualsScreen({
           <section
             key={section.key}
             id={`rituals-section-${section.key}`}
-            className={`py-16 px-6 max-w-6xl mx-auto ${section.border ? 'border-t border-[#efe6dc]/50' : ''}`}
+            className={`py-16 px-6 max-w-6xl mx-auto ${section.border ? 'border-t border-[#dcebe2]/50' : ''}`}
           >
             <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
               <div>
-                <span className="text-[10px] font-sans font-bold tracking-[0.3em] text-[#764229]/70 uppercase block mb-1">
+                <span className="text-[10px] font-sans font-bold tracking-[0.3em] text-[#35755d]/70 uppercase block mb-1">
                   {section.eyebrow}
                 </span>
-                <h3 className="text-3xl sm:text-4xl font-serif text-[#4a2815] font-light">
+                <h3 className="text-3xl sm:text-4xl font-serif text-[#23543f] font-light">
                   {section.label}
                 </h3>
                 <p className="text-xs text-stone-500 mt-1.5 max-w-lg leading-relaxed">
@@ -160,7 +163,7 @@ export default function RitualsScreen({
               </div>
               <button
                 onClick={onBookAppointment}
-                className="w-full sm:w-auto flex-shrink-0 py-2.5 px-5 border border-[#764229]/40 text-[#764229] hover:bg-[#764229]/5 active:scale-[0.97] text-[10px] font-sans font-semibold tracking-widest uppercase rounded-full transition-[transform,background-color] duration-150 flex items-center justify-center gap-1.5"
+                className="w-full sm:w-auto flex-shrink-0 py-2.5 px-5 border border-[#35755d]/40 text-[#35755d] hover:bg-[#35755d]/5 active:scale-[0.97] text-[10px] font-sans font-semibold tracking-widest uppercase rounded-full transition-[transform,background-color] duration-150 flex items-center justify-center gap-1.5"
               >
                 Reservar <ArrowRight className="w-3 h-3" />
               </button>
@@ -186,7 +189,7 @@ export default function RitualsScreen({
                   }}
                   onClick={() => onViewRitual(ritual)}
                 >
-                  <div className="relative h-[340px] w-full rounded-xs overflow-hidden mb-4 bg-[#efe6dc] shadow-sm">
+                  <div className="relative h-[340px] w-full rounded-xs overflow-hidden mb-4 bg-[#dcebe2] shadow-sm">
                     <img
                       src={ritual.imageUrl}
                       alt={ritual.name}
@@ -197,28 +200,28 @@ export default function RitualsScreen({
                       <span className={`absolute top-4 right-4 backdrop-blur-xs border text-[9px] font-sans font-bold tracking-widest px-3 py-1 rounded-sm uppercase ${
                         ritual.customQuote
                           ? 'bg-sky-50/90 border-sky-200/60 text-sky-700'
-                          : 'bg-[#efe6dc]/95 border-[#faf6f0]/50 text-[#764229]'
+                          : 'bg-[#dcebe2]/95 border-[#f3f8f5]/50 text-[#35755d]'
                       }`}>
                         {ritual.badge}
                       </span>
                     )}
-                    <div className="absolute bottom-3 left-3 bg-[#1c130d]/45 text-[#efe6dc] font-mono text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider backdrop-blur-xs">
+                    <div className="absolute bottom-3 left-3 bg-[#0f231b]/45 text-[#dcebe2] font-mono text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider backdrop-blur-xs">
                       {ritual.duration} MIN
                     </div>
                   </div>
                   <div className="flex flex-col">
                     <div className="flex justify-between items-baseline mb-1">
-                      <h4 className="text-xl font-serif text-[#4a2815] group-hover:text-[#764229] transition-colors duration-200 leading-snug">
+                      <h4 className="text-xl font-serif text-[#23543f] group-hover:text-[#35755d] transition-colors duration-200 leading-snug">
                         {ritual.name}
                       </h4>
-                      <span className="text-sm font-serif font-bold text-[#764229] ml-2 flex-shrink-0">
+                      <span className="text-sm font-serif font-bold text-[#35755d] ml-2 flex-shrink-0">
                         {ritual.customQuote ? 'Cotización' : `$${ritual.price}`}
                       </span>
                     </div>
                     <p className="text-xs text-stone-500 leading-relaxed mb-3 line-clamp-2">
                       {ritual.shortDescription}
                     </p>
-                    <div className="inline-flex items-center gap-1.5 text-[10px] font-sans font-bold tracking-widest text-[#764229] uppercase border-b border-transparent group-hover:border-[#764229] w-max transition-[border-color] duration-200">
+                    <div className="inline-flex items-center gap-1.5 text-[10px] font-sans font-bold tracking-widest text-[#35755d] uppercase border-b border-transparent group-hover:border-[#35755d] w-max transition-[border-color] duration-200">
                       Explorar <ArrowRight className="w-3.5 h-3.5" />
                     </div>
                   </div>
@@ -230,17 +233,17 @@ export default function RitualsScreen({
       })}
 
       {/* 4. SPECIALIST SPOTLIGHT */}
-      <section id="specialist-spotlight" className="py-16 px-6 bg-[#f4eae1]/40 border-t border-b border-[#efe6dc]/50">
+      <section id="specialist-spotlight" className="py-16 px-6 bg-[#e6f1ea]/40 border-t border-b border-[#dcebe2]/50">
         <div className="max-w-4xl mx-auto">
           <div className="mb-10 text-center">
-            <h3 className="text-3xl sm:text-4xl font-serif text-[#4a2815] font-light">Tu Especialista</h3>
+            <h3 className="text-3xl sm:text-4xl font-serif text-[#23543f] font-light">Tu Especialista</h3>
             <p className="text-xs text-stone-600 mt-2 max-w-sm mx-auto leading-relaxed font-serif italic">
               Atención personalizada y profesional en cada visita.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-8 items-center bg-white rounded-xl border border-[#efe6dc] shadow-xs overflow-hidden">
-            <div className="w-full sm:w-64 h-64 sm:h-auto flex-shrink-0 bg-[#efe6dc]">
+          <div className="flex flex-col sm:flex-row gap-8 items-center bg-white rounded-xl border border-[#dcebe2] shadow-xs overflow-hidden">
+            <div className="w-full sm:w-64 h-64 sm:h-auto flex-shrink-0 bg-[#dcebe2]">
               <img
                 src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80"
                 alt="Anel, Especialista Aura"
@@ -249,10 +252,10 @@ export default function RitualsScreen({
               />
             </div>
             <div className="p-6 sm:p-8 flex flex-col justify-center">
-              <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#764229] uppercase block mb-2">
+              <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#35755d] uppercase block mb-2">
                 Especialista Certificada
               </span>
-              <h4 className="text-3xl font-serif text-[#4a2815] leading-tight mb-1">Anel (Especialista Aura)</h4>
+              <h4 className="text-3xl font-serif text-[#23543f] leading-tight mb-1">Anel (Especialista Aura)</h4>
               <p className="text-xs font-mono text-stone-500 mb-4 uppercase tracking-wider">Lic. Cosmetología e Imagen</p>
               <p className="text-sm text-stone-600 leading-relaxed font-serif mb-6">
                 Licenciada en Cosmetología e Imagen, especializada en maquillaje artístico, técnicas faciales avanzadas y servicios corporales. Cada visita es una experiencia diseñada para realzar tu belleza natural con técnicas profesionales y atención personalizada.
@@ -260,7 +263,7 @@ export default function RitualsScreen({
               <button
                 id="specialist-book-btn"
                 onClick={onBookAppointment}
-                className="w-full sm:w-auto py-3 px-8 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.97] text-white text-xs font-semibold tracking-[0.2em] rounded-sm transition-[transform,background-color] duration-150 font-sans uppercase cursor-pointer"
+                className="w-full sm:w-auto py-3 px-8 bg-[#35755d] hover:bg-[#23543f] active:scale-[0.97] text-white text-xs font-semibold tracking-[0.2em] rounded-sm transition-[transform,background-color] duration-150 font-sans uppercase cursor-pointer"
               >
                 Agendar con Anel
               </button>
@@ -272,8 +275,8 @@ export default function RitualsScreen({
       {/* 5. REFINE CONCIERGE CALLOUT BLOCK */}
       <section id="refine-callout" className="py-16 px-6 max-w-4xl mx-auto flex flex-col md:flex-row gap-8 items-center justify-between">
         <div className="max-w-md">
-          <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#764229] uppercase">Evaluación de la Piel</span>
-          <h4 className="text-3xl font-serif text-[#4a2815] mt-1 mb-2 leading-snug">Descubre el servicio ideal para tu piel</h4>
+          <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#35755d] uppercase">Evaluación de la Piel</span>
+          <h4 className="text-3xl font-serif text-[#23543f] mt-1 mb-2 leading-snug">Descubre el servicio ideal para tu piel</h4>
           <p className="text-xs text-stone-600 leading-relaxed font-serif italic">
             Completa nuestro breve análisis sensorial botánico. Cuéntanos acerca de tus sensibilidades cutáneas y preocupaciones, y nuestro algoritmo identificará los servicios y activos ideales para el ritmo óptimo de tu piel.
           </p>
@@ -281,19 +284,19 @@ export default function RitualsScreen({
         <button
           id="go-to-refine-block"
           onClick={() => onNavigateToTab('refine')}
-          className="w-full md:w-auto py-3.5 px-8 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center justify-center gap-2 shadow-md cursor-pointer"
+          className="w-full md:w-auto py-3.5 px-8 bg-[#35755d] hover:bg-[#23543f] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center justify-center gap-2 shadow-md cursor-pointer"
         >
-          <Sparkles className="w-4 h-4 text-[#efe6dc]" />
+          <Sparkles className="w-4 h-4 text-[#dcebe2]" />
           Refinar mi Rutina
         </button>
       </section>
 
       {/* 6. FOUNDER CITATION QUOTATION SECTION */}
-      <section id="founder-citation" className="py-24 px-6 bg-[#faf8f5] text-center border-t border-[#efe6dc]/40">
+      <section id="founder-citation" className="py-24 px-6 bg-[#f7fbf9] text-center border-t border-[#dcebe2]/40">
         <div className="max-w-2xl mx-auto">
-          <span className="text-5xl font-serif text-[#e4dacd] text-center block mb-2 select-none leading-none">“</span>
+          <span className="text-5xl font-serif text-[#d3e5da] text-center block mb-2 select-none leading-none">“</span>
           
-          <blockquote className="text-2xl sm:text-3xl font-serif text-[#764229] italic leading-relaxed tracking-wide font-light mb-8">
+          <blockquote className="text-2xl sm:text-3xl font-serif text-[#35755d] italic leading-relaxed tracking-wide font-light mb-8">
             Tu belleza natural es el lienzo. Mi trabajo es hacerla brillar con técnica, cuidado y pasión.
           </blockquote>
           
@@ -304,19 +307,27 @@ export default function RitualsScreen({
       </section>
 
       {/* 7. ELEGANT FOOTER */}
-      <footer id="aura-footer" className="py-12 px-6 border-t border-[#efe6dc] bg-stone-50 text-stone-400">
+      <footer id="aura-footer" className="py-12 px-6 border-t border-[#dcebe2] bg-stone-50 text-stone-400">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
-            <span className="text-xl font-serif tracking-[0.2em] text-[#4a2815]">AURA</span>
+            <span className="text-xl font-serif tracking-[0.2em] text-[#23543f]">AURA</span>
             <p className="text-[10px] mt-1.5 text-stone-500 font-sans tracking-wide">
               Cosmetología e Imagen Profesional.
             </p>
+            <a
+              href="https://wa.me/526381285959"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block text-[10px] mt-1 text-[#35755d] hover:text-[#23543f] font-sans font-semibold tracking-wide transition-colors"
+            >
+              WhatsApp: 638 128 5959
+            </a>
           </div>
           <div className="flex gap-6 text-[10px] font-sans font-semibold tracking-widest uppercase">
-            <button onClick={onOpenPhilosophy} className="hover:text-stone-700 transition-[#764229] cursor-pointer">Filosofía</button>
-            <button onClick={() => onNavigateToTab('refine')} className="hover:text-stone-700 transition-[#764229] cursor-pointer">Análisis</button>
-            {/* <button onClick={() => onNavigateToTab('shop')} className="hover:text-stone-700 transition-[#764229] cursor-pointer">Tienda</button> */}
-            <button onClick={onBookAppointment} className="hover:text-stone-700 transition-[#764229] cursor-pointer">Reservar</button>
+            <button onClick={onOpenPhilosophy} className="hover:text-stone-700 transition-[#35755d] cursor-pointer">Filosofía</button>
+            <button onClick={() => onNavigateToTab('refine')} className="hover:text-stone-700 transition-[#35755d] cursor-pointer">Análisis</button>
+            {/* <button onClick={() => onNavigateToTab('shop')} className="hover:text-stone-700 transition-[#35755d] cursor-pointer">Tienda</button> */}
+            <button onClick={onBookAppointment} className="hover:text-stone-700 transition-[#35755d] cursor-pointer">Reservar</button>
           </div>
           <p className="text-[9px] font-mono text-center md:text-right">
             © 2026 SANTUARIO AURA. Todos los derechos reservados.

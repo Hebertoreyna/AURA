@@ -6,6 +6,8 @@ import {
   Lock, ArrowRight, LogOut, Info, AlertTriangle, ChevronLeft, ChevronRight,
   Download, Share2, Palette, Clock, Sliders, CheckSquare, Gift, Heart, Tag, User, SlidersHorizontal
 } from 'lucide-react';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../lib/firebase';
 import { Appointment, SkinProfile } from '../types';
 import { RITUALS } from '../data';
 
@@ -36,11 +38,11 @@ export default function ProfileScreen({
   onUpdateAppointmentNotes,
   onDeleteAppointment,
 }: ProfileScreenProps) {
-  // Master authentication passcode for administration block (configurable via env)
-  const MASTER_PIN = (import.meta as any).env?.VITE_ADMIN_PIN || '2026';
-  
+  // Autenticación real vía Firebase Auth (email/contraseña del personal AURA)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [passcodeInput, setPasscodeInput] = useState<string>('');
+  const [emailInput, setEmailInput] = useState<string>('');
+  const [passwordInput, setPasswordInput] = useState<string>('');
+  const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   
   // Admin search and list filter states
@@ -64,7 +66,7 @@ export default function ProfileScreen({
   const [selectedRitualForCard, setSelectedRitualForCard] = useState<any | null>(null);
   const [selectedCardTheme, setSelectedCardTheme] = useState<string>('champagne');
   const [customPriceVal, setCustomPriceVal] = useState<string>('');
-  const [customFootnoteVal, setCustomFootnoteVal] = useState<string>('Reserva vía WhatsApp: 55-AURA-WELL');
+  const [customFootnoteVal, setCustomFootnoteVal] = useState<string>('Reserva vía WhatsApp: 638 128 5959');
   const [customDiscountText, setCustomDiscountText] = useState<string>('Piel saludable y luminosa desde la primera sesión');
   const [assignedSpecialist, setAssignedSpecialist] = useState<string>('Atendido por Anel, Licenciada en Cosmetología Aura');
 
@@ -81,42 +83,45 @@ export default function ProfileScreen({
     return matchesSearch && matchesCategory;
   });
 
-  // Check persistent login session on load ("este desde donde entre tiene mi sesion")
+  // Sesión persistente manejada por Firebase Auth (sobrevive recargas del navegador)
   useEffect(() => {
-    const sessionToken = localStorage.getItem('aura_admin_session');
-    if (sessionToken === 'authenticated_aura_admin') {
-      setIsAuthenticated(true);
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAuthenticated(!!user);
+    });
+    return unsubscribe;
   }, []);
 
-  // Login handler
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  // Login handler — valida credenciales contra Firebase Auth
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passcodeInput === MASTER_PIN) {
-      localStorage.setItem('aura_admin_session', 'authenticated_aura_admin');
-      setIsAuthenticated(true);
-      setLoginError(null);
-      setPasscodeInput('');
-    } else {
-      setLoginError('PIN administrativo incorrecto. Intente de nuevo.');
-      setPasscodeInput('');
-    }
-  };
-
-  // Keyboard PIN button pad assistant
-  const handlePinPadClick = (num: string) => {
+    if (!emailInput || !passwordInput || isLoggingIn) return;
+    setIsLoggingIn(true);
     setLoginError(null);
-    if (passcodeInput.length < 4) {
-      setPasscodeInput(prev => prev + num);
+    try {
+      await signInWithEmailAndPassword(auth, emailInput.trim(), passwordInput);
+      setEmailInput('');
+      setPasswordInput('');
+    } catch (err: any) {
+      const code = err?.code || '';
+      if (code === 'auth/too-many-requests') {
+        setLoginError('Demasiados intentos. Espera unos minutos e intenta de nuevo.');
+      } else if (code === 'auth/network-request-failed') {
+        setLoginError('Sin conexión. Verifica tu internet e intenta de nuevo.');
+      } else {
+        setLoginError('Correo o contraseña incorrectos. Intente de nuevo.');
+      }
+      setPasswordInput('');
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
-  const handlePinPadClear = () => {
-    setPasscodeInput('');
-  };
-
-  const handleSignOut = () => {
-    localStorage.removeItem('aura_admin_session');
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.warn('Sign out failed:', e);
+    }
     setIsAuthenticated(false);
   };
 
@@ -179,9 +184,9 @@ export default function ProfileScreen({
       decorColor: '#C5A880',
       textColor: '#3D2517',
       mutedColor: '#756358',
-      accentBg: '#F4ECE1',
-      accentText: '#764229',
-      badgeClass: 'bg-[#F4ECE1] text-[#764229]',
+      accentBg: '#e6f1ea',
+      accentText: '#35755d',
+      badgeClass: 'bg-[#e6f1ea] text-[#35755d]',
       cardClass: 'bg-[#FDFBF9] text-[#3D2517] border-[#C5A880]'
     },
     {
@@ -217,7 +222,7 @@ export default function ProfileScreen({
     setSelectedCardTheme('champagne');
     setCustomPriceVal(ritual.customQuote ? 'Valoración Personalizada de Piel' : `$${ritual.price} MXN`);
     setCustomDiscountText(ritual.badge ? `Ritual con Sello AURA - ${ritual.badge}` : 'Piel saludable y luminosa desde la primera sesión');
-    setCustomFootnoteVal('Agenda al WhatsApp: 55-AURA-WELL');
+    setCustomFootnoteVal('Agenda al WhatsApp: 638 128 5959');
     setAssignedSpecialist('Atendido por Anel, Licenciada en Cosmetología Aura');
   };
 
@@ -525,45 +530,48 @@ export default function ProfileScreen({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3 }}
-            className="max-w-md mx-auto my-12 bg-white rounded-2xl border border-[#efe6dc] shadow-xl overflow-hidden p-6 sm:p-8 space-y-6"
+            className="max-w-md mx-auto my-12 bg-white rounded-2xl border border-[#dcebe2] shadow-xl overflow-hidden p-6 sm:p-8 space-y-6"
           >
             <div className="text-center space-y-2">
-              <div className="w-12 h-12 bg-[#764229]/10 rounded-full flex items-center justify-center text-[#764229] mx-auto">
+              <div className="w-12 h-12 bg-[#35755d]/10 rounded-full flex items-center justify-center text-[#35755d] mx-auto">
                 <Lock className="w-6 h-6" />
               </div>
-              <h2 className="font-serif text-2xl font-bold text-[#4a2815]">Santuario AURA</h2>
+              <h2 className="font-serif text-2xl font-bold text-[#23543f]">Santuario AURA</h2>
               <p className="text-xs text-stone-500 max-w-xs mx-auto">
                 Acceso reservado únicamente para terapeutas y personal de administración.
               </p>
             </div>
 
             <form onSubmit={handleLoginSubmit} className="space-y-4">
-              <div className="space-y-1.5 text-center">
-                <label className="text-[10px] font-sans font-bold tracking-widest text-[#764229] uppercase">
-                  Código de Seguridad PIN
+              <div className="space-y-1.5">
+                <label htmlFor="admin-email" className="text-[10px] font-sans font-bold tracking-widest text-[#35755d] uppercase">
+                  Correo del personal
                 </label>
-                
-                {/* Visual dots placeholder indicators */}
-                <div className="flex justify-center gap-3 py-3">
-                  {[1, 2, 3, 4].map((dotIndex) => (
-                    <div 
-                      key={dotIndex}
-                      className={`w-3.5 h-3.5 rounded-full border transition-all ${
-                        passcodeInput.length >= dotIndex 
-                          ? 'bg-[#764229] border-[#764229] scale-110 shadow-xs' 
-                          : 'bg-stone-50 border-stone-300'
-                      }`}
-                    />
-                  ))}
-                </div>
-
                 <input
+                  id="admin-email"
+                  type="email"
+                  autoComplete="username"
+                  value={emailInput}
+                  onChange={(e) => { setEmailInput(e.target.value); setLoginError(null); }}
+                  placeholder="correo@aura.com"
+                  className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-[#35755d] focus:bg-white transition-colors"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="admin-password" className="text-[10px] font-sans font-bold tracking-widest text-[#35755d] uppercase">
+                  Contraseña
+                </label>
+                <input
+                  id="admin-password"
                   type="password"
-                  maxLength={4}
-                  readOnly
-                  value={passcodeInput}
-                  placeholder="PIN administrativo"
-                  className="hidden" 
+                  autoComplete="current-password"
+                  value={passwordInput}
+                  onChange={(e) => { setPasswordInput(e.target.value); setLoginError(null); }}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-[#35755d] focus:bg-white transition-colors"
+                  required
                 />
               </div>
 
@@ -574,53 +582,22 @@ export default function ProfileScreen({
                 </div>
               )}
 
-              {/* PREMIUM KEYPAD GRID */}
-              <div className="grid grid-cols-3 gap-2.5 max-w-[280px] mx-auto pt-2">
-                {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
-                  <button
-                    key={num}
-                    type="button"
-                    onClick={() => handlePinPadClick(num)}
-                    className="h-12 rounded-full border border-stone-200 bg-stone-50 hover:bg-[#764229]/5 text-stone-700 hover:text-[#764229] font-serif font-bold text-lg flex items-center justify-center transition-colors shadow-2xs active:scale-95 cursor-pointer"
-                  >
-                    {num}
-                  </button>
-                ))}
-                
-                <button
-                  type="button"
-                  onClick={handlePinPadClear}
-                  className="h-12 rounded-full text-stone-400 hover:text-rose-600 font-sans text-xs flex items-center justify-center transition-colors uppercase font-bold tracking-wider cursor-pointer"
-                >
-                  Limpiar
-                </button>
-                
-                <button
-                  type="button"
-                  onClick={() => handlePinPadClick('0')}
-                  className="h-12 rounded-full border border-stone-200 bg-stone-50 hover:bg-[#764229]/5 text-stone-700 hover:text-[#764229] font-serif font-bold text-lg flex items-center justify-center transition-colors shadow-2xs active:scale-95 cursor-pointer"
-                >
-                  0
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={passcodeInput.length < 4}
-                  className={`h-12 rounded-full flex items-center justify-center transition-all shadow-xs cursor-pointer ${
-                    passcodeInput.length === 4 
-                      ? 'bg-[#5e6c58] text-white hover:bg-[#4b5746]' 
-                      : 'bg-stone-100 text-stone-300 pointer-events-none'
-                  }`}
-                  aria-label="Submit passcode"
-                >
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={!emailInput || !passwordInput || isLoggingIn}
+                className={`w-full h-12 rounded-xl flex items-center justify-center gap-2 font-sans font-bold text-sm uppercase tracking-wider transition-all shadow-xs cursor-pointer ${
+                  emailInput && passwordInput && !isLoggingIn
+                    ? 'bg-[#45705f] text-white hover:bg-[#38594c]'
+                    : 'bg-stone-100 text-stone-300 pointer-events-none'
+                }`}
+              >
+                {isLoggingIn ? 'Verificando…' : <>Ingresar <ArrowRight className="w-4 h-4" /></>}
+              </button>
 
               {/* Secure note for staff */}
-              <div className="pt-4 border-t border-dashed border-[#efe6dc] text-center font-sans">
+              <div className="pt-4 border-t border-dashed border-[#dcebe2] text-center font-sans">
                 <p className="text-[10px] text-stone-400">
-                  <span className="font-semibold text-stone-500">Aviso:</span> Conexión cifrada de uso exclusivo de AURA. Se registrará la dirección IP y el navegador al iniciar sesión. Con este PIN persistirá la sesión en este dispositivo.
+                  <span className="font-semibold text-stone-500">Aviso:</span> Acceso protegido con Firebase Authentication, de uso exclusivo del personal de AURA. La sesión persistirá en este dispositivo hasta cerrar sesión.
                 </p>
               </div>
             </form>
@@ -639,14 +616,14 @@ export default function ProfileScreen({
             className="space-y-6 text-stone-800"
           >
             {/* WORKSPACE HEADER BAR */}
-            <div className="bg-gradient-to-r from-[#4a2815] to-[#2c1d11] text-white rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 border border-[#4a2815] shadow-md">
+            <div className="bg-gradient-to-r from-[#23543f] to-[#142e24] text-white rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 border border-[#23543f] shadow-md">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#f4eae1]/10 border border-[#efe6dc]/20 flex items-center justify-center text-[#f4eae1]">
+                <div className="w-10 h-10 rounded-full bg-[#e6f1ea]/10 border border-[#dcebe2]/20 flex items-center justify-center text-[#e6f1ea]">
                   <ShieldCheck className="w-5.5 h-5.5" />
                 </div>
                 <div>
                   <h3 className="font-serif font-bold text-white text-base sm:text-lg">Panel de Administración AURA</h3>
-                  <p className="text-[10px] sm:text-xs text-[#efe6dc]/70 font-mono">Control de Reservaciones & Wellness Skincare</p>
+                  <p className="text-[10px] sm:text-xs text-[#dcebe2]/70 font-mono">Control de Reservaciones & Wellness Skincare</p>
                 </div>
               </div>
               
@@ -660,16 +637,16 @@ export default function ProfileScreen({
             </div>
 
             {/* TAB-SELECTION BAR FOR DUAL ADMINISTRATOR CONTROLS */}
-            <div className="flex border-b border-[#efe6dc] pb-0.5 gap-2">
+            <div className="flex border-b border-[#dcebe2] pb-0.5 gap-2">
               <button
                 onClick={() => setAdminSubTab('appointments')}
                 className={`py-2.5 px-4 text-xs font-sans font-bold uppercase tracking-wider transition-all border-b-2 flex items-center gap-2 cursor-pointer ${
                   adminSubTab === 'appointments'
-                    ? 'border-[#764229] text-[#764229]'
+                    ? 'border-[#35755d] text-[#35755d]'
                     : 'border-transparent text-stone-400 hover:text-stone-750'
                 }`}
               >
-                <Calendar className="w-4 h-4 text-[#764229]" />
+                <Calendar className="w-4 h-4 text-[#35755d]" />
                 <span>Control de Citas</span>
               </button>
               <button
@@ -677,11 +654,11 @@ export default function ProfileScreen({
                 onClick={() => setAdminSubTab('serviceCards')}
                 className={`py-2.5 px-4 text-xs font-sans font-bold uppercase tracking-wider transition-all border-b-2 flex items-center gap-2 cursor-pointer ${
                   adminSubTab === 'serviceCards'
-                    ? 'border-[#764229] text-[#764229] font-extrabold'
+                    ? 'border-[#35755d] text-[#35755d] font-extrabold'
                     : 'border-transparent text-stone-400 hover:text-stone-750'
                 }`}
               >
-                <Share2 className="w-4 h-4 text-[#764229]" />
+                <Share2 className="w-4 h-4 text-[#35755d]" />
                 <span>Fichas de Servicios</span>
               </button>
             </div>
@@ -690,15 +667,15 @@ export default function ProfileScreen({
               <>
                 {/* ADMON METRIC CARDS */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-              <div className="bg-white p-4 rounded-xl border border-[#efe6dc] shadow-2xs">
+              <div className="bg-white p-4 rounded-xl border border-[#dcebe2] shadow-2xs">
                 <span className="text-[9px] font-sans font-bold tracking-widest text-stone-400 uppercase flex items-center gap-1">
-                  <DollarSign className="w-3 h-3 text-[#5e6c58]" /> Estimado Mensual
+                  <DollarSign className="w-3 h-3 text-[#45705f]" /> Estimado Mensual
                 </span>
-                <p className="text-xl sm:text-2xl font-serif font-bold text-[#4a2815] mt-1">${estimatedRevenue}</p>
-                <span className="text-[9px] text-[#5e6c58] font-semibold mt-0.5 block">Excluye cancelados</span>
+                <p className="text-xl sm:text-2xl font-serif font-bold text-[#23543f] mt-1">${estimatedRevenue}</p>
+                <span className="text-[9px] text-[#45705f] font-semibold mt-0.5 block">Excluye cancelados</span>
               </div>
               
-              <div className="bg-white p-4 rounded-xl border border-[#efe6dc] shadow-2xs">
+              <div className="bg-white p-4 rounded-xl border border-[#dcebe2] shadow-2xs">
                 <span className="text-[9px] font-sans font-bold tracking-widest text-stone-400 uppercase flex items-center gap-1">
                   <Calendar className="w-3 h-3 text-stone-400" /> Totales
                 </span>
@@ -706,15 +683,15 @@ export default function ProfileScreen({
                 <span className="text-[9px] text-stone-400 mt-0.5 block">Registros en base de datos</span>
               </div>
 
-              <div className="bg-white p-4 rounded-xl border border-[#efe6dc] shadow-2xs">
+              <div className="bg-white p-4 rounded-xl border border-[#dcebe2] shadow-2xs">
                 <span className="text-[9px] font-sans font-bold tracking-widest text-stone-400 uppercase flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-[#764229]" /> Por Atender (Activos)
+                  <Sparkles className="w-3 h-3 text-[#35755d]" /> Por Atender (Activos)
                 </span>
-                <p className="text-xl sm:text-2xl font-serif font-bold text-[#5e6c58] mt-1">{activeBookings}</p>
-                <span className="text-[9px] text-[#5e6c58] font-semibold mt-0.5 block">Citas activas</span>
+                <p className="text-xl sm:text-2xl font-serif font-bold text-[#45705f] mt-1">{activeBookings}</p>
+                <span className="text-[9px] text-[#45705f] font-semibold mt-0.5 block">Citas activas</span>
               </div>
 
-              <div className="bg-white p-4 rounded-xl border border-[#efe6dc] shadow-2xs">
+              <div className="bg-white p-4 rounded-xl border border-[#dcebe2] shadow-2xs">
                 <span className="text-[9px] font-sans font-bold tracking-widest text-stone-400 uppercase flex items-center gap-1">
                   <Calendar className="w-3 h-3 text-rose-500" /> Cancelados
                 </span>
@@ -724,16 +701,16 @@ export default function ProfileScreen({
             </div>
 
             {/* SYNC NOTI ALERT (REVERSION DIRECTIVE INSTRUCTIONS) */}
-            <div className="bg-[#fcfaf7] border-l-4 border-[#764229] rounded-xl p-4 sm:p-5 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between shadow-2xs">
+            <div className="bg-[#fafcfb] border-l-4 border-[#35755d] rounded-xl p-4 sm:p-5 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between shadow-2xs">
               <div className="space-y-1">
                 <h5 className="font-serif font-bold text-stone-800 text-sm flex items-center gap-1.5">
-                  <Info className="w-4 h-4 text-[#764229]" /> ¿Los cambios se revierten al actualizar?
+                  <Info className="w-4 h-4 text-[#35755d]" /> ¿Los cambios se revierten al actualizar?
                 </h5>
                 <p className="text-xs text-stone-600 max-w-3xl leading-relaxed">
                   Firestore requiere permisos explícitos para modificar o borrar documentos en producción. Ya hemos generado el archivo de configuración ideal en <strong>/firestore.rules</strong> en tu servidor. Solo debes copiar su contenido y pegarlo en la pestaña <strong>Rules</strong> de tu Firebase Console para permitir cambios permanentes en tus citas.
                 </p>
               </div>
-              <div className="bg-[#764229]/5 text-[#764229] border border-[#764229]/20 px-3 py-1.5 rounded-lg text-[10px] font-mono whitespace-nowrap self-stretch md:self-auto text-center font-bold">
+              <div className="bg-[#35755d]/5 text-[#35755d] border border-[#35755d]/20 px-3 py-1.5 rounded-lg text-[10px] font-mono whitespace-nowrap self-stretch md:self-auto text-center font-bold">
                 Copia firestore.rules
               </div>
             </div>
@@ -743,12 +720,12 @@ export default function ProfileScreen({
 
               {/* COL 1: INTERACTIVE CALENDAR SECTION */}
               <div className="space-y-4">
-                <div className="bg-white rounded-xl border border-[#efe6dc] p-4 shadow-2xs space-y-4">
+                <div className="bg-white rounded-xl border border-[#dcebe2] p-4 shadow-2xs space-y-4">
                   
                   {/* Calendar Widget Title / Month Navigation */}
-                  <div className="flex items-center justify-between pb-2 border-b border-[#efe6dc]/50">
-                    <span className="text-xs font-serif font-bold text-[#4a2815] flex items-center gap-1.5">
-                      <Calendar className="w-4 h-4 text-[#764229]" />
+                  <div className="flex items-center justify-between pb-2 border-b border-[#dcebe2]/50">
+                    <span className="text-xs font-serif font-bold text-[#23543f] flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4 text-[#35755d]" />
                       Agenda Mensual
                     </span>
                     
@@ -813,8 +790,8 @@ export default function ProfileScreen({
                           className={`min-h-[44px] p-1 flex flex-col justify-between items-center rounded-lg cursor-pointer transition-all border ${
                             day.isCurrentMonth 
                               ? isSelected 
-                                ? 'bg-[#764229] border-[#764229] text-white font-bold scale-102 shadow-xs' 
-                                : 'bg-stone-50 hover:bg-[#764229]/5 border-stone-200/50 text-stone-800'
+                                ? 'bg-[#35755d] border-[#35755d] text-white font-bold scale-102 shadow-xs' 
+                                : 'bg-stone-50 hover:bg-[#35755d]/5 border-stone-200/50 text-stone-800'
                               : 'bg-stone-100/40 border-transparent text-stone-300'
                           }`}
                         >
@@ -824,7 +801,7 @@ export default function ProfileScreen({
                           {/* Colored Dots Indicators under the day */}
                           <div className="flex gap-0.5 justify-center mt-1 w-full flex-wrap h-1.5 mb-0.5">
                             {counts.scheduled > 0 && (
-                              <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[#e5d4cb]' : 'bg-[#5e6c58]'} inline-block`} title={`${counts.scheduled} cita(s) vigentes`} />
+                              <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[#cfe3d8]' : 'bg-[#45705f]'} inline-block`} title={`${counts.scheduled} cita(s) vigentes`} />
                             )}
                             {counts.completed > 0 && (
                               <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-indigo-200' : 'bg-indigo-500'} inline-block`} title={`${counts.completed} completadas`} />
@@ -839,9 +816,9 @@ export default function ProfileScreen({
                   </div>
 
                   {/* Calendar explanatory legend */}
-                  <div className="pt-2 border-t border-[#efe6dc]/50 flex items-center justify-between text-[9px] text-[#764229]/80 font-mono">
+                  <div className="pt-2 border-t border-[#dcebe2]/50 flex items-center justify-between text-[9px] text-[#35755d]/80 font-mono">
                     <span className="flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#5e6c58]" /> Vigente
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#45705f]" /> Vigente
                     </span>
                     <span className="flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#4338ca]" /> Atendida
@@ -855,7 +832,7 @@ export default function ProfileScreen({
 
                 {/* Info block for selected date */}
                 {selectedCalendarDate && (
-                  <div className="bg-[#f0ece6] border border-[#efe6dc] rounded-xl p-3.5 space-y-2">
+                  <div className="bg-[#eaf2ed] border border-[#dcebe2] rounded-xl p-3.5 space-y-2">
                     <div className="flex items-start justify-between">
                       <div className="space-y-0.5">
                         <span className="text-[9px] uppercase font-mono tracking-wider text-stone-400 font-bold block">Filtro de fecha activo</span>
@@ -865,7 +842,7 @@ export default function ProfileScreen({
                       </div>
                       <button
                         onClick={() => setSelectedCalendarDate(null)}
-                        className="text-[10px] font-mono text-[#764229] hover:underline cursor-pointer border border-[#764229]/20 bg-[#f4ece1] px-2 py-0.5 rounded-md hover:bg-[#efe6dc] transition-colors"
+                        className="text-[10px] font-mono text-[#35755d] hover:underline cursor-pointer border border-[#35755d]/20 bg-[#e6f1ea] px-2 py-0.5 rounded-md hover:bg-[#dcebe2] transition-colors"
                       >
                         Limpiar
                       </button>
@@ -879,13 +856,13 @@ export default function ProfileScreen({
 
               {/* COL 2 & 3: CENTRAL AGENDA AGENDA LIST */}
               <div className="lg:col-span-2 space-y-4">
-                <div className="bg-white rounded-xl border border-[#efe6dc] p-5 space-y-4 shadow-2xs">
+                <div className="bg-white rounded-xl border border-[#dcebe2] p-5 space-y-4 shadow-2xs">
                   
                   {/* List Header Search query bar */}
                   <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
                     <div className="space-y-0.5 self-start">
-                      <h4 className="text-xs font-sans font-bold tracking-wider text-[#4a2815] uppercase flex items-center gap-1.5">
-                        <Eye className="w-4 h-4 text-[#764229]" />
+                      <h4 className="text-xs font-sans font-bold tracking-wider text-[#23543f] uppercase flex items-center gap-1.5">
+                        <Eye className="w-4 h-4 text-[#35755d]" />
                         Listado de Citas ({filteredBookings.length})
                       </h4>
                       {selectedCalendarDate ? (
@@ -905,13 +882,13 @@ export default function ProfileScreen({
                         placeholder="Busca por huésped, ritual, especialista..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full text-xs pl-9 pr-4 py-2 bg-stone-50 border border-[#efe6dc] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#764229]"
+                        className="w-full text-xs pl-9 pr-4 py-2 bg-stone-50 border border-[#dcebe2] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#35755d]"
                       />
                     </div>
                   </div>
 
                   {/* CRM status filter tabs bar */}
-                  <div className="flex flex-wrap gap-1.5 border-b border-[#efe6dc]/50 pb-2">
+                  <div className="flex flex-wrap gap-1.5 border-b border-[#dcebe2]/50 pb-2">
                     {[
                       { value: 'all', label: 'Todas' },
                       { value: 'scheduled', label: 'Vigentes' },
@@ -923,7 +900,7 @@ export default function ProfileScreen({
                         onClick={() => setStatusFilter(tab.value as any)}
                         className={`px-3 py-1 text-[10px] font-sans font-bold tracking-wider rounded-lg uppercase cursor-pointer transition-colors ${
                           statusFilter === tab.value
-                            ? 'bg-[#764229]/10 text-[#764229] border border-[#764229]/20 font-extrabold'
+                            ? 'bg-[#35755d]/10 text-[#35755d] border border-[#35755d]/20 font-extrabold'
                             : 'text-stone-500 hover:bg-stone-50 border border-transparent'
                         }`}
                       >
@@ -943,13 +920,13 @@ export default function ProfileScreen({
                           setStatusFilter('all');
                           setSelectedCalendarDate(null);
                         }}
-                        className="text-[11px] font-sans uppercase tracking-[0.1em] text-[#764229] underline hover:text-[#5c331f] cursor-pointer"
+                        className="text-[11px] font-sans uppercase tracking-[0.1em] text-[#35755d] underline hover:text-[#23543f] cursor-pointer"
                       >
                         Limpiar todos los filtros
                       </button>
                     </div>
                   ) : (
-                    <div className="divide-y divide-[#efe6dc]/50">
+                    <div className="divide-y divide-[#dcebe2]/50">
                       {filteredBookings.map((apt) => {
                         const currentNoteVal = localNotes[apt.id] !== undefined ? localNotes[apt.id] : (apt.notes || '');
                         const hasUnsavedNotes = localNotes[apt.id] !== undefined && localNotes[apt.id] !== (apt.notes || '');
@@ -959,7 +936,7 @@ export default function ProfileScreen({
                           <div key={apt.id} className="py-5 first:pt-0 last:pb-0 flex flex-col md:flex-row gap-4 justify-between items-start transition-all">
                             {/* LEFT DETAIL META */}
                             <div className="flex gap-4 items-start flex-1 min-w-0">
-                              <div className="w-12 h-12 rounded-lg bg-[#efe6dc]/40 overflow-hidden flex-shrink-0 border border-stone-200">
+                              <div className="w-12 h-12 rounded-lg bg-[#dcebe2]/40 overflow-hidden flex-shrink-0 border border-stone-200">
                                 <img src={apt.ritualImageUrl} alt={apt.ritualName} className="w-full h-full object-cover" />
                               </div>
                               
@@ -969,7 +946,7 @@ export default function ProfileScreen({
                                   
                                   {/* Status pill styles in CRM */}
                                   {apt.status === 'scheduled' && (
-                                    <span className="text-[9px] uppercase font-bold tracking-wider bg-[#5e6c58]/10 text-[#5e6c58] border border-[#5e6c58]/20 px-2 py-0.5 rounded-full">
+                                    <span className="text-[9px] uppercase font-bold tracking-wider bg-[#45705f]/10 text-[#45705f] border border-[#45705f]/20 px-2 py-0.5 rounded-full">
                                       Vigente
                                     </span>
                                   )}
@@ -995,7 +972,7 @@ export default function ProfileScreen({
                                     <span className="text-stone-400">Email:</span>
                                     <span className="text-stone-600">{apt.clientEmail || 'sin dirección'}</span>
                                   </p>
-                                  <p className="flex items-center gap-1 text-[#764229] font-medium mt-0.5">
+                                  <p className="flex items-center gap-1 text-[#35755d] font-medium mt-0.5">
                                     <span className="font-mono text-[9px] uppercase text-stone-400">Horario Cita:</span>
                                     <span>{apt.dateTime}</span>
                                   </p>
@@ -1010,21 +987,21 @@ export default function ProfileScreen({
                                 </div>
 
                                 {/* SECURE CLINICAL NOTE EDITOR */}
-                                <div className="mt-3.5 bg-stone-50 rounded-xl p-3 border border-[#efe6dc]/50 max-w-xl">
-                                  <span className="text-[9px] font-bold tracking-wider text-[#764229] uppercase flex items-center gap-1 mb-1.5">
+                                <div className="mt-3.5 bg-stone-50 rounded-xl p-3 border border-[#dcebe2]/50 max-w-xl">
+                                  <span className="text-[9px] font-bold tracking-wider text-[#35755d] uppercase flex items-center gap-1 mb-1.5">
                                     <MessageSquare className="w-3.5 h-3.5" /> Notas Clínicas de la Cita (Para Terapeutas):
                                   </span>
                                   <textarea
                                     value={currentNoteVal}
                                     onChange={(e) => handleNoteChangeLocal(apt.id, e.target.value)}
                                     placeholder="Escribe aquí observaciones útiles (Ej. alergias, dolores, nivel de fuerza deseada, tipo de piel para productos AURA)..."
-                                    className="w-full text-xs bg-white border border-stone-200 rounded-lg p-2 text-stone-700 focus:outline-none focus:ring-1 focus:ring-[#764229] placeholder:italic"
+                                    className="w-full text-xs bg-white border border-stone-200 rounded-lg p-2 text-stone-700 focus:outline-none focus:ring-1 focus:ring-[#35755d] placeholder:italic"
                                     rows={2}
                                   />
                                   {hasUnsavedNotes && (
                                     <button
                                       onClick={() => handleSaveNotes(apt.id)}
-                                      className="mt-2 px-3 py-1 bg-[#5e6c58] text-white font-sans text-[10px] font-bold uppercase rounded-md flex items-center gap-1 shadow-2xs hover:bg-[#4b5746] cursor-pointer"
+                                      className="mt-2 px-3 py-1 bg-[#45705f] text-white font-sans text-[10px] font-bold uppercase rounded-md flex items-center gap-1 shadow-2xs hover:bg-[#38594c] cursor-pointer"
                                     >
                                       <Check className="w-3.5 h-3.5" /> Guardar Notas de Terapeuta
                                     </button>
@@ -1051,7 +1028,7 @@ export default function ProfileScreen({
                               {onUpdateAppointmentStatus && apt.status !== 'scheduled' && (
                                 <button
                                   onClick={() => onUpdateAppointmentStatus(apt.id, 'scheduled')}
-                                  className="flex-1 md:flex-none px-3 py-2 bg-stone-50 hover:bg-stone-100 text-[#5e6c58] text-[10px] font-bold uppercase tracking-wider rounded-lg border border-[#5e6c58]/30 flex items-center justify-center gap-1 cursor-pointer"
+                                  className="flex-1 md:flex-none px-3 py-2 bg-stone-50 hover:bg-stone-100 text-[#45705f] text-[10px] font-bold uppercase tracking-wider rounded-lg border border-[#45705f]/30 flex items-center justify-center gap-1 cursor-pointer"
                                   title="Colocar como reserva activa de nuevo"
                                 >
                                   <Calendar className="w-3.5 h-3.5" /> Reactivar
@@ -1120,10 +1097,10 @@ export default function ProfileScreen({
               /* ========================================================== */
               <div className="space-y-6">
                 {/* Visual Editorial Description header */}
-                <div className="bg-[#fdfaf7] rounded-xl border border-[#efe6dc] p-5 space-y-2 shadow-2xs">
+                <div className="bg-[#fbfdfc] rounded-xl border border-[#dcebe2] p-5 space-y-2 shadow-2xs">
                   <div className="flex items-center gap-2">
-                    <div className="p-2 bg-[#764229]/10 text-[#764229] rounded-lg">
-                      <Sparkles className="w-5 h-5 text-[#764229]" />
+                    <div className="p-2 bg-[#35755d]/10 text-[#35755d] rounded-lg">
+                      <Sparkles className="w-5 h-5 text-[#35755d]" />
                     </div>
                     <div>
                       <h4 className="font-serif font-bold text-stone-900 text-sm">Generador de Fichas Compartibles</h4>
@@ -1136,7 +1113,7 @@ export default function ProfileScreen({
                 </div>
 
                 {/* Filter and catalog search bar */}
-                <div className="bg-white rounded-xl border border-[#efe6dc]/80 p-4 shadow-3xs flex flex-col sm:flex-row gap-3 items-center justify-between">
+                <div className="bg-white rounded-xl border border-[#dcebe2]/80 p-4 shadow-3xs flex flex-col sm:flex-row gap-3 items-center justify-between">
                   <div className="flex flex-wrap gap-1.5 self-start sm:self-auto">
                     {[
                       { value: 'all', label: 'Todos los Rituales' },
@@ -1148,7 +1125,7 @@ export default function ProfileScreen({
                         onClick={() => setCatalogCategory(btn.value as any)}
                         className={`px-3 py-1 text-[10px] uppercase font-sans font-extrabold tracking-wider rounded-lg border transition-all cursor-pointer ${
                           catalogCategory === btn.value
-                            ? 'bg-[#764229] text-white border-[#764229] shadow-xs font-extrabold'
+                            ? 'bg-[#35755d] text-white border-[#35755d] shadow-xs font-extrabold'
                             : 'bg-stone-50 text-stone-500 border-stone-200 hover:bg-stone-100'
                         }`}
                       >
@@ -1164,7 +1141,7 @@ export default function ProfileScreen({
                       placeholder="Buscar servicio para compartir..."
                       value={catalogSearch}
                       onChange={(e) => setCatalogSearch(e.target.value)}
-                      className="w-full text-xs pl-9 pr-4 py-2 bg-stone-50 border border-[#efe6dc] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#764229]"
+                      className="w-full text-xs pl-9 pr-4 py-2 bg-stone-50 border border-[#dcebe2] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#35755d]"
                     />
                   </div>
                 </div>
@@ -1179,38 +1156,38 @@ export default function ProfileScreen({
                     {filteredCatalogRaw.map((ritual) => (
                       <div 
                         key={ritual.id}
-                        className="bg-white rounded-xl border border-[#efe6dc] hover:border-[#764229]/40 transition-all duration-300 p-4 shadow-3xs hover:shadow-xs flex flex-col justify-between"
+                        className="bg-white rounded-xl border border-[#dcebe2] hover:border-[#35755d]/40 transition-all duration-300 p-4 shadow-3xs hover:shadow-xs flex flex-col justify-between"
                       >
                         <div className="space-y-3">
                           <div className="aspect-[16/9] w-full rounded-lg bg-stone-100 overflow-hidden relative border border-stone-100">
                             <img src={ritual.imageUrl} alt={ritual.name} className="w-full h-full object-cover select-none" />
-                            <span className="absolute top-2 right-2 text-[9px] font-sans font-extrabold bg-[#764229] text-white px-2 py-0.5 rounded-full tracking-wider shadow-xs">
+                            <span className="absolute top-2 right-2 text-[9px] font-sans font-extrabold bg-[#35755d] text-white px-2 py-0.5 rounded-full tracking-wider shadow-xs">
                               {ritual.badge || 'PRO'}
                             </span>
                           </div>
                           
                           <div className="space-y-1">
                             <h5 className="font-serif font-bold text-stone-900 text-smPr">{ritual.name}</h5>
-                            <div className="flex gap-2 text-[10px] font-mono text-[#764229]">
+                            <div className="flex gap-2 text-[10px] font-mono text-[#35755d]">
                               {ritual.subcategory && (
                                 <span className="uppercase">● {ritual.subcategory}</span>
                               )}
                               <span>⏱ {ritual.duration} min</span>
                             </div>
-                            <p className="text-[11px] text-stone-500 font-sans line-clamp-2 leading-tight">
+                            <p className="text-[11px] text-stone-500 font-sans leading-relaxed whitespace-normal">
                               {ritual.shortDescription}
                             </p>
                           </div>
                         </div>
 
-                        <div className="pt-4 border-t border-dashed border-[#efe6dc]/60 mt-4 flex items-center justify-between">
+                        <div className="pt-4 border-t border-dashed border-[#dcebe2]/60 mt-4 flex items-center justify-between">
                           <span className="text-xs font-serif font-extrabold text-stone-850">
                             {ritual.customQuote ? 'A Cotizar' : `$${ritual.price} MXN`}
                           </span>
                           
                           <button
                             onClick={() => openFichaDesigner(ritual)}
-                            className="px-3.5 py-1.5 bg-[#764229] hover:bg-[#5e341e] text-white rounded-lg text-[10px] font-sans font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                            className="px-3.5 py-1.5 bg-[#35755d] hover:bg-[#23543f] text-white rounded-lg text-[10px] font-sans font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
                           >
                             <Share2 className="w-3.5 h-3.5" /> Generar Ficha
                           </button>
@@ -1231,216 +1208,232 @@ export default function ProfileScreen({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 overflow-y-auto"
+                    className="fixed inset-0 bg-stone-900/65 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
                   >
                     <motion.div
                       initial={{ scale: 0.95, y: 15 }}
                       animate={{ scale: 1, y: 0 }}
                       exit={{ scale: 0.95, y: 15 }}
-                      className="bg-[#fcfaf7] rounded-2xl w-full max-w-4xl border border-[#efe6dc] overflow-hidden shadow-2xl flex flex-col md:flex-row relative my-8"
+                      className="bg-[#fafcfb] rounded-2xl w-full max-w-4xl border border-[#dcebe2] shadow-2xl relative overflow-hidden flex flex-col my-4 max-h-[96vh] sm:my-8"
                     >
-                      {/* Close Button top-right */}
-                      <button
-                        onClick={() => setSelectedRitualForCard(null)}
-                        className="absolute top-4 right-4 text-stone-500 hover:text-stone-850 bg-stone-200/60 hover:bg-stone-200 p-1 px-3 rounded-full text-[10px] font-bold font-mono transition-colors cursor-pointer z-20"
-                      >
-                        ✕ Cerrar
-                      </button>
-
-                      {/* LEFT: CARD DESIGN ADJUSTMENT FORM PANEL */}
-                      <div className="w-full md:w-1/2 p-5 sm:p-6 border-b md:border-b-0 md:border-r border-[#efe6dc]/65 overflow-y-auto max-h-[90vh] md:max-h-[640px] space-y-4">
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase font-mono tracking-widest text-[#764229] font-extrabold flex items-center gap-1">
-                            <Sliders className="w-3.5 h-3.5" /> Personalizador Pro
-                          </span>
-                          <h3 className="font-serif font-bold text-stone-850 text-base">{selectedRitualForCard.name}</h3>
-                          <p className="text-[11px] text-stone-500">Diseña una ficha estética antes de guardarla para enviar por redes sociales.</p>
-                        </div>
-
-                        {/* Themes Select */}
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] uppercase font-mono tracking-wider text-stone-400 font-bold block flex items-center gap-1">
-                            <Palette className="w-3.5 h-3.5 text-[#764229]" /> 1. Elige una Paleta de Color:
-                          </label>
-                          <div className="grid grid-cols-3 gap-2">
-                            {CARD_THEMES.map((theme) => (
-                              <button
-                                key={theme.id}
-                                onClick={() => setSelectedCardTheme(theme.id)}
-                                className={`p-2 rounded-xl border text-[9px] font-sans font-bold flex flex-col items-center gap-1.5 transition-all text-center cursor-pointer ${
-                                  selectedCardTheme === theme.id
-                                    ? 'border-[#764229] ring-1 ring-[#764229] bg-[#764229]/5 scale-102 font-extrabold'
-                                    : 'border-stone-200 bg-white text-stone-500 hover:bg-stone-50'
-                                }`}
-                              >
-                                <span 
-                                  className="w-5 h-5 rounded-full border border-stone-250 flex items-center justify-center text-[8px]" 
-                                  style={{ backgroundColor: theme.bgColor, color: theme.textColor }}
-                                >
-                                  Aa
-                                </span>
-                                <span>{theme.name}</span>
-                              </button>
-                            ))}
+                      {/* FIXED STICKY TOP HEADER FOR CONSTANT RETURN OPTION */}
+                      <div className="sticky top-0 bg-[#fafcfb]/98 backdrop-blur-md border-b border-[#dcebe2]/70 px-4 sm:px-6 py-3.5 flex items-center justify-between z-30 w-full shrink-0">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 bg-[#35755d]/5 text-[#35755d] rounded-lg">
+                            <Share2 className="w-4 h-4 text-[#35755d]" />
+                          </div>
+                          <div>
+                            <h3 className="font-serif font-bold text-stone-850 text-xs sm:text-sm">Personalizar Ficha</h3>
+                            <p className="text-[9px] text-[#35755d] font-mono tracking-wider uppercase font-semibold">AURA Cosmetología e Imagen</p>
                           </div>
                         </div>
-
-                        {/* Price input settings */}
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] uppercase font-mono tracking-wider text-stone-400 font-bold block flex items-center gap-1">
-                            <Tag className="w-3.5 h-3.5 text-[#764229]" /> 2. Personalizar Precio / Leyenda de Valor:
-                          </label>
-                          <input
-                            type="text"
-                            value={customPriceVal}
-                            onChange={(e) => setCustomPriceVal(e.target.value)}
-                            placeholder="Ej. $800 MXN o ¡Gratis con Membresía!"
-                            className="w-full text-xs p-2.5 bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#764229]"
-                          />
-                          <p className="text-[9px] text-stone-400 leading-tight">
-                            Puedes escribir formulas alternativas como "10% OFF: $720 MXN" para reflejar descuentos especiales temporales.
-                          </p>
-                        </div>
-
-                        {/* Promotional Text input settings */}
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] uppercase font-mono tracking-wider text-stone-400 font-bold block flex items-center gap-1">
-                            <Gift className="w-3.5 h-3.5 text-[#764229]" /> 3. Sello o Descuento Especial Promocional:
-                          </label>
-                          <textarea
-                            value={customDiscountText}
-                            onChange={(e) => setCustomDiscountText(e.target.value)}
-                            rows={2}
-                            maxLength={75}
-                            placeholder="Ej. ¡25% OFF reservando esta semana!"
-                            className="w-full text-xs p-2.5 bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#764229]"
-                          />
-                          <span className="text-[9px] text-stone-400 text-right block">{customDiscountText.length}/75 carácteres máximo</span>
-                        </div>
-
-                        {/* Specialist details settings */}
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] uppercase font-mono tracking-wider text-stone-400 font-bold block flex items-center gap-1">
-                            <User className="w-3.5 h-3.5 text-[#764229]" /> 4. Lic. en Cosmetología / Recomendado:
-                          </label>
-                          <input
-                            type="text"
-                            value={assignedSpecialist}
-                            onChange={(e) => setAssignedSpecialist(e.target.value)}
-                            placeholder="Ej. Atendido por Anel, Licenciada en Cosmetología Aura"
-                            className="w-full text-xs p-2.5 bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#764229]"
-                          />
-                        </div>
-
-                        {/* Footnotes instructions rules */}
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] uppercase font-mono tracking-wider text-stone-400 font-bold block flex items-center gap-1">
-                            <CheckSquare className="w-3.5 h-3.5 text-[#764229]" /> 5. Instrucción de Contacto (Pie de Ficha):
-                          </label>
-                          <input
-                            type="text"
-                            value={customFootnoteVal}
-                            onChange={(e) => setCustomFootnoteVal(e.target.value)}
-                            placeholder="Ej. WhatsApp: 55-AURA-WELL"
-                            className="w-full text-xs p-2.5 bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#764229]"
-                          />
-                        </div>
+                        <button
+                          onClick={() => setSelectedRitualForCard(null)}
+                          className="text-xs font-bold text-[#35755d] hover:bg-[#35755d]/10 bg-[#35755d]/5 border border-[#35755d]/25 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 active:scale-95"
+                        >
+                          ✕ Cerrar Editor
+                        </button>
                       </div>
 
-                      {/* RIGHT: REAL-TIME PREMIUM WYSIWYG DESIGN PREVIEW AND EXPORT BUTTON */}
-                      <div className="w-full md:w-1/2 p-5 sm:p-6 bg-stone-100 flex flex-col justify-between items-center gap-5 overflow-y-auto max-h-[90vh] md:max-h-[640px]">
-                        <div className="w-full text-center">
-                          <span className="text-[8px] uppercase font-mono tracking-widest text-[#764229] font-bold bg-[#764229]/5 px-2.5 py-1 rounded border border-[#764229]/15">
-                            Vista previa en tiempo real
-                          </span>
-                        </div>
+                      {/* SPLIT RESPONSIVE VIEWPORT CONTAINER */}
+                      <div className="flex flex-col md:flex-row w-full overflow-y-auto md:overflow-hidden md:h-[580px] max-h-[calc(100vh-140px)] md:max-h-[640px]">
+                        
+                        {/* LEFT: CARD DESIGN ADJUSTMENT FORM PANEL */}
+                        <div className="w-full md:w-1/2 p-4 sm:p-6 border-b md:border-b-0 md:border-r border-[#dcebe2]/65 space-y-4 md:overflow-y-auto md:h-full">
+                          <div className="space-y-1">
+                            <span className="text-[10px] uppercase font-mono tracking-widest text-[#35755d] font-extrabold flex items-center gap-1">
+                              <Sliders className="w-3.5 h-3.5" /> Ajustes de Diseño
+                            </span>
+                            <h4 className="font-serif font-bold text-stone-850 text-sm md:text-base">{selectedRitualForCard.name}</h4>
+                            <p className="text-[11px] text-stone-500">Modifica los detalles estéticos antes de descargar la imagen promocional.</p>
+                          </div>
 
-                        {/* Beautiful Card preview box */}
-                        <div 
-                          ref={previewRef}
-                          style={{ backgroundColor: activeTheme.bgColor }}
-                          className="w-full aspect-[4/5] max-w-[310px] shadow-lg rounded-xl border p-6 flex flex-col justify-between text-center relative overflow-hidden transition-all font-serif"
-                        >
-                          {/* Double elegant borders */}
-                          <div style={{ borderColor: activeTheme.borderColor }} className="absolute inset-3 border pointer-events-none select-none" />
-                          <div style={{ borderColor: activeTheme.borderColor }} className="absolute inset-4 border-2 pointer-events-none select-none" />
-                          
-                          {/* Tiny corner ornamental stars */}
-                          <div style={{ color: activeTheme.decorColor }} className="absolute top-4 left-4 text-[10px] select-none pointer-events-none">✧</div>
-                          <div style={{ color: activeTheme.decorColor }} className="absolute top-4 right-4 text-[10px] select-none pointer-events-none">✧</div>
-                          <div style={{ color: activeTheme.decorColor }} className="absolute bottom-4 left-4 text-[10px] select-none pointer-events-none">✧</div>
-                          <div style={{ color: activeTheme.decorColor }} className="absolute bottom-4 right-4 text-[10px] select-none pointer-events-none">✧</div>
-
-                          <div className="relative z-10 flex flex-col items-center justify-between h-full py-2 px-1">
-                            {/* Logo header */}
-                            <div className="space-y-1">
-                              <h4 style={{ color: activeTheme.textColor }} className="text-xl tracking-[0.2em] font-medium font-serif select-none">A U R A</h4>
-                              <p style={{ color: activeTheme.mutedColor }} className="text-[7.5px] font-sans tracking-[0.14em] uppercase select-none">Cosmetología e Imagen</p>
-                              <div style={{ backgroundColor: activeTheme.borderColor }} className="h-[1px] w-10 mx-auto mt-1 opacity-50" />
+                          {/* Themes Select */}
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] uppercase font-mono tracking-wider text-stone-400 font-bold block flex items-center gap-1">
+                              <Palette className="w-3.5 h-3.5 text-[#35755d]" /> 1. Elige una Paleta de Color:
+                            </label>
+                            <div className="grid grid-cols-3 gap-2">
+                              {CARD_THEMES.map((theme) => (
+                                <button
+                                  key={theme.id}
+                                  onClick={() => setSelectedCardTheme(theme.id)}
+                                  className={`p-2 rounded-xl border text-[9px] font-sans font-bold flex flex-col items-center gap-1.5 transition-all text-center cursor-pointer ${
+                                    selectedCardTheme === theme.id
+                                      ? 'border-[#35755d] ring-1 ring-[#35755d] bg-[#35755d]/5 scale-102 font-extrabold'
+                                      : 'border-stone-200 bg-white text-stone-500 hover:bg-stone-50'
+                                  }`}
+                                >
+                                  <span 
+                                    className="w-5 h-5 rounded-full border border-stone-250 flex items-center justify-center text-[8px]" 
+                                    style={{ backgroundColor: theme.bgColor, color: theme.textColor }}
+                                  >
+                                    Aa
+                                  </span>
+                                  <span>{theme.name}</span>
+                                </button>
+                              ))}
                             </div>
+                          </div>
 
-                            {/* Central vector therapeutic seal */}
-                            <div style={{ color: activeTheme.decorColor }} className="flex flex-col items-center select-none py-1">
-                              <div style={{ borderColor: activeTheme.decorColor }} className="w-10 h-10 rounded-full border border-dashed flex items-center justify-center relative">
-                                <Sparkles className="w-4 h-4 absolute" />
-                              </div>
-                            </div>
-
-                            {/* Name of ritual */}
-                            <div className="space-y-1 w-full">
-                              <span style={{ color: activeTheme.textColor }} className="inline-block text-[7px] tracking-widest font-sans font-bold uppercase py-0.5 px-2 bg-black/5 rounded select-none">
-                                {selectedRitualForCard.badge || 'EXCLUSIVO BIENESTAR'}
-                              </span>
-                              <h3 style={{ color: activeTheme.textColor }} className="text-base font-serif italic font-bold leading-tight px-1 max-w-full break-words">
-                                {selectedRitualForCard.name}
-                              </h3>
-                            </div>
-
-                            {/* Value and duration panel mockup */}
-                            <div style={{ backgroundColor: activeTheme.accentBg }} className="py-2 px-3 rounded-lg w-full max-w-[230px] space-y-0.5 border border-[#d4af37]/15">
-                              <span style={{ color: activeTheme.accentText }} className="text-[8.5px] font-sans font-extrabold block uppercase tracking-wide">
-                                ⏱ {selectedRitualForCard.duration} minutos
-                              </span>
-                              <span style={{ color: activeTheme.textColor }} className="text-sm font-serif font-extrabold block">
-                                {customPriceVal ? customPriceVal : `$${selectedRitualForCard.price} MXN`}
-                              </span>
-                            </div>
-
-                            {/* Description */}
-                            <p style={{ color: activeTheme.mutedColor }} className="text-[8.5px] leading-relaxed line-clamp-4 font-sans px-2 italic font-medium">
-                              "{selectedRitualForCard.description || selectedRitualForCard.shortDescription}"
+                          {/* Price input settings */}
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] uppercase font-mono tracking-wider text-stone-400 font-bold block flex items-center gap-1">
+                              <Tag className="w-3.5 h-3.5 text-[#35755d]" /> 2. Personalizar Precio / Leyenda de Valor:
+                            </label>
+                            <input
+                              type="text"
+                              value={customPriceVal}
+                              onChange={(e) => setCustomPriceVal(e.target.value)}
+                              placeholder="Ej. $800 MXN o ¡Gratis con Membresía!"
+                              className="w-full text-xs p-2.5 bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#35755d]"
+                            />
+                            <p className="text-[9px] text-stone-400 leading-tight">
+                              Puedes escribir formulas alternativas como "10% OFF: $720 MXN" para reflejar descuentos especiales temporales.
                             </p>
+                          </div>
 
-                            {/* Promo footnotes info */}
-                            {customDiscountText && (
-                              <div className="space-y-0.5">
-                                <div style={{ backgroundColor: activeTheme.borderColor }} className="h-[0.8px] w-5 mx-auto opacity-50" />
-                                <p style={{ color: activeTheme.accentText }} className="text-[8px] font-sans font-extrabold uppercase tracking-widest leading-normal">
-                                  {customDiscountText}
-                                </p>
-                              </div>
-                            )}
+                          {/* Promotional Text input settings */}
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] uppercase font-mono tracking-wider text-stone-400 font-bold block flex items-center gap-1">
+                              <Gift className="w-3.5 h-3.5 text-[#35755d]" /> 3. Sello o Descuento Especial Promocional:
+                            </label>
+                            <textarea
+                              value={customDiscountText}
+                              onChange={(e) => setCustomDiscountText(e.target.value)}
+                              rows={2}
+                              maxLength={75}
+                              placeholder="Ej. ¡25% OFF reservando esta semana!"
+                              className="w-full text-xs p-2.5 bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#35755d]"
+                            />
+                            <span className="text-[9px] text-stone-400 text-right block">{customDiscountText.length}/75 carácteres máximo</span>
+                          </div>
 
-                            {/* Footers client actions instructions */}
-                            <div className="space-y-0.5">
-                              <span style={{ color: activeTheme.mutedColor }} className="text-[7.5px] font-sans block italic">
-                                {assignedSpecialist}
-                              </span>
-                              <span style={{ color: activeTheme.textColor }} className="text-[8px] font-sans font-extrabold uppercase tracking-wide block">
-                                {customFootnoteVal}
-                              </span>
-                            </div>
+                          {/* Specialist details settings */}
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] uppercase font-mono tracking-wider text-stone-400 font-bold block flex items-center gap-1">
+                              <User className="w-3.5 h-3.5 text-[#35755d]" /> 4. Lic. en Cosmetología / Recomendado:
+                            </label>
+                            <input
+                              type="text"
+                              value={assignedSpecialist}
+                              onChange={(e) => setAssignedSpecialist(e.target.value)}
+                              placeholder="Ej. Atendido por Anel, Licenciada en Cosmetología Aura"
+                              className="w-full text-xs p-2.5 bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#35755d]"
+                            />
+                          </div>
+
+                          {/* Footnotes instructions rules */}
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] uppercase font-mono tracking-wider text-stone-400 font-bold block flex items-center gap-1">
+                              <CheckSquare className="w-3.5 h-3.5 text-[#35755d]" /> 5. Instrucción de Contacto (Pie de Ficha):
+                            </label>
+                            <input
+                              type="text"
+                              value={customFootnoteVal}
+                              onChange={(e) => setCustomFootnoteVal(e.target.value)}
+                              placeholder="Ej. WhatsApp: 638 128 5959"
+                              className="w-full text-xs p-2.5 bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#35755d]"
+                            />
                           </div>
                         </div>
 
-                        {/* Immediate Direct Export Save Download button */}
-                        <button
-                          onClick={handleDownloadCard}
-                          className="w-full max-w-[310px] py-2.5 bg-[#764229] hover:bg-[#5e341e] text-white hover:text-white rounded-xl text-xs font-sans font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer hover:scale-102"
-                        >
-                          <Download className="w-4 h-4" />
-                          <span>Descargar Ficha para Compartir</span>
-                        </button>
+                        {/* RIGHT: REAL-TIME PREMIUM WYSIWYG DESIGN PREVIEW AND EXPORT BUTTON */}
+                        <div className="w-full md:w-1/2 p-5 sm:p-6 bg-stone-50 flex flex-col justify-between items-center gap-4 md:overflow-y-auto md:h-full border-t md:border-t-0 border-[#dcebe2]/60">
+                          <div className="w-full text-center">
+                            <span className="text-[8px] uppercase font-mono tracking-widest text-[#35755d] font-bold bg-[#35755d]/5 px-2.5 py-1 rounded border border-[#35755d]/15">
+                              Vista previa en tiempo real
+                            </span>
+                          </div>
+
+                          {/* Beautiful Card preview box */}
+                          <div 
+                            ref={previewRef}
+                            style={{ backgroundColor: activeTheme.bgColor }}
+                            className="w-full min-h-[440px] h-auto max-w-[310px] shadow-lg rounded-xl border p-6 flex flex-col justify-between items-center gap-4 text-center relative overflow-hidden transition-all font-serif shrink-0 py-8"
+                          >
+                            {/* Double elegant borders */}
+                            <div style={{ borderColor: activeTheme.borderColor }} className="absolute inset-3 border pointer-events-none select-none" />
+                            <div style={{ borderColor: activeTheme.borderColor }} className="absolute inset-4 border-2 pointer-events-none select-none" />
+                            
+                            {/* Tiny corner ornamental stars */}
+                            <div style={{ color: activeTheme.decorColor }} className="absolute top-4 left-4 text-[10px] select-none pointer-events-none">✧</div>
+                            <div style={{ color: activeTheme.decorColor }} className="absolute top-4 right-4 text-[10px] select-none pointer-events-none">✧</div>
+                            <div style={{ color: activeTheme.decorColor }} className="absolute bottom-4 left-4 text-[10px] select-none pointer-events-none">✧</div>
+                            <div style={{ color: activeTheme.decorColor }} className="absolute bottom-4 right-4 text-[10px] select-none pointer-events-none">✧</div>
+
+                            <div className="relative z-10 flex flex-col items-center justify-between gap-3.5 w-full h-full py-1 px-1">
+                              {/* Logo header */}
+                              <div className="space-y-1">
+                                <h4 style={{ color: activeTheme.textColor }} className="text-xl tracking-[0.2em] font-medium font-serif select-none">A U R A</h4>
+                                <p style={{ color: activeTheme.mutedColor }} className="text-[7.5px] font-sans tracking-[0.14em] uppercase select-none">Cosmetología e Imagen</p>
+                                <div style={{ backgroundColor: activeTheme.borderColor }} className="h-[1px] w-10 mx-auto mt-1 opacity-50" />
+                              </div>
+
+                              {/* Central vector therapeutic seal */}
+                              <div style={{ color: activeTheme.decorColor }} className="flex flex-col items-center select-none py-1">
+                                <div style={{ borderColor: activeTheme.decorColor }} className="w-10 h-10 rounded-full border border-dashed flex items-center justify-center relative">
+                                  <Sparkles className="w-4 h-4 absolute" />
+                                </div>
+                              </div>
+
+                              {/* Name of ritual */}
+                              <div className="space-y-1 w-full">
+                                <span style={{ color: activeTheme.textColor }} className="inline-block text-[7px] tracking-widest font-sans font-bold uppercase py-0.5 px-2 bg-black/5 rounded select-none">
+                                  {selectedRitualForCard.badge || 'EXCLUSIVO BIENESTAR'}
+                                </span>
+                                <h3 style={{ color: activeTheme.textColor }} className="text-base font-serif italic font-bold leading-tight px-1 max-w-full break-words">
+                                  {selectedRitualForCard.name}
+                                </h3>
+                              </div>
+
+                              {/* Value and duration panel mockup */}
+                              <div style={{ backgroundColor: activeTheme.accentBg }} className="py-2 px-3 rounded-lg w-full max-w-[230px] space-y-0.5 border border-[#d4af37]/15">
+                                <span style={{ color: activeTheme.accentText }} className="text-[8.5px] font-sans font-extrabold block uppercase tracking-wide">
+                                  ⏱ {selectedRitualForCard.duration} minutos
+                                </span>
+                                <span style={{ color: activeTheme.textColor }} className="text-sm font-serif font-extrabold block">
+                                  {customPriceVal ? customPriceVal : `$${selectedRitualForCard.price} MXN`}
+                                </span>
+                              </div>
+
+                              {/* Description */}
+                              <p style={{ color: activeTheme.mutedColor }} className="text-[8.5px] leading-relaxed font-sans px-2 italic font-medium whitespace-normal">
+                                "{selectedRitualForCard.description || selectedRitualForCard.shortDescription}"
+                              </p>
+
+                              {/* Promo footnotes info */}
+                              {customDiscountText && (
+                                <div className="space-y-0.5">
+                                  <div style={{ backgroundColor: activeTheme.borderColor }} className="h-[0.8px] w-5 mx-auto opacity-50" />
+                                  <p style={{ color: activeTheme.accentText }} className="text-[8px] font-sans font-extrabold uppercase tracking-widest leading-normal">
+                                    {customDiscountText}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Footers client actions instructions */}
+                              <div className="space-y-0.5">
+                                <span style={{ color: activeTheme.mutedColor }} className="text-[7.5px] font-sans block italic">
+                                  {assignedSpecialist}
+                                </span>
+                                <span style={{ color: activeTheme.textColor }} className="text-[8px] font-sans font-extrabold uppercase tracking-wide block">
+                                  {customFootnoteVal}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Immediate Direct Export Save Download button */}
+                          <button
+                            onClick={handleDownloadCard}
+                            className="w-full max-w-[310px] py-3 bg-[#35755d] hover:bg-[#23543f] text-white hover:text-white rounded-xl text-xs font-sans font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer hover:scale-102 shrink-0 my-2 active:scale-95"
+                          >
+                            <Download className="w-4 h-4" />
+                            <span>Descargar Ficha</span>
+                          </button>
+                        </div>
+
                       </div>
                     </motion.div>
                   </motion.div>

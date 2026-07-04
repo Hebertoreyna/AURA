@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sprout, Sparkles, ShieldCheck } from 'lucide-react';
-import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { db } from './lib/firebase';
+import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import { db, auth } from './lib/firebase';
 import { RITUALS, SPECIALISTS } from './data';
 
 // Entity types
@@ -34,6 +35,9 @@ export default function App() {
   });
 
   // Modal toggle triggers
+  // Sesión de administración (Firebase Auth) — controla el acceso a los datos de reservas
+  const [isAdminAuthed, setIsAdminAuthed] = useState(false);
+
   const [isPhilosophyOpen, setIsPhilosophyOpen] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [bookingPreSelectedId, setBookingPreSelectedId] = useState<string | null>(null);
@@ -112,7 +116,7 @@ export default function App() {
     }
   };
 
-  // Load state from localStorage & Firestore
+  // Load state from localStorage
   useEffect(() => {
     try {
       const storedCart = localStorage.getItem('aura_cart');
@@ -123,15 +127,27 @@ export default function App() {
     } catch (e) {
       console.error('Failed to load storage variables:', e);
     }
-    fetchBookings();
+  }, []);
+
+  // Las reservas (datos de clientes) solo se descargan con sesión admin activa
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAdminAuthed(!!user);
+      if (user) {
+        fetchBookings();
+      } else {
+        setAppointments([]);
+      }
+    });
+    return unsubscribe;
   }, []);
 
   // Sync bookings after the wizard is closed (user might have booked)
   useEffect(() => {
-    if (!isBookingOpen) {
+    if (!isBookingOpen && isAdminAuthed) {
       fetchBookings();
     }
-  }, [isBookingOpen]);
+  }, [isBookingOpen, isAdminAuthed]);
 
   const syncCart = (newCart: CartItem[]) => {
     setCart(newCart);
@@ -213,7 +229,7 @@ export default function App() {
   };
 
   return (
-    <div id="aura-app" className="min-h-screen bg-[#faf8f5] text-[#2c1d11] font-sans pb-20">
+    <div id="aura-app" className="min-h-screen bg-[#f7fbf9] text-[#142e24] font-sans pb-20">
 
       {/* ANIMATED MAIN PAGE TRANSITIONS */}
       <main id="aura-pages-container" className="relative w-full">
@@ -288,14 +304,14 @@ export default function App() {
       </main>
 
       {/* ================= BOTTOM NAVIGATION BAR ================= */}
-      <nav id="bottom-navigation-bar" className="fixed bottom-0 inset-x-0 bg-[#faf6f0]/95 backdrop-blur-md border-t border-[#efe6dc] py-2 px-4 flex justify-around items-center z-40 max-w-lg mx-auto rounded-t-xl sm:shadow-lg">
+      <nav id="bottom-navigation-bar" className="fixed bottom-0 inset-x-0 bg-[#f3f8f5]/95 backdrop-blur-md border-t border-[#dcebe2] py-2 px-4 flex justify-around items-center z-40 max-w-lg mx-auto rounded-t-xl sm:shadow-lg">
 
         {/* TAB 1: DIAGNÓSTICO */}
         <button
           id="nav-tab-refine"
           onClick={() => setActiveTab('refine')}
           className={`flex flex-col items-center justify-center py-1.5 transition-colors cursor-pointer ${
-            activeTab === 'refine' ? 'text-[#764229] font-bold' : 'text-stone-400 hover:text-[#764229]'
+            activeTab === 'refine' ? 'text-[#35755d] font-bold' : 'text-stone-400 hover:text-[#35755d]'
           }`}
         >
           <Sprout className="w-5 h-5 mb-1" />
@@ -307,7 +323,7 @@ export default function App() {
           id="nav-tab-rituals"
           onClick={() => setActiveTab('rituals')}
           className={`flex flex-col items-center justify-center py-1.5 transition-colors cursor-pointer ${
-            activeTab === 'rituals' ? 'text-[#764229] font-bold' : 'text-stone-400 hover:text-[#764229]'
+            activeTab === 'rituals' ? 'text-[#35755d] font-bold' : 'text-stone-400 hover:text-[#35755d]'
           }`}
         >
           <Sparkles className="w-5 h-5 mb-1" />
@@ -319,7 +335,7 @@ export default function App() {
           id="nav-tab-profile"
           onClick={() => setActiveTab('profile')}
           className={`flex flex-col items-center justify-center py-1.5 transition-colors cursor-pointer ${
-            activeTab === 'profile' ? 'text-[#764229] font-bold' : 'text-stone-400 hover:text-[#764229]'
+            activeTab === 'profile' ? 'text-[#35755d] font-bold' : 'text-stone-400 hover:text-[#35755d]'
           }`}
         >
           <ShieldCheck className="w-5 h-5 mb-1" />

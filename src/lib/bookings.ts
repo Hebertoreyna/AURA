@@ -11,21 +11,13 @@
  *   clientName       string
  *   clientEmail      string
  *   notes            string
- *   status           "pending" | "confirmed" | "cancelled"
+ *   price            number   precio total MXN al reservar
+ *   status           "pending" | "confirmed" | "cancelled" (el panel admin
+ *                    también escribe "scheduled" | "completed")
  *   createdAt        Timestamp
  *
- * Reglas de Firestore sugeridas (Firebase Console → Firestore → Rules):
- *
- *   rules_version = '2';
- *   service cloud.firestore {
- *     match /databases/{database}/documents {
- *       match /bookings/{id} {
- *         allow read: if true;
- *         allow create: if true;
- *         allow update, delete: if false;
- *       }
- *     }
- *   }
+ * Reglas de seguridad: ver /firestore.rules (creación pública validada con
+ * status "pending"; update/delete solo con Firebase Auth).
  */
 
 import {
@@ -55,6 +47,7 @@ export interface BookingRecord {
   clientName: string;
   clientEmail: string;
   notes: string;
+  price: number;    // precio total en MXN al momento de reservar (fuente de verdad)
   status: 'pending' | 'confirmed' | 'cancelled';
 }
 
@@ -135,7 +128,12 @@ export function isSlotAvailable(
 
 /**
  * Devuelve los slots reservados para una fecha dada, opcionalmente filtrados
- * por especialista. Incluye pending y confirmed; excluye cancelled.
+ * por especialista.
+ *
+ * IMPORTANTE: bloquea CUALQUIER reserva cuyo status no sea 'cancelled'.
+ * El panel admin usa vocabulario propio ('scheduled', 'completed'), por lo
+ * que filtrar solo por ['pending','confirmed'] provocaba dobles reservas:
+ * una cita confirmada por el personal dejaba de bloquear su horario.
  */
 export async function getBookedSlots(
   date: string,
@@ -143,8 +141,7 @@ export async function getBookedSlots(
 ): Promise<BookedSlot[]> {
   const q = query(
     collection(db, 'bookings'),
-    where('date', '==', date),
-    where('status', 'in', ['pending', 'confirmed'])
+    where('date', '==', date)
   );
 
   const snapshot = await getDocs(q);
@@ -152,6 +149,8 @@ export async function getBookedSlots(
 
   snapshot.forEach(doc => {
     const data = doc.data();
+    // Las canceladas liberan el horario; todo lo demás lo bloquea
+    if (data.status === 'cancelled') return;
     // Filtrar por especialista en memoria para evitar índice compuesto en Firestore
     if (!specialistName || data.specialistName === specialistName) {
       slots.push({

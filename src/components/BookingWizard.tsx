@@ -321,6 +321,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
       clientName:     name.trim(),
       clientEmail:    email.trim(),
       notes:          notes.trim(),
+      price:          isEvalAppointment ? 0 : effectivePrice,
       status:         'pending',
     }).catch(err => console.error('Firestore (non-blocking):', err));
   };
@@ -354,7 +355,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleReset}
-            className="absolute inset-0 bg-[#4a2815]/30 backdrop-blur-md"
+            className="absolute inset-0 bg-[#23543f]/30 backdrop-blur-md"
           />
 
           {/* Dialog */}
@@ -363,14 +364,14 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
             initial={{ opacity: 0, scale: 0.96, y: 24 }}
             animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.35, ease: [0.23, 1, 0.32, 1] } }}
             exit={{ opacity: 0, scale: 0.97, y: 10, transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] } }}
-            className="relative w-full max-w-xl bg-[#faf6f0] rounded-2xl overflow-hidden shadow-2xl border border-[#efe6dc] flex flex-col"
+            className="relative w-full max-w-xl bg-[#f3f8f5] rounded-2xl overflow-hidden shadow-2xl border border-[#dcebe2] flex flex-col"
             style={{ maxHeight: '90vh' }}
           >
             {/* Header */}
-            <div id="booking-wizard-header" className="p-5 border-b border-[#efe6dc] flex justify-between items-center bg-white/50">
+            <div id="booking-wizard-header" className="p-5 border-b border-[#dcebe2] flex justify-between items-center bg-white/50">
               <div>
-                <span className="text-[10px] font-sans font-bold tracking-widest text-[#764229] uppercase">Agendador Exclusivo</span>
-                <h3 className="text-xl font-serif text-[#4a2815]">
+                <span className="text-[10px] font-sans font-bold tracking-widest text-[#35755d] uppercase">Agendador Exclusivo</span>
+                <h3 className="text-xl font-serif text-[#23543f]">
                   {success ? '¡Mensaje Enviado!' : 'Reservar por WhatsApp'}
                 </h3>
               </div>
@@ -385,7 +386,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
 
             {/* Error banner */}
             {validationError && (
-              <div id="booking-validation-error" className="bg-[#8a4f35]/10 border-b border-[#8a4f35]/20 px-5 py-2.5 text-xs text-[#8a4f35] flex items-center gap-2">
+              <div id="booking-validation-error" className="bg-[#46876c]/10 border-b border-[#46876c]/20 px-5 py-2.5 text-xs text-[#46876c] flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                 <span>{validationError}</span>
               </div>
@@ -393,7 +394,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
 
             {/* Step tabs */}
             {!success && (
-              <div id="booking-steps-nav" className="flex bg-[#efe6dc]/40 border-b border-[#efe6dc]/50 text-[10px] font-sans font-semibold uppercase tracking-wider text-stone-500">
+              <div id="booking-steps-nav" className="flex bg-[#dcebe2]/40 border-b border-[#dcebe2]/50 text-[10px] font-sans font-semibold uppercase tracking-wider text-stone-500">
                 {(['1. Servicio', '2. Especialista', '3. Horario', '4. Confirmación'] as const).map((label, i) => {
                   const s = (i + 1) as 1 | 2 | 3 | 4;
                   const clickable = s < step;
@@ -402,8 +403,8 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                       key={s}
                       onClick={() => { if (clickable) { prevStep.current = step; setStep(s); } }}
                       disabled={!clickable && step !== s}
-                      className={`flex-1 py-3 text-center border-r border-[#efe6dc]/40 transition-all last:border-r-0 ${
-                        step === s ? 'bg-[#efe6dc] text-[#4a2815]' : ''
+                      className={`flex-1 py-3 text-center border-r border-[#dcebe2]/40 transition-all last:border-r-0 ${
+                        step === s ? 'bg-[#dcebe2] text-[#23543f]' : ''
                       }`}
                     >
                       {label}
@@ -427,32 +428,32 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                     <MessageCircle className="w-8 h-8" />
                   </div>
                   <span className="text-xs font-mono tracking-widest text-[#25D366] uppercase font-semibold">Mensaje enviado</span>
-                  <h4 className="text-2xl font-serif text-[#4a2815] mt-1 mb-2">¡Solicitud enviada por WhatsApp!</h4>
+                  <h4 className="text-2xl font-serif text-[#23543f] mt-1 mb-2">¡Solicitud enviada por WhatsApp!</h4>
                   <p className="text-xs text-stone-600 max-w-sm leading-relaxed mb-6">
                     Tu mensaje fue enviado por WhatsApp. Confirmaremos tu cita en breve.
                   </p>
 
-                  <div className="w-full bg-[#f2eae4] rounded-xl p-5 text-left border border-[#efe6dc] space-y-3 max-w-sm mb-6">
-                    <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
+                  <div className="w-full bg-[#e9f3ed] rounded-xl p-5 text-left border border-[#dcebe2] space-y-3 max-w-sm mb-6">
+                    <div className="flex justify-between text-xs pb-2 border-b border-[#dcebe2]">
                       <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">
                         {selectedRituals.length > 1 ? 'Servicios' : 'Servicio'}
                       </span>
                       <div className="text-right">
                         {selectedRituals.map(r => (
-                          <span key={r.id} className="font-serif font-semibold text-[#4a2815] block">{r.name}</span>
+                          <span key={r.id} className="font-serif font-semibold text-[#23543f] block">{r.name}</span>
                         ))}
                         {canHaveAuraAddon && withAuraAddon && (
-                          <span className="text-[9px] font-sans font-semibold text-[#764229] flex items-center justify-end gap-1 mt-0.5">
+                          <span className="text-[9px] font-sans font-semibold text-[#35755d] flex items-center justify-end gap-1 mt-0.5">
                             <Sparkles className="w-2.5 h-2.5" /> + Ritual AURA
                           </span>
                         )}
                       </div>
                     </div>
-                    <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
+                    <div className="flex justify-between text-xs pb-2 border-b border-[#dcebe2]">
                       <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Especialista</span>
                       <span className="text-stone-700">{selectedSpecialist?.name}</span>
                     </div>
-                    <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
+                    <div className="flex justify-between text-xs pb-2 border-b border-[#dcebe2]">
                       <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Fecha y Hora</span>
                       <span className="text-stone-700 text-right max-w-[150px]">{fmtDisplay(selectedDate)} · {selectedTime}</span>
                     </div>
@@ -463,9 +464,9 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                       </div>
                     ) : (
                       <>
-                        <div className="flex justify-between text-xs pb-2 border-b border-[#efe6dc]">
+                        <div className="flex justify-between text-xs pb-2 border-b border-[#dcebe2]">
                           <span className="text-stone-500 uppercase tracking-widest font-sans font-bold">Precio Total</span>
-                          <span className="font-serif font-semibold text-[#4a2815]">${effectivePrice} MXN</span>
+                          <span className="font-serif font-semibold text-[#23543f]">${effectivePrice} MXN</span>
                         </div>
                         {effectiveDepPct > 0 ? (
                           <div className="flex justify-between text-xs pt-1">
@@ -493,7 +494,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                   <button
                     id="booking-finish-btn"
                     onClick={handleReset}
-                    className="py-3 px-10 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase"
+                    className="py-3 px-10 bg-[#35755d] hover:bg-[#23543f] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase"
                   >
                     Cerrar
                   </button>
@@ -542,11 +543,11 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                 }}
                                 className={`p-4 rounded-xl border-2 text-left transition-[border-color,background-color,transform] duration-150 active:scale-[0.97] ${
                                   active
-                                    ? 'border-[#764229] bg-[#764229] text-white shadow-md'
-                                    : 'border-[#efe6dc] bg-white text-[#4a2815] hover:border-[#764229]/40'
+                                    ? 'border-[#35755d] bg-[#35755d] text-white shadow-md'
+                                    : 'border-[#dcebe2] bg-white text-[#23543f] hover:border-[#35755d]/40'
                                 }`}
                               >
-                                <div className={`mb-2 ${active ? 'text-white/90' : 'text-[#764229]'}`}>
+                                <div className={`mb-2 ${active ? 'text-white/90' : 'text-[#35755d]'}`}>
                                   {cat.icon}
                                 </div>
                                 <span className="text-sm font-serif font-bold block leading-tight">{cat.label}</span>
@@ -591,10 +592,10 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                 <div key={grp.key} className="space-y-2">
                                   {/* Encabezado de subgrupo */}
                                   <div className="flex items-center gap-2">
-                                    <span className="text-[9px] font-sans font-bold tracking-[0.25em] text-[#764229]/70 uppercase">
+                                    <span className="text-[9px] font-sans font-bold tracking-[0.25em] text-[#35755d]/70 uppercase">
                                       — {grp.label}
                                     </span>
-                                    <div className="flex-1 h-px bg-[#efe6dc]" />
+                                    <div className="flex-1 h-px bg-[#dcebe2]" />
                                   </div>
 
                                   {/* Items del grupo — checkbox multi-select */}
@@ -607,14 +608,14 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                           onClick={() => handleToggleRitual(r)}
                                           className={`p-4 rounded-xl text-left border transition-all flex items-center justify-between group ${
                                             selected
-                                              ? 'bg-[#efe6dc]/50 border-[#764229] shadow-md'
-                                              : 'bg-white border-[#efe6dc] hover:border-stone-300'
+                                              ? 'bg-[#dcebe2]/50 border-[#35755d] shadow-md'
+                                              : 'bg-white border-[#dcebe2] hover:border-stone-300'
                                           }`}
                                         >
                                           <div className="flex gap-3 items-center min-w-0">
                                             {/* Checkbox visual */}
                                             <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors duration-150 ${
-                                              selected ? 'bg-[#764229] border-[#764229]' : 'border-stone-300'
+                                              selected ? 'bg-[#35755d] border-[#35755d]' : 'border-stone-300'
                                             }`}>
                                               {selected && <Check className="w-3 h-3 text-white" />}
                                             </div>
@@ -622,14 +623,14 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                               className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
                                             <div className="min-w-0">
                                               <div className="flex items-center gap-1.5 flex-wrap">
-                                                <span className="text-sm font-serif font-semibold text-[#4a2815] group-hover:text-[#764229] transition-colors">
+                                                <span className="text-sm font-serif font-semibold text-[#23543f] group-hover:text-[#35755d] transition-colors">
                                                   {r.name}
                                                 </span>
                                                 {r.badge && (
                                                   <span className={`text-[8px] font-sans px-1.5 py-0.5 rounded-full font-bold ${
                                                     r.customQuote
                                                       ? 'bg-sky-100 text-sky-700'
-                                                      : 'bg-[#efe6dc] text-[#764229]'
+                                                      : 'bg-[#dcebe2] text-[#35755d]'
                                                   }`}>
                                                     {r.badge}
                                                   </span>
@@ -641,7 +642,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                           <div className="text-right flex-shrink-0 ml-3 space-y-0.5">
                                             {r.customQuote
                                               ? <span className="text-xs font-serif font-bold text-sky-700 block">Cotización</span>
-                                              : <span className="text-sm font-serif font-bold text-[#764229] block">${r.price}</span>
+                                              : <span className="text-sm font-serif font-bold text-[#35755d] block">${r.price}</span>
                                             }
                                             <span className="text-[9px] font-mono text-stone-400 block">{r.duration} min</span>
                                             {r.customQuote
@@ -666,16 +667,16 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                   initial={{ opacity: 0, y: 6 }}
                                   animate={{ opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.23, 1, 0.32, 1] } }}
                                   exit={{ opacity: 0, y: -4, transition: { duration: 0.15 } }}
-                                  className="bg-[#f2eae4] rounded-xl px-4 py-3 flex items-center justify-between border border-[#efe6dc]"
+                                  className="bg-[#e9f3ed] rounded-xl px-4 py-3 flex items-center justify-between border border-[#dcebe2]"
                                 >
                                   <div className="flex items-center gap-2 text-[11px] text-stone-500 font-sans">
-                                    <span className="font-semibold text-[#4a2815]">
+                                    <span className="font-semibold text-[#23543f]">
                                       {selectedRituals.length} {selectedRituals.length === 1 ? 'servicio' : 'servicios'}
                                     </span>
                                     <span>·</span>
                                     <span>{baseDuration} min</span>
                                   </div>
-                                  <span className="font-serif font-bold text-[#764229] text-sm">${basePrice} MXN</span>
+                                  <span className="font-serif font-bold text-[#35755d] text-sm">${basePrice} MXN</span>
                                 </motion.div>
                               )}
                             </AnimatePresence>
@@ -689,24 +690,24 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                   exit={{ opacity: 0, y: -4, transition: { duration: 0.15 } }}
                                   className={`p-4 rounded-xl border-2 cursor-pointer transition-[border-color,background-color] duration-150 ${
                                     withAuraAddon
-                                      ? 'border-[#764229] bg-[#efe6dc]/40'
-                                      : 'border-[#efe6dc] bg-white hover:border-[#764229]/30'
+                                      ? 'border-[#35755d] bg-[#dcebe2]/40'
+                                      : 'border-[#dcebe2] bg-white hover:border-[#35755d]/30'
                                   }`}
                                   onClick={() => setWithAuraAddon(v => !v)}
                                 >
                                   <div className="flex items-center gap-3">
                                     <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors duration-150 ${
-                                      withAuraAddon ? 'bg-[#764229] border-[#764229]' : 'border-stone-300'
+                                      withAuraAddon ? 'bg-[#35755d] border-[#35755d]' : 'border-stone-300'
                                     }`}>
                                       {withAuraAddon && <Check className="w-3 h-3 text-white" />}
                                     </div>
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2">
-                                        <Sparkles className="w-3.5 h-3.5 text-[#764229]" />
-                                        <span className="text-xs font-serif font-semibold text-[#4a2815]">
+                                        <Sparkles className="w-3.5 h-3.5 text-[#35755d]" />
+                                        <span className="text-xs font-serif font-semibold text-[#23543f]">
                                           Agregar Ritual AURA
                                         </span>
-                                        <span className="text-[9px] font-mono font-bold text-[#764229] bg-[#efe6dc] px-2 py-0.5 rounded-full">
+                                        <span className="text-[9px] font-mono font-bold text-[#35755d] bg-[#dcebe2] px-2 py-0.5 rounded-full">
                                           +${AURA_ADDON_PRICE} · +30 min
                                         </span>
                                       </div>
@@ -735,7 +736,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                     >
                       <p className="text-xs text-stone-500 font-serif italic">
                         Especialistas disponibles para{' '}
-                        <strong className="text-[#4a2815]">
+                        <strong className="text-[#23543f]">
                           {selectedRituals.map(r => r.name).join(' + ')}
                           {canHaveAuraAddon && withAuraAddon ? ' + Ritual AURA' : ''}
                         </strong>:
@@ -747,15 +748,15 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                             onClick={() => setSelectedSpecialist(s)}
                             className={`p-4 rounded-xl text-left border transition-all flex gap-4 items-start ${
                               selectedSpecialist?.id === s.id
-                                ? 'bg-[#efe6dc]/50 border-[#764229] shadow-md'
-                                : 'bg-white border-[#efe6dc] hover:border-stone-300'
+                                ? 'bg-[#dcebe2]/50 border-[#35755d] shadow-md'
+                                : 'bg-white border-[#dcebe2] hover:border-stone-300'
                             }`}
                           >
                             <img src={s.avatarUrl} alt={s.name} referrerPolicy="no-referrer"
                               className="w-16 h-16 rounded-full object-cover border-2 border-white flex-shrink-0 shadow-sm" />
                             <div>
-                              <span className="text-sm font-serif font-semibold text-[#4a2815] block">{s.name}</span>
-                              <span className="text-[10px] font-sans tracking-wider text-[#764229] uppercase font-semibold block">{s.role}</span>
+                              <span className="text-sm font-serif font-semibold text-[#23543f] block">{s.name}</span>
+                              <span className="text-[10px] font-sans tracking-wider text-[#35755d] uppercase font-semibold block">{s.role}</span>
                               <p className="text-[10px] text-stone-600 mt-1 leading-relaxed">{s.bio}</p>
                             </div>
                           </button>
@@ -777,7 +778,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                       <div className="space-y-3">
                         {/* Encabezado de mes con navegación */}
                         <div className="flex items-center justify-between">
-                          <label className="text-xs font-sans font-semibold uppercase tracking-wider text-[#4a2815] flex items-center gap-1.5">
+                          <label className="text-xs font-sans font-semibold uppercase tracking-wider text-[#23543f] flex items-center gap-1.5">
                             <CalendarDays className="w-3.5 h-3.5" />
                             Seleccionar Fecha
                           </label>
@@ -789,22 +790,22 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                         </div>
 
                         {/* Navegación mes */}
-                        <div className="flex items-center justify-between bg-white border border-[#efe6dc] rounded-xl px-3 py-2">
+                        <div className="flex items-center justify-between bg-white border border-[#dcebe2] rounded-xl px-3 py-2">
                           <button
                             type="button"
                             onClick={goPrevMonth}
                             disabled={isPrevMonthDisabled()}
-                            className="p-1 rounded-lg text-stone-400 hover:text-[#764229] disabled:opacity-25 disabled:cursor-not-allowed transition-colors active:scale-[0.92]"
+                            className="p-1 rounded-lg text-stone-400 hover:text-[#35755d] disabled:opacity-25 disabled:cursor-not-allowed transition-colors active:scale-[0.92]"
                           >
                             <ChevronLeft className="w-4 h-4" />
                           </button>
-                          <span className="text-sm font-serif font-semibold text-[#4a2815] capitalize">
+                          <span className="text-sm font-serif font-semibold text-[#23543f] capitalize">
                             {MONTHS_ES[calMonth]} {calYear}
                           </span>
                           <button
                             type="button"
                             onClick={goNextMonth}
-                            className="p-1 rounded-lg text-stone-400 hover:text-[#764229] transition-colors active:scale-[0.92]"
+                            className="p-1 rounded-lg text-stone-400 hover:text-[#35755d] transition-colors active:scale-[0.92]"
                           >
                             <ChevronRight className="w-4 h-4" />
                           </button>
@@ -835,17 +836,17 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                 onClick={() => handleSelectDate(day)}
                                 className={`aspect-square flex flex-col items-center justify-center rounded-lg text-xs font-sans transition-[background-color,color,transform] duration-150
                                   ${isSelected
-                                    ? 'bg-[#764229] text-white font-bold shadow-md'
+                                    ? 'bg-[#35755d] text-white font-bold shadow-md'
                                     : disabled
                                     ? 'text-stone-300 cursor-not-allowed'
                                     : isToday
-                                    ? 'border border-[#764229]/40 text-[#764229] font-semibold hover:bg-[#efe6dc]/60'
-                                    : 'text-stone-700 hover:bg-[#efe6dc]/50 active:scale-[0.94]'
+                                    ? 'border border-[#35755d]/40 text-[#35755d] font-semibold hover:bg-[#dcebe2]/60'
+                                    : 'text-stone-700 hover:bg-[#dcebe2]/50 active:scale-[0.94]'
                                   }`}
                               >
                                 <span className="leading-none">{day}</span>
                                 {isToday && !isSelected && (
-                                  <span className="w-1 h-1 rounded-full bg-[#764229] mt-0.5 block" />
+                                  <span className="w-1 h-1 rounded-full bg-[#35755d] mt-0.5 block" />
                                 )}
                               </button>
                             );
@@ -854,9 +855,9 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                       </div>
 
                       {/* ── Horarios disponibles ── */}
-                      <div className="space-y-2 pt-1 border-t border-[#efe6dc]">
+                      <div className="space-y-2 pt-1 border-t border-[#dcebe2]">
                         <div className="flex items-center justify-between pt-2">
-                          <label className="text-xs font-sans font-semibold uppercase tracking-wider text-[#4a2815]">
+                          <label className="text-xs font-sans font-semibold uppercase tracking-wider text-[#23543f]">
                             Horarios Disponibles
                           </label>
                           {loadingSlots && (
@@ -887,11 +888,11 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                       ${unavailable
                                         ? 'bg-stone-100 border-stone-200 text-stone-300 cursor-not-allowed line-through'
                                         : isSelected
-                                        ? 'bg-[#efe6dc] border-[#764229] text-[#4a2815] font-semibold shadow-sm'
-                                        : 'bg-white border-[#efe6dc] hover:border-stone-300 text-stone-600 cursor-pointer active:scale-[0.96]'
+                                        ? 'bg-[#dcebe2] border-[#35755d] text-[#23543f] font-semibold shadow-sm'
+                                        : 'bg-white border-[#dcebe2] hover:border-stone-300 text-stone-600 cursor-pointer active:scale-[0.96]'
                                       }`}
                                   >
-                                    <Clock className={`w-3 h-3 flex-shrink-0 ${unavailable ? 'text-stone-300' : 'text-[#5e6c58] opacity-70'}`} />
+                                    <Clock className={`w-3 h-3 flex-shrink-0 ${unavailable ? 'text-stone-300' : 'text-[#45705f] opacity-70'}`} />
                                     {t}
                                   </button>
                                 );
@@ -920,17 +921,17 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                       </p>
                       <form onSubmit={handleConfirmReservation} className="space-y-4">
                         {/* Resumen de reserva con desglose de anticipo */}
-                        <div className="bg-white border border-[#efe6dc] rounded-xl overflow-hidden text-xs">
+                        <div className="bg-white border border-[#dcebe2] rounded-xl overflow-hidden text-xs">
                           {/* Lista de servicios seleccionados */}
                           {selectedRituals.map((r, idx) => (
                             <div
                               key={r.id}
-                              className={`p-4 flex gap-3 leading-normal ${idx > 0 ? 'border-t border-[#efe6dc]' : ''}`}
+                              className={`p-4 flex gap-3 leading-normal ${idx > 0 ? 'border-t border-[#dcebe2]' : ''}`}
                             >
                               <img src={r.imageUrl} alt={r.name} referrerPolicy="no-referrer"
                                 className="w-10 h-10 object-cover rounded-lg flex-shrink-0" />
                               <div className="min-w-0 flex-1">
-                                <span className="font-serif font-bold text-[#4a2815] block truncate">{r.name}</span>
+                                <span className="font-serif font-bold text-[#23543f] block truncate">{r.name}</span>
                                 <span className="text-[10px] text-stone-400 font-mono">
                                   {r.duration} min{r.customQuote ? ' · Cotización' : ` · $${r.price} MXN`}
                                 </span>
@@ -940,19 +941,19 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
 
                           {/* Ritual AURA addon row */}
                           {canHaveAuraAddon && withAuraAddon && (
-                            <div className="p-4 border-t border-[#efe6dc] flex gap-3 leading-normal bg-[#efe6dc]/20">
-                              <div className="w-10 h-10 rounded-lg bg-[#764229]/10 flex items-center justify-center flex-shrink-0">
-                                <Sparkles className="w-4 h-4 text-[#764229]" />
+                            <div className="p-4 border-t border-[#dcebe2] flex gap-3 leading-normal bg-[#dcebe2]/20">
+                              <div className="w-10 h-10 rounded-lg bg-[#35755d]/10 flex items-center justify-center flex-shrink-0">
+                                <Sparkles className="w-4 h-4 text-[#35755d]" />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <span className="font-serif font-bold text-[#4a2815] block">Ritual AURA</span>
+                                <span className="font-serif font-bold text-[#23543f] block">Ritual AURA</span>
                                 <span className="text-[10px] text-stone-400 font-mono">+30 min · +$400 MXN</span>
                               </div>
                             </div>
                           )}
 
                           {/* Info de cita */}
-                          <div className="px-4 py-3 border-t border-[#efe6dc] bg-[#faf6f0]/60 space-y-1.5">
+                          <div className="px-4 py-3 border-t border-[#dcebe2] bg-[#f3f8f5]/60 space-y-1.5">
                             <div className="flex justify-between">
                               <span className="text-stone-500">Especialista</span>
                               <span className="text-stone-700">{selectedSpecialist?.name}</span>
@@ -971,7 +972,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
 
                           {/* Desglose anticipo / evaluación gratuita */}
                           {isEvalAppointment ? (
-                            <div className="px-4 py-3 border-t border-[#efe6dc] bg-sky-50/60 flex items-center justify-between">
+                            <div className="px-4 py-3 border-t border-[#dcebe2] bg-sky-50/60 flex items-center justify-between">
                               <div>
                                 <span className="font-sans font-semibold text-sky-800 block">
                                   Esta es una cita de evaluación gratuita
@@ -985,7 +986,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                               </span>
                             </div>
                           ) : effectiveDepPct > 0 ? (
-                            <div className="px-4 py-3 border-t border-[#efe6dc] bg-amber-50/60 flex items-center justify-between">
+                            <div className="px-4 py-3 border-t border-[#dcebe2] bg-amber-50/60 flex items-center justify-between">
                               <div>
                                 <span className="font-sans font-semibold text-amber-800 block">
                                   Total: ${effectivePrice} MXN · Anticipo {effectiveDepPct}%
@@ -1002,7 +1003,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                               </div>
                             </div>
                           ) : (
-                            <div className="px-4 py-3 border-t border-[#efe6dc] bg-emerald-50/40 flex items-center justify-between">
+                            <div className="px-4 py-3 border-t border-[#dcebe2] bg-emerald-50/40 flex items-center justify-between">
                               <div>
                                 <span className="font-sans font-semibold text-emerald-700 block">
                                   Total: ${effectivePrice} MXN
@@ -1017,14 +1018,14 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                           <label className="text-[10px] font-sans font-bold tracking-widest text-stone-500 uppercase">Nombre del Huésped</label>
                           <input type="text" required placeholder="Ej. Camila Silva"
                             value={name} onChange={(e) => setName(e.target.value)}
-                            className="w-full p-3 text-xs rounded-xl border border-[#efe6dc] bg-white focus:outline-none focus:border-[#764229]" />
+                            className="w-full p-3 text-xs rounded-xl border border-[#dcebe2] bg-white focus:outline-none focus:border-[#35755d]" />
                         </div>
 
                         <div className="space-y-1">
                           <label className="text-[10px] font-sans font-bold tracking-widest text-stone-500 uppercase">Correo Electrónico</label>
                           <input type="email" required placeholder="Ej. camila@ejemplo.com"
                             value={email} onChange={(e) => setEmail(e.target.value)}
-                            className="w-full p-3 text-xs rounded-xl border border-[#efe6dc] bg-white focus:outline-none focus:border-[#764229]" />
+                            className="w-full p-3 text-xs rounded-xl border border-[#dcebe2] bg-white focus:outline-none focus:border-[#35755d]" />
                         </div>
 
                         <div className="space-y-1">
@@ -1033,7 +1034,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                           </label>
                           <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)}
                             placeholder="Cuéntanos sobre sensibilidades cutáneas, zonas secas o preferencias de presión..."
-                            className="w-full p-3 text-xs rounded-xl border border-[#efe6dc] bg-white focus:outline-none focus:border-[#764229] resize-none" />
+                            className="w-full p-3 text-xs rounded-xl border border-[#dcebe2] bg-white focus:outline-none focus:border-[#35755d] resize-none" />
                         </div>
 
                         <button type="submit" className="hidden" id="booking-submit-trigger" />
@@ -1046,12 +1047,12 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
 
             {/* Footer de acciones */}
             {!success && (
-              <div id="booking-wizard-footer" className="p-5 border-t border-[#efe6dc] flex justify-between gap-3 bg-white/50">
+              <div id="booking-wizard-footer" className="p-5 border-t border-[#dcebe2] flex justify-between gap-3 bg-white/50">
                 {step > 1 && (
                   <button
                     id="booking-prev-step-btn"
                     onClick={handlePrevStep}
-                    className="py-3 px-4 border border-[#efe6dc] hover:bg-[#efe6dc]/20 active:scale-[0.97] text-stone-700 text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center gap-1.5"
+                    className="py-3 px-4 border border-[#dcebe2] hover:bg-[#dcebe2]/20 active:scale-[0.97] text-stone-700 text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center gap-1.5"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     Atrás
@@ -1062,7 +1063,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                   <button
                     id="booking-next-step-btn"
                     onClick={handleNextStep}
-                    className="ml-auto py-3 px-6 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center gap-1.5"
+                    className="ml-auto py-3 px-6 bg-[#35755d] hover:bg-[#23543f] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase flex items-center gap-1.5"
                   >
                     Continuar
                     <ChevronRight className="w-4 h-4" />

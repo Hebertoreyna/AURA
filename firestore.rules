@@ -1,16 +1,62 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Reglas AURA - Control de Reservas
+
+    // ── Reglas AURA — Reservas ──────────────────────────────────────────
+    //
+    // Modelo de seguridad:
+    //  * Cualquier visitante puede CREAR una reserva (status "pending",
+    //    con el esquema exacto validado abajo).
+    //  * Cualquier visitante puede LEER reservas — necesario para que el
+    //    wizard calcule disponibilidad de horarios. (Limitación conocida:
+    //    Firestore no permite ocultar campos; para ocultar datos de
+    //    clientes al público se requeriría un backend intermedio.)
+    //  * Solo personal AUTENTICADO (Firebase Auth) puede ACTUALIZAR o
+    //    BORRAR reservas — esto protege el panel de administración.
+    //
+    // Requisito de despliegue:
+    //  1. Firebase Console → Authentication → habilitar "Email/Password".
+    //  2. Crear el usuario administrador (email + contraseña de Anel).
+    //  3. Firestore → Rules → pegar este archivo y publicar.
+
     match /bookings/{bookingId} {
-      // Permite a cualquier persona consultar y agendar citas
-      allow read, create: if true;
-      
-      // Permite modificar y borrar citas (para personal administrativo/terapeutas)
-      // Puede restringirse según requisitos, pero para el panel de administración
-      // debe permitir 'update' y 'delete' para que los cambios persistan en el servidor.
-      allow update, delete: if true;
+
+      allow read: if true;
+
+      allow create: if
+        // Esquema estricto: solo estos campos
+        request.resource.data.keys().hasOnly([
+          'date', 'time', 'duration', 'ritualName', 'specialistName',
+          'clientName', 'clientEmail', 'notes', 'status', 'price', 'createdAt'
+        ]) &&
+        request.resource.data.date is string &&
+        request.resource.data.date.matches('\\d{4}-\\d{2}-\\d{2}') &&
+        request.resource.data.time is string &&
+        request.resource.data.time.size() < 12 &&
+        request.resource.data.duration is number &&
+        request.resource.data.duration > 0 &&
+        request.resource.data.duration <= 480 &&
+        request.resource.data.ritualName is string &&
+        request.resource.data.ritualName.size() < 300 &&
+        request.resource.data.specialistName is string &&
+        request.resource.data.specialistName.size() < 100 &&
+        request.resource.data.clientName is string &&
+        request.resource.data.clientName.size() > 0 &&
+        request.resource.data.clientName.size() < 100 &&
+        request.resource.data.clientEmail is string &&
+        request.resource.data.clientEmail.size() < 150 &&
+        request.resource.data.notes is string &&
+        request.resource.data.notes.size() < 1000 &&
+        // Toda reserva pública nace como "pending"
+        request.resource.data.status == 'pending';
+
+      // Solo el personal autenticado puede modificar o borrar
+      allow update, delete: if request.auth != null;
+    }
+
+    // Todo lo demás: bloqueado
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

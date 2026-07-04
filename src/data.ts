@@ -196,7 +196,7 @@ export const RITUALS: Ritual[] = [
     subcategory: 'facial',
     duration: 60,
     price: 900,
-    imageUrl: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80',
     shortDescription: 'El facial más completo de la cabina: incluye la aparatología que Anel determine necesaria según el análisis de tu piel.',
     description: 'Facial adaptado exclusivamente a las necesidades de tu piel. Tras un análisis independiente y detallado, Anel selecciona y aplica la aparatología específica que considera necesaria para tu caso — sin límite de técnicas. La opción más integral y personalizada del menú.',
     benefits: [
@@ -317,16 +317,16 @@ export const RITUALS: Ritual[] = [
     category: 'maquillaje',
     duration: 120,
     price: 750,
-    imageUrl: 'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1522337094846-8a81113521f0?auto=format&fit=crop&w=800&q=80',
     shortDescription: 'Look elegante, fresco y duradero para destacar en tu graduación y fotografías.',
     description: 'Look ideal para tu graduación, creado para destacar tus facciones con un maquillaje elegante, fresco y duradero para fotografías y celebración.',
     benefits: [
       'Look fotogénico adaptado a tu personalidad',
-      'Elegante, fresco y de larga duración',
+      'Elegante, fresco and de larga duración',
       'Perfecto para ceremonia y celebración'
     ],
     steps: [
-      'Análisis de tono de piel y preferencias',
+      'Análisis de tono de piel y de preferencias',
       'Preparación: limpieza, hidratación y primer',
       'Base HD y corrección de imperfecciones',
       'Diseño y delineado de cejas',
@@ -342,7 +342,7 @@ export const RITUALS: Ritual[] = [
     category: 'maquillaje',
     duration: 180,
     price: 800,
-    imageUrl: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=800&q=80',
     shortDescription: 'Aprende técnicas y productos ideales para tu tipo de rostro y piel con Anel.',
     description: 'Aprende técnicas y productos ideales para tu tipo de rostro y piel. Curso personalizado para lograr maquillajes prácticos, favorecedores y adaptados a tu estilo.',
     benefits: [
@@ -470,7 +470,7 @@ export const RITUALS: Ritual[] = [
     subcategory: 'corporal',
     duration: 120,
     price: 1500,
-    imageUrl: 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1600334189155-410710114d2a?auto=format&fit=crop&w=800&q=80',
     shortDescription: 'Exfoliación corporal completa con mascarilla y envoltura para una piel radiante en tu día especial.',
     description: 'La forma perfecta para lucir una piel radiante y suave en un día especial. Consiste en una exfoliación corporal completa donde eliminamos células muertas, impurezas, puntos negros, exceso de grasa y toxinas acumuladas. Mascarilla personalizada y envoltura por ambos lados del cuerpo.',
     benefits: [

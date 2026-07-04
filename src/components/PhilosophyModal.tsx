@@ -18,7 +18,7 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-[#4a2815]/30 backdrop-blur-md"
+            className="absolute inset-0 bg-[#23543f]/30 backdrop-blur-md"
           />
 
           {/* Modal Content */}
@@ -27,7 +27,7 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
             initial={{ opacity: 0, scale: 0.96, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0, transition: { type: 'spring', duration: 0.4, bounce: 0.1 } }}
             exit={{ opacity: 0, scale: 0.97, y: 8, transition: { duration: 0.16, ease: [0.32, 0.72, 0, 1] } }}
-            className="relative w-full max-w-lg overflow-y-auto max-h-[85vh] bg-[#faf6f0] rounded-2xl p-6 md:p-8 shadow-xl border border-[#efe6dc] text-stone-800"
+            className="relative w-full max-w-lg overflow-y-auto max-h-[85vh] bg-[#f3f8f5] rounded-2xl p-6 md:p-8 shadow-xl border border-[#dcebe2] text-stone-800"
           >
             {/* Close button */}
             <button
@@ -40,18 +40,18 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
 
             {/* Header */}
             <div id="philosophy-header" className="text-center mb-8">
-              <span className="text-xs uppercase tracking-widest text-[#764229] font-medium">En el interior de nuestra esencia</span>
-              <h2 className="text-3xl font-serif text-[#4a2815] mt-1">Nuestra Filosofía</h2>
+              <span className="text-xs uppercase tracking-widest text-[#35755d] font-medium">En el interior de nuestra esencia</span>
+              <h2 className="text-3xl font-serif text-[#23543f] mt-1">Nuestra Filosofía</h2>
             </div>
 
             {/* Core Values */}
             <div id="philosophy-values" className="space-y-6">
               <div id="value-pure" className="flex gap-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#f2eae4] flex items-center justify-center text-[#764229]">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#e9f3ed] flex items-center justify-center text-[#35755d]">
                   <Sprout className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg text-[#4a2815] font-medium">Cuidado Personalizado</h3>
+                  <h3 className="font-serif text-lg text-[#23543f] font-medium">Cuidado Personalizado</h3>
                   <p className="text-xs text-stone-600 mt-1 leading-relaxed">
                     Cada servicio comienza con un análisis de tu piel. Adaptamos cada servicio a tus necesidades específicas para que veas resultados reales desde la primera sesión.
                   </p>
@@ -59,11 +59,11 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
               </div>
 
               <div id="value-cycle" className="flex gap-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#f2eae4] flex items-center justify-center text-[#764229]">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#e9f3ed] flex items-center justify-center text-[#35755d]">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg text-[#4a2815] font-medium">Técnicas Profesionales</h3>
+                  <h3 className="font-serif text-lg text-[#23543f] font-medium">Técnicas Profesionales</h3>
                   <p className="text-xs text-stone-600 mt-1 leading-relaxed">
                     Combinamos las técnicas más avanzadas en cosmetología con productos de alta calidad. Desde faciales con tecnología Hydrofacial hasta maquillaje artístico para tus momentos más especiales.
                   </p>
@@ -71,11 +71,11 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
               </div>
 
               <div id="value-care" className="flex gap-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#f2eae4] flex items-center justify-center text-[#764229]">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#e9f3ed] flex items-center justify-center text-[#35755d]">
                   <Heart className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg text-[#4a2815] font-medium">Experiencia que Transforma</h3>
+                  <h3 className="font-serif text-lg text-[#23543f] font-medium">Experiencia que Transforma</h3>
                   <p className="text-xs text-stone-600 mt-1 leading-relaxed">
                     Más que un servicio de belleza, AURA es un espacio donde te cuidas y te consientes. Cada visita es una pausa en tu día para reconectar contigo misma y salir radiante.
                   </p>
@@ -84,7 +84,7 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
             </div>
 
             {/* Quote Block */}
-            <div id="philosophy-quote" className="mt-8 pt-6 border-t border-[#efe6dc] text-center italic text-[#764229] text-sm font-serif">
+            <div id="philosophy-quote" className="mt-8 pt-6 border-t border-[#dcebe2] text-center italic text-[#35755d] text-sm font-serif">
               "Tu belleza natural es el lienzo. Mi trabajo es hacerla brillar."
               <p className="text-[10px] mt-1 not-italic font-sans tracking-widest uppercase text-stone-500">— Anel, Fundadora de AURA</p>
             </div>
@@ -93,7 +93,7 @@ export default function PhilosophyModal({ isOpen, onClose }: PhilosophyModalProp
             <button
               id="philosophy-dismiss-btn"
               onClick={onClose}
-              className="mt-6 w-full py-3 bg-[#764229] hover:bg-[#4a2815] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase"
+              className="mt-6 w-full py-3 bg-[#35755d] hover:bg-[#23543f] active:scale-[0.97] text-white text-xs font-semibold tracking-wider rounded-xl transition-[transform,background-color] duration-150 font-sans uppercase"
             >
               Continuar Nuestro Viaje
             </button>

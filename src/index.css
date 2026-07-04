@@ -4,13 +4,13 @@
   --font-serif: 'Cormorant Garamond', Georgia, serif;
   --font-sans: 'Inter', system-ui, sans-serif;
   
-  --color-aura-gold: #b38865;
-  --color-aura-brown-dark: #4a2815;
-  --color-aura-brown-light: #764229;
-  --color-aura-cream: #faf6f0;
-  --color-aura-beige: #f2eae4;
-  --color-aura-sand: #efe6dc;
-  --color-aura-sage: #5e6c58;
+  --color-aura-gold: #7fa892;
+  --color-aura-brown-dark: #23543f;
+  --color-aura-brown-light: #35755d;
+  --color-aura-cream: #f3f8f5;
+  --color-aura-beige: #e9f3ed;
+  --color-aura-sand: #dcebe2;
+  --color-aura-sage: #45705f;
 }
 
 /* Custom styles */
@@ -30,4 +30,44 @@ input::-webkit-inner-spin-button {
 }
 input[type=number] {
   -moz-appearance: textfield;
+}
+
+/* ── Animación ligera del hero (GPU-friendly, solo transform/opacity) ── */
+
+/* Ken Burns: zoom lentísimo sobre la foto del hero */
+@keyframes aura-kenburns {
+  from { transform: scale(1.05) translateY(0); }
+  to   { transform: scale(1.14) translateY(-1.5%); }
+}
+.aura-kenburns {
+  animation: aura-kenburns 28s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* Orbes de luz que flotan con deriva suave */
+@keyframes aura-float-a {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(4%, -6%) scale(1.08); }
+  100% { transform: translate(-3%, 3%) scale(0.96); }
+}
+@keyframes aura-float-b {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(-5%, 5%) scale(1.1); }
+  100% { transform: translate(3%, -4%) scale(0.94); }
+}
+.aura-orb {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(60px);
+  mix-blend-mode: soft-light;
+}
+.aura-orb-a { animation: aura-float-a 16s ease-in-out infinite alternate; }
+.aura-orb-b { animation: aura-float-b 21s ease-in-out infinite alternate; }
+
+/* Accesibilidad: sin animación si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+  .aura-kenburns, .aura-orb-a, .aura-orb-b {
+    animation: none;
+  }
 }
