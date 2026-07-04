@@ -66,6 +66,22 @@ export default function RitualsScreen({
           {/* Orbes de luz flotantes — acento sutil, sin costo de carga */}
           <div aria-hidden="true" className="aura-orb aura-orb-a w-[45vw] h-[45vw] max-w-[420px] max-h-[420px] -top-[8%] -left-[10%] bg-[#7fa892]/50" />
           <div aria-hidden="true" className="aura-orb aura-orb-b w-[38vw] h-[38vw] max-w-[360px] max-h-[360px] bottom-[12%] -right-[8%] bg-[#dcebe2]/60" />
+          {/* Destellos de luz dorada que ascienden sobre el hero */}
+          <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none">
+            {Array.from({ length: 14 }).map((_, i) => (
+              <span
+                key={i}
+                className="aura-particle"
+                style={{
+                  left: `${(i * 7 + 4) % 100}%`,
+                  width: `${4 + (i % 4) * 2}px`,
+                  height: `${4 + (i % 4) * 2}px`,
+                  animationDuration: `${9 + (i % 5) * 2}s`,
+                  animationDelay: `${(i % 7) * 1.4}s`,
+                }}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Hero Text Alignments & Triggers */}
