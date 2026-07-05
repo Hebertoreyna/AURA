@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { ArrowRight, Menu, Sparkles, CalendarPlus } from 'lucide-react';
+import { ArrowRight, Menu, Sparkles, CalendarPlus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Ritual, Product } from '../types';
 import { RITUALS } from '../data';
 
@@ -18,6 +18,12 @@ export default function RitualsScreen({
   onViewRitual,
   onNavigateToTab
 }: RitualsScreenProps) {
+
+  // Desplaza un carrusel horizontal (usado por las flechas en escritorio)
+  const scrollSlider = (key: string, dir: 1 | -1) => {
+    const el = document.getElementById(`rituals-slider-${key}`);
+    if (el) el.scrollBy({ left: dir * 330, behavior: 'smooth' });
+  };
 
   return (
     <div id="rituals-screen" className="relative w-full overflow-hidden bg-[#f7fbf9]">
@@ -185,10 +191,11 @@ export default function RitualsScreen({
               </button>
             </div>
 
-            {/* Scroll horizontal con stagger */}
+            {/* Carrusel con flechas de navegación en escritorio */}
+            <div className="relative">
             <motion.div
               id={`rituals-slider-${section.key}`}
-              className="flex gap-6 overflow-x-auto pb-6 pt-2 no-scrollbar snap-x cursor-grab active:cursor-grabbing"
+              className="flex gap-6 overflow-x-auto pb-6 pt-2 no-scrollbar snap-x scroll-smooth cursor-grab active:cursor-grabbing"
               variants={{ visible: { transition: { staggerChildren: 0.07, delayChildren: 0.04 } } }}
               initial="hidden"
               whileInView="visible"
@@ -244,6 +251,29 @@ export default function RitualsScreen({
                 </motion.div>
               ))}
             </motion.div>
+
+            {/* Flechas de navegación — solo escritorio (en móvil el carrusel se desliza con el dedo) */}
+            {sectionRituals.length > 3 && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Ver servicios anteriores"
+                  onClick={() => scrollSlider(section.key, -1)}
+                  className="hidden md:flex absolute left-0 -translate-x-1/2 top-[178px] -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/95 border border-[#dcebe2] shadow-md items-center justify-center text-[#35755d] hover:bg-white hover:text-[#23543f] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Ver más servicios"
+                  onClick={() => scrollSlider(section.key, 1)}
+                  className="hidden md:flex absolute right-0 translate-x-1/2 top-[178px] -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/95 border border-[#dcebe2] shadow-md items-center justify-center text-[#35755d] hover:bg-white hover:text-[#23543f] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </>
+            )}
+            </div>
           </section>
         );
       })}
