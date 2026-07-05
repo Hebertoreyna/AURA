@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Clock, Sparkles } from 'lucide-react';
 import { Ritual } from '../types';
+import { ServiceVisual } from './ServiceIcon';
 
 interface RitualDetailModalProps {
   ritual: Ritual | null;
@@ -46,12 +47,7 @@ export default function RitualDetailModal({ ritual, isOpen, onClose, onBookRitua
 
             {/* Left side: Hero Image with badge */}
             <div id="ritual-modal-image-panel" className="relative w-full md:w-1/2 h-56 md:h-auto min-h-[250px] bg-[#dcebe2]">
-              <img
-                src={ritual.imageUrl}
-                alt={ritual.name}
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover"
-              />
+              <ServiceVisual ritual={ritual} className="w-full h-full" iconClassName="w-2/5 h-2/5" />
               {ritual.badge && (
                 <span className="absolute top-4 left-4 bg-[#35755d] text-white text-[10px] font-sans font-semibold tracking-wider px-3 py-1 rounded-full uppercase">
                   {ritual.badge}

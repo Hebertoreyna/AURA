@@ -6,7 +6,7 @@ export const SPECIALISTS: Specialist[] = [
     name: 'Anel, Especialista Aura',
     role: 'Lic. Cosmetología e Imagen',
     bio: 'Licenciada en Cosmetología e Imagen, especializada en maquillaje artístico, técnicas faciales avanzadas y servicios corporales. Cada visita es una experiencia diseñada para realzar tu belleza natural con técnicas profesionales y atención personalizada.',
-    avatarUrl: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=250&q=80'
+    avatarUrl: ''
   }
 ];
 
@@ -18,7 +18,7 @@ export const PRODUCTS: Product[] = [
     shortDescription: 'Un elixir ligero que restaura la elasticidad de la piel y proporciona un acabado aterciopelado.',
     description: 'Hidratación profunda con péptidos activos y ácido hialurónico de triple peso molecular. Ideal para todo tipo de piel.',
     price: 84.00,
-    imageUrl: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     category: 'serum',
     rating: 4.9,
     reviewsCount: 142,
@@ -40,7 +40,7 @@ export const RITUALS: Ritual[] = [
     subcategory: 'facial',
     duration: 60,
     price: 750,
-    imageUrl: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Servicio ideal para tu primera cita, personalizado a las necesidades de tu piel.',
     description: 'Servicio ideal para tu primera cita, personalizado a las necesidades de tu piel. Utilizando aparatología personalizada luce tu piel limpia, saludable y luminosa.',
     benefits: [
@@ -67,7 +67,7 @@ export const RITUALS: Ritual[] = [
     subcategory: 'facial',
     duration: 60,
     price: 800,
-    imageUrl: 'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Limpieza profunda, extracción, hidratación y exfoliación para una piel oxigenada y limpia.',
     description: 'Sesión facial que combina limpieza profunda, extracción, hidratación y exfoliación. Eliminando impurezas para una piel oxigenada y limpia.',
     benefits: [
@@ -93,7 +93,7 @@ export const RITUALS: Ritual[] = [
     subcategory: 'facial',
     duration: 60,
     price: 800,
-    imageUrl: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Radiofrecuencia para estimular colágeno y elastina, previniendo arrugas y flacidez.',
     description: 'Sesión de radiofrecuencia que estimula la producción de colágeno y elastina en la piel, previniendo y reduciendo arrugas y flacidez en el rostro.',
     benefits: [
@@ -119,7 +119,7 @@ export const RITUALS: Ritual[] = [
     subcategory: 'facial',
     duration: 60,
     price: 750,
-    imageUrl: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Limpieza profunda para controlar el exceso de grasa y disminuir brotes e impurezas.',
     description: 'Sesión enfocada en limpiar profundamente la piel, controlar el exceso de grasa y ayudar a disminuir brotes e impurezas. Incluye limpieza, exfoliación, extracción, activos especializados, aparatología específica y mascarilla calmante para favorecer una piel más equilibrada y saludable.',
     benefits: [
@@ -145,7 +145,7 @@ export const RITUALS: Ritual[] = [
     subcategory: 'facial',
     duration: 60,
     price: 750,
-    imageUrl: 'https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Técnica no invasiva que exfolia y renueva la piel, eliminando células muertas.',
     description: 'Consiste en una técnica no invasiva que exfolia y renueva la piel, eliminando células muertas y mejorando su apariencia.',
     benefits: [
@@ -171,7 +171,7 @@ export const RITUALS: Ritual[] = [
     subcategory: 'facial',
     duration: 40,
     price: 550,
-    imageUrl: 'https://images.unsplash.com/photo-1588776814546-1ffbb8abba64?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Protocolo cosmetológico personalizado de 40 min para quienes quieren lucir bien con poco tiempo.',
     description: 'Sesión de 40 min. con un protocolo cosmetológico personalizado adecuado a tus necesidades. Para quienes tienen poco tiempo pero quieren lucir una piel sana y limpia.',
     benefits: [
@@ -196,7 +196,7 @@ export const RITUALS: Ritual[] = [
     subcategory: 'facial',
     duration: 60,
     price: 900,
-    imageUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'El facial más completo de la cabina: incluye la aparatología que Anel determine necesaria según el análisis de tu piel.',
     description: 'Facial adaptado exclusivamente a las necesidades de tu piel. Tras un análisis independiente y detallado, Anel selecciona y aplica la aparatología específica que considera necesaria para tu caso — sin límite de técnicas. La opción más integral y personalizada del menú.',
     benefits: [
@@ -223,7 +223,7 @@ export const RITUALS: Ritual[] = [
     isAddon: true,
     duration: 30,
     price: 400,
-    imageUrl: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Ritual de relajación y estimulación para rostro, cuello, brazos y cuero cabelludo. Agrégalo como extra en cualquier servicio de cabina (+$400).',
     description: 'Un ritual exclusivo que fusiona relajación profunda y estimulación delicada en el rostro, cuello, brazos y cuero cabelludo. Diseñado para liberar tensiones, revitalizar la piel y brindar una sensación inmediata de bienestar. Sus movimientos suaves ayudan a mejorar la circulación, disminuir el estrés y devolver luminosidad natural al rostro. Vive una experiencia sensorial envolvente que equilibra cuerpo y mente, dejando tu piel descansada y radiante.',
     benefits: [
@@ -242,7 +242,7 @@ export const RITUALS: Ritual[] = [
     category: 'maquillaje',
     duration: 120,
     price: 700,
-    imageUrl: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Maquillaje profesional para eventos y ocasiones sociales, con acabado armonioso y de larga duración.',
     description: 'Maquillaje profesional ideal para eventos y ocasiones sociales. Diseñado para resaltar tus facciones con un acabado armonioso, elegante y de larga duración, adaptado a tu estilo y preferencias.',
     benefits: [
@@ -267,7 +267,7 @@ export const RITUALS: Ritual[] = [
     category: 'maquillaje',
     duration: 180,
     price: 2000,
-    imageUrl: 'https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Maquillaje profesional de alta duración para lucir impecable durante toda la celebración.',
     description: 'Maquillaje profesional de alta duración pensado para lucir impecable durante toda la celebración, realzando tus facciones con un acabado sofisticado y personalizado.',
     benefits: [
@@ -292,7 +292,7 @@ export const RITUALS: Ritual[] = [
     category: 'maquillaje',
     duration: 120,
     price: 900,
-    imageUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Acabado juvenil y de larga duración adaptado a tu estilo y temática del evento.',
     description: 'Maquillaje diseñado para resaltar tu belleza en un día tan especial, con un acabado juvenil y de larga duración, adaptado a tu estilo y temática del evento.',
     benefits: [
@@ -317,7 +317,7 @@ export const RITUALS: Ritual[] = [
     category: 'maquillaje',
     duration: 120,
     price: 750,
-    imageUrl: 'https://images.unsplash.com/photo-1522337094846-8a81113521f0?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Look elegante, fresco y duradero para destacar en tu graduación y fotografías.',
     description: 'Look ideal para tu graduación, creado para destacar tus facciones con un maquillaje elegante, fresco y duradero para fotografías y celebración.',
     benefits: [
@@ -342,7 +342,7 @@ export const RITUALS: Ritual[] = [
     category: 'maquillaje',
     duration: 180,
     price: 800,
-    imageUrl: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Aprende técnicas y productos ideales para tu tipo de rostro y piel con Anel.',
     description: 'Aprende técnicas y productos ideales para tu tipo de rostro y piel. Curso personalizado para lograr maquillajes prácticos, favorecedores y adaptados a tu estilo.',
     benefits: [
@@ -369,7 +369,7 @@ export const RITUALS: Ritual[] = [
     subcategory: 'corporal',
     duration: 60,
     price: 700,
-    imageUrl: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Técnica terapéutica de movimientos suaves y rítmicos para la relajación general del cuerpo y la mente.',
     description: 'Consiste en una técnica terapéutica que utiliza movimientos suaves y rítmicos. Aliviando la tensión muscular y promoviendo la relajación general del cuerpo y la mente.',
     benefits: [
@@ -394,7 +394,7 @@ export const RITUALS: Ritual[] = [
     subcategory: 'corporal',
     duration: 60,
     price: 1000,
-    imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Tecnología EMS y drenaje linfático manual para tonificar, reafirmar y eliminar retención de líquidos.',
     description: 'Sesión corporal de alta tecnología que combina electroestimulación muscular (EMS) con drenaje linfático manual. Tonifica los músculos, reduce la celulitis y elimina la retención de líquidos para un cuerpo más firme y definido.',
     benefits: [
@@ -418,7 +418,7 @@ export const RITUALS: Ritual[] = [
     subcategory: 'corporal',
     duration: 60,
     price: 850,
-    imageUrl: 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Exfoliación mecánica con mascarilla personalizada para eliminar células muertas e hidratar la piel.',
     description: 'Sesión con exfoliación mecánica en la zona para eliminar células muertas de la piel, seguida de una mascarilla personalizada y envoltura para hidratar y nutrir la piel.',
     benefits: [
@@ -445,7 +445,7 @@ export const RITUALS: Ritual[] = [
     duration: 30,
     price: 0,
     customQuote: true,
-    imageUrl: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Evaluación gratuita para determinar el método y presupuesto personalizado según cada caso.',
     description: 'Eliminación de verrugas con aparatología. El precio varía según el número y características de las lesiones, por ello la primera cita es una evaluación gratuita donde Anel analizará tu caso y te entregará un presupuesto personalizado sin compromiso.',
     benefits: [
@@ -470,7 +470,7 @@ export const RITUALS: Ritual[] = [
     subcategory: 'corporal',
     duration: 120,
     price: 1500,
-    imageUrl: 'https://images.unsplash.com/photo-1600334189155-410710114d2a?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '',
     shortDescription: 'Exfoliación corporal completa con mascarilla y envoltura para una piel radiante en tu día especial.',
     description: 'La forma perfecta para lucir una piel radiante y suave en un día especial. Consiste en una exfoliación corporal completa donde eliminamos células muertas, impurezas, puntos negros, exceso de grasa y toxinas acumuladas. Mascarilla personalizada y envoltura por ambos lados del cuerpo.',
     benefits: [

@@ -2,6 +2,10 @@ import { motion } from 'motion/react';
 import { ArrowRight, Menu, Sparkles, CalendarPlus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Ritual, Product } from '../types';
 import { RITUALS } from '../data';
+import { ServiceVisual, SpecialistAvatar, PhotoPlaceholder } from './ServiceIcon';
+
+// Portada del hero: pega aquí la URL de la foto cuando esté lista (deja '' para mostrar el placeholder)
+const HERO_IMAGE = '';
 
 interface RitualsScreenProps {
   onBookAppointment: () => void;
@@ -58,17 +62,12 @@ export default function RitualsScreen({
 
       {/* 2. LUMINOUS CLINICAL HERO BANNER */}
       <section id="hero-banner" className="relative w-full h-[85vh] sm:h-[90vh] overflow-hidden bg-[#f7fbf9]">
-        {/* Background Image — luminosa y limpia */}
+        {/* Portada del hero: foto real cuando exista, o placeholder con espacio reservado */}
         <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1600&q=80"
-            alt="Tratamiento facial profesional en AURA"
-            referrerPolicy="no-referrer"
-            className="w-full h-full object-cover aura-kenburns"
-            style={{ objectPosition: 'center 30%' }}
-          />
-          {/* Velo claro para legibilidad manteniendo la luminosidad */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#f7fbf9] via-[#f7fbf9]/35 to-white/10" />
+          <PhotoPlaceholder src={HERO_IMAGE} label="Foto de portada · próximamente" className="absolute inset-0" />
+          {HERO_IMAGE && (
+            <div className="absolute inset-0 bg-gradient-to-t from-[#12261d]/75 via-[#12261d]/25 to-[#12261d]/5" />
+          )}
           {/* Orbes de luz flotantes — acento sutil, sin costo de carga */}
           <div aria-hidden="true" className="aura-orb aura-orb-a w-[45vw] h-[45vw] max-w-[420px] max-h-[420px] -top-[8%] -left-[10%] bg-[#7fa892]/50" />
           <div aria-hidden="true" className="aura-orb aura-orb-b w-[38vw] h-[38vw] max-w-[360px] max-h-[360px] bottom-[12%] -right-[8%] bg-[#dcebe2]/60" />
@@ -97,7 +96,7 @@ export default function RitualsScreen({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            className="text-xs tracking-[0.3em] font-sans text-[#35755d] font-semibold uppercase mb-3"
+            className={`text-xs tracking-[0.3em] font-sans font-semibold uppercase mb-3 ${HERO_IMAGE ? 'text-[#dcebe2]' : 'text-[#35755d]'}`}
           >
             Cosmetología Profesional
           </motion.span>
@@ -107,7 +106,7 @@ export default function RitualsScreen({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.08, ease: [0.23, 1, 0.32, 1] }}
-            className="text-4xl sm:text-5xl md:text-6xl font-serif text-[#1d3b2e] leading-[1.1] mb-8 max-w-2xl font-light tracking-wide"
+            className={`text-4xl sm:text-5xl md:text-6xl font-serif leading-[1.1] mb-8 max-w-2xl font-light tracking-wide ${HERO_IMAGE ? 'text-[#f3f8f5]' : 'text-[#1d3b2e]'}`}
           >
             Piel sana y luminosa, con ciencia y cuidado experto.
           </motion.h2>
@@ -129,7 +128,7 @@ export default function RitualsScreen({
             <button
               id="hero-philosophy-btn"
               onClick={onOpenPhilosophy}
-              className="py-4 px-8 border border-[#35755d]/50 hover:bg-[#35755d]/5 active:scale-[0.97] text-[#23543f] text-xs font-semibold tracking-[0.2em] rounded-sm transition-[transform,background-color] duration-150 font-sans uppercase backdrop-blur-xs text-center cursor-pointer"
+              className={`py-4 px-8 border active:scale-[0.97] text-xs font-semibold tracking-[0.2em] rounded-sm transition-[transform,background-color] duration-150 font-sans uppercase backdrop-blur-xs text-center cursor-pointer ${HERO_IMAGE ? 'border-[#f3f8f5]/60 text-[#f3f8f5] hover:bg-white/10' : 'border-[#35755d]/50 text-[#23543f] hover:bg-[#35755d]/5'}`}
             >
               Nuestra filosofía
             </button>
@@ -213,11 +212,10 @@ export default function RitualsScreen({
                   onClick={() => onViewRitual(ritual)}
                 >
                   <div className="relative h-[340px] w-full rounded-xs overflow-hidden mb-4 bg-[#dcebe2] shadow-sm">
-                    <img
-                      src={ritual.imageUrl}
-                      alt={ritual.name}
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    <ServiceVisual
+                      ritual={ritual}
+                      className="w-full h-full transition-transform duration-500 ease-out group-hover:scale-105"
+                      iconClassName="w-1/3 h-1/3"
                     />
                     {ritual.badge && (
                       <span className={`absolute top-4 right-4 backdrop-blur-xs border text-[9px] font-sans font-bold tracking-widest px-3 py-1 rounded-sm uppercase ${
@@ -290,12 +288,7 @@ export default function RitualsScreen({
 
           <div className="flex flex-col sm:flex-row gap-8 items-center bg-white rounded-xl border border-[#dcebe2] shadow-xs overflow-hidden">
             <div className="w-full sm:w-64 h-64 sm:h-auto flex-shrink-0 bg-[#dcebe2]">
-              <img
-                src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80"
-                alt="Anel, Especialista Aura"
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover"
-              />
+              <SpecialistAvatar className="w-full h-full min-h-[16rem]" />
             </div>
             <div className="p-6 sm:p-8 flex flex-col justify-center">
               <span className="text-[10px] font-sans font-bold tracking-[0.25em] text-[#35755d] uppercase block mb-2">

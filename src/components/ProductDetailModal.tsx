@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Sparkles, ShoppingBag } from 'lucide-react';
 import { Product } from '../types';
+import { ProductIcon } from './ServiceIcon';
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -47,12 +48,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
 
             {/* Left side: Hero Image with best seller indicator */}
             <div id="product-modal-image-panel" className="relative w-full md:w-1/2 h-56 md:h-auto min-h-[250px] bg-[#dcebe2]">
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover"
-              />
+              <ProductIcon className="w-full h-full" iconClassName="w-2/5 h-2/5" />
               {product.isBestSeller && (
                 <span className="absolute top-4 left-4 bg-[#35755d] text-white text-[10px] font-sans font-semibold tracking-wider px-3 py-1 rounded-full uppercase">
                   Más Vendido

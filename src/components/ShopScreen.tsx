@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ShoppingBag, Eye, Trash2, Check, ArrowRight, ShieldCheck, Tag } from 'lucide-react';
 import { Product, CartItem } from '../types';
 import { PRODUCTS } from '../data';
+import { ProductIcon } from './ServiceIcon';
 
 interface ShopScreenProps {
   cart: CartItem[];
@@ -127,12 +128,7 @@ export default function ShopScreen({
                 className="relative h-64 bg-stone-100 overflow-hidden cursor-pointer"
                 onClick={() => onViewProduct(p)}
               >
-                <img
-                  src={p.imageUrl}
-                  alt={p.name}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-103"
-                />
+                <ProductIcon className="w-full h-full transition-transform duration-700 group-hover:scale-103" iconClassName="w-2/5 h-2/5" />
                 {p.isBestSeller && (
                   <span className="absolute top-3 left-3 bg-[#35755d] text-white text-[9px] font-sans font-bold tracking-widest px-2.5 py-0.5 rounded-sm uppercase shadow-xs">
                     Más Vendido
@@ -268,12 +264,7 @@ export default function ShopScreen({
                         className="flex gap-3 bg-white p-3.5 rounded-xl border border-[#dcebe2]/50 shadow-xs"
                       >
                         <div className="w-16 h-16 rounded-md overflow-hidden bg-stone-100 flex-shrink-0">
-                          <img
-                            src={item.product.imageUrl}
-                            alt={item.product.name}
-                            referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover"
-                          />
+                          <ProductIcon className="w-full h-full" iconClassName="w-1/2 h-1/2" />
                         </div>
 
                         <div className="flex-1 flex flex-col justify-between">

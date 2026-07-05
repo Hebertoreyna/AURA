@@ -88,12 +88,12 @@ export default function App() {
           id: docSnap.id,
           ritualId: matchingRitual?.id || 'r1',
           ritualName: ritualName,
-          ritualImageUrl: matchingRitual?.imageUrl || 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=400&q=80',
+          ritualImageUrl: '',
           duration: data.duration || 60,
           price: price,
           dateTime: displayDate,
           specialistName: specName || 'Anel, Especialista Aura',
-          specialistAvatar: spec?.avatarUrl || 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=250&q=80',
+          specialistAvatar: '',
           status: resolvedStatus,
           notes: data.notes || '',
           clientName: data.clientName || 'Cliente Aura',
@@ -291,7 +291,7 @@ export default function App() {
                 onDeleteAppointment={handleDeleteAppointment}
                 skinProfile={skinProfile}
                 orders={[]}
-                userAvatar="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=250&q=80"
+                userAvatar=""
                 onNavigateToTab={(tab) => {
                   if (tab === 'profile' || tab === 'rituals' || tab === 'refine') {
                     setActiveTab(tab as 'rituals' | 'refine' | 'profile');

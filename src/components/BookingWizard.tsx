@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Clock, ChevronRight, ChevronLeft, AlertTriangle, MessageCircle, Loader2, CalendarDays, Check, Sparkles, Leaf } from 'lucide-react';
 import { Ritual, Specialist } from '../types';
 import { RITUALS, SPECIALISTS } from '../data';
+import { ServiceVisual, SpecialistAvatar } from './ServiceIcon';
 import {
   BookedSlot, getBookedSlots, saveBooking,
   generateTimeSlots, isSlotAvailable, SESSION_BUFFER, timeToMin,
@@ -619,8 +620,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                             }`}>
                                               {selected && <Check className="w-3 h-3 text-white" />}
                                             </div>
-                                            <img src={r.imageUrl} alt={r.name} referrerPolicy="no-referrer"
-                                              className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
+                                            <ServiceVisual ritual={r} className="w-11 h-11 rounded-lg flex-shrink-0" iconClassName="w-3/5 h-3/5" />
                                             <div className="min-w-0">
                                               <div className="flex items-center gap-1.5 flex-wrap">
                                                 <span className="text-sm font-serif font-semibold text-[#23543f] group-hover:text-[#35755d] transition-colors">
@@ -752,8 +752,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                                 : 'bg-white border-[#dcebe2] hover:border-stone-300'
                             }`}
                           >
-                            <img src={s.avatarUrl} alt={s.name} referrerPolicy="no-referrer"
-                              className="w-16 h-16 rounded-full object-cover border-2 border-white flex-shrink-0 shadow-sm" />
+                            <SpecialistAvatar className="w-16 h-16 rounded-full border-2 border-white flex-shrink-0 shadow-sm" />
                             <div>
                               <span className="text-sm font-serif font-semibold text-[#23543f] block">{s.name}</span>
                               <span className="text-[10px] font-sans tracking-wider text-[#35755d] uppercase font-semibold block">{s.role}</span>
@@ -928,8 +927,7 @@ export default function BookingWizard({ isOpen, preSelectedRitualId, onClose }: 
                               key={r.id}
                               className={`p-4 flex gap-3 leading-normal ${idx > 0 ? 'border-t border-[#dcebe2]' : ''}`}
                             >
-                              <img src={r.imageUrl} alt={r.name} referrerPolicy="no-referrer"
-                                className="w-10 h-10 object-cover rounded-lg flex-shrink-0" />
+                              <ServiceVisual ritual={r} className="w-10 h-10 rounded-lg flex-shrink-0" iconClassName="w-3/5 h-3/5" />
                               <div className="min-w-0 flex-1">
                                 <span className="font-serif font-bold text-[#23543f] block truncate">{r.name}</span>
                                 <span className="text-[10px] text-stone-400 font-mono">

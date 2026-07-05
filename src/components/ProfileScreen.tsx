@@ -10,6 +10,7 @@ import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebas
 import { auth } from '../lib/firebase';
 import { Appointment, SkinProfile } from '../types';
 import { RITUALS } from '../data';
+import { ServiceVisual } from './ServiceIcon';
 
 interface OrderHistoryRecord {
   id: string;
@@ -937,7 +938,7 @@ export default function ProfileScreen({
                             {/* LEFT DETAIL META */}
                             <div className="flex gap-4 items-start flex-1 min-w-0">
                               <div className="w-12 h-12 rounded-lg bg-[#dcebe2]/40 overflow-hidden flex-shrink-0 border border-stone-200">
-                                <img src={apt.ritualImageUrl} alt={apt.ritualName} className="w-full h-full object-cover" />
+                                <ServiceVisual ritual={RITUALS.find(x => x.id === apt.ritualId) || RITUALS[0]} className="w-full h-full" iconClassName="w-1/2 h-1/2" />
                               </div>
                               
                               <div className="space-y-1 flex-1 min-w-0">
@@ -1160,7 +1161,7 @@ export default function ProfileScreen({
                       >
                         <div className="space-y-3">
                           <div className="aspect-[16/9] w-full rounded-lg bg-stone-100 overflow-hidden relative border border-stone-100">
-                            <img src={ritual.imageUrl} alt={ritual.name} className="w-full h-full object-cover select-none" />
+                            <ServiceVisual ritual={ritual} className="w-full h-full" iconClassName="w-1/4 h-1/4" />
                             <span className="absolute top-2 right-2 text-[9px] font-sans font-extrabold bg-[#35755d] text-white px-2 py-0.5 rounded-full tracking-wider shadow-xs">
                               {ritual.badge || 'PRO'}
                             </span>

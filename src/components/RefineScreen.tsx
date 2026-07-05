@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { SkinProfile, Product, Ritual } from '../types';
 import { PRODUCTS, RITUALS } from '../data';
+import { ServiceVisual, ProductIcon } from './ServiceIcon';
 
 interface RefineScreenProps {
   currentProfile: SkinProfile;
@@ -474,8 +475,7 @@ export default function RefineScreen({
                   className="bg-white rounded-xl border border-[#dcebe2]/60 overflow-hidden flex flex-col sm:flex-row"
                 >
                   <div className="sm:w-2/5 h-40 sm:h-auto bg-[#dcebe2] flex-shrink-0">
-                    <img src={r.imageUrl} alt={r.name} referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover" />
+                    <ServiceVisual ritual={r} className="w-full h-full min-h-[10rem]" iconClassName="w-1/3 h-1/3" />
                   </div>
                   <div className="flex-1 p-5 flex flex-col justify-between">
                     <div>
@@ -509,8 +509,7 @@ export default function RefineScreen({
                 {matchedProducts.slice(0, 1).map(p => (
                   <div key={p.id} className="bg-white rounded-xl border border-[#dcebe2]/60 p-4 flex gap-4 items-center">
                     <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-stone-100">
-                      <img src={p.imageUrl} alt={p.name} referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover" />
+                      <ProductIcon className="w-full h-full" iconClassName="w-3/5 h-3/5" />
                     </div>
                     <div className="min-w-0">
                       <span className="font-serif font-semibold text-sm text-[#23543f] block truncate">{p.name}</span>
